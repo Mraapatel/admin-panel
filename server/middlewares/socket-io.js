@@ -20,7 +20,7 @@ function initialize(server) {
         })
 
         socket.on('getActiveDriversForAssign', async (data) => {
-            console.log('getDataForAssign', data);
+            console.log('getDataForAssign', dat   a);
             let Drivers = await getDrivers(data.cityId, data.typeId);
             if (Drivers) {
                 socket.emit('ActiveDrivers', Drivers);

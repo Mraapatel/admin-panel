@@ -1,6 +1,6 @@
 const { Server } = require('socket.io');
 const { getDrivers } = require('../controllers/confirmRide-controller');
-const { runnigRequest, allRunnigRequest } = require('../controllers/runningRequest-controller');
+const { runnigRequest, allRunnigRequest, driverAccecptedRide } = require('../controllers/runningRequest-controller');
 
 let ioInstance;
 
@@ -34,11 +34,13 @@ function initialize(server) {
         })
 
         socket.on('getTheRunningRequests', async (data) => {
-            console.log('getTheRunningRequests', data);
             let assignedRidesWithDrivers = await allRunnigRequest(data.rideStatus);
-            console.log('inside the getTheRunningRequests');
             socket.emit('allAssignedRidesWithDrivers', assignedRidesWithDrivers);
-            console.log('inside the getTheRunningRequests');
+        })
+
+        socket.on("driverAccecptedRideRequest", async (data) => {
+            let accecptedRide = driverAccecptedRide(data.rideId);
+            ioInstance.emit('acceptedRideWithDriver', accecptedRide)
         })
     })
 }

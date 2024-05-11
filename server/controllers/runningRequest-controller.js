@@ -209,4 +209,18 @@ const allRunnigRequest = async (status) => {
 
 }
 
-module.exports = { runnigRequest, allRunnigRequest }
+
+const driverAccecptedRide = async (rideId) => {
+
+
+    const accecptedRide = await createRide.findByIdAndUpdate(rideId, {
+        rideStatus: 2
+    }, { new: true })
+
+    console.log('inside the runningRequest-controller--------->', accecptedRide);
+
+    return accecptedRide
+
+}
+
+module.exports = { runnigRequest, allRunnigRequest ,driverAccecptedRide}

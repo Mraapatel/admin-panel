@@ -42,10 +42,21 @@ export class ConfirmRideComponent {
         this.returnedRideInfo = res
         let index = this.RidesFetched.findIndex((r) => r._id === this.returnedRideInfo._id)
         this.RidesFetched[index] = this.returnedRideInfo
-        console.log('this.RidesFetched[index]',this.RidesFetched[index]);
-        console.log('dofffffffffffffffffffffffffffff');       
+        console.log('this.RidesFetched[index]', this.RidesFetched[index]);
+        console.log('dofffffffffffffffffffffffffffff');
       }
     });
+
+    this._socketIoService.listen('acceptedRideWithDriver').pipe(
+      catchError((error) => {
+        this._toster.error('Error getting the acceptedRideWithDriver', 'Error');
+        return of(error)
+      })).subscribe({
+        next: (res: assignedRidesWithDriver) => {
+          let index = this.RidesFetched.findIndex((r)=> r._id = res._id)
+          this.RidesFetched[index].rideStatus = res.rideStatus
+        }
+      })
 
 
     this.confirmRideForm = this._fb.group({
@@ -74,6 +85,8 @@ export class ConfirmRideComponent {
     this.fetcheTypes()
 
   }
+
+
   AssingBtnClicked(ride: Ride) {
     this.selectedRide = ride;
     this.RidesUser = ride.userId;

@@ -64,8 +64,12 @@ export class RunningRequestComponent {
       }
     })
 
-
   }
 
+  driverAcceptedRide(rideId: string) {
+
+    this._socketIoService.emitNewEvent('driverAccecptedRideRequest', { rideId: rideId });
+
+  }
 
 }

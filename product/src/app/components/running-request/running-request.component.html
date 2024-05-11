@@ -1,1 +1,65 @@
-<p>running-request works!</p>
+<div>
+    <div class="table-responsive rounded">
+        <div class="d-flex justify-content-center">
+            <h2>Running Requests</h2>
+        </div>
+        <table class="table table-responsive shadow">
+            <tr>
+                <th class="border text-center p-1 py-2 bg-dark text-white id">User Profile</th>
+                <th class="border text-center p-1 py-2 bg-dark text-white id">User Name</th>
+                <th class="border text-center p-1 py-2 bg-dark text-white">User Phone</th>
+                <th class="border text-center p-1 py-2 bg-dark text-white">Driver Name</th>
+                <th class="border text-center p-1 py-2 bg-dark text-white width">Driver Phone</th>
+                <th class="border text-center p-1 py-2 bg-dark text-white">Pickup Time</th>
+                <th class="border text-center p-1 py-2 bg-dark text-white">Pickup address</th>
+                <th class="border text-center p-1 py-2 bg-dark text-white">Drop off address</th>
+                <th class="border text-center p-1 py-2 bg-dark text-white">Service Type</th>
+                <th class="border text-center p-1 py-2 bg-dark text-white">Service Image</th>
+                <th class="border text-center p-1 py-2 bg-dark text-white">Status</th>
+                <th class="border text-center p-1 py-2 bg-dark text-white">Action</th>
+            </tr>
+            @if(runningRequests.length > 0){
+            @for(ride of runningRequests;track $index){
+            <tr>
+                <td class="border text-center p-1 py-2 id">
+                    <img [src]="'http://localhost:5000/public/userProfile/' + ride.userId.userProfile"
+                        onerror="this.src='assets/noImageFound.jpg'" class="my-1 border profile rounded img-fluid "
+                        alt="{{ride.userId.userName }} Icon">
+                </td>
+                <td class="border text-center p-1 py-2 id">{{ride.userId.userName}}</td>
+                <td class="border text-center p-1 py-2">{{ride.countryInfo.countryCallingCode}} {{ride.userId.userPhone}}</td>
+                <td class="border text-center p-1 py-2">{{ride.driverId.driverName}}</td>
+                <td class="border text-center p-1 py-2 width">{{ride.countryInfo.countryCallingCode}} {{ride.driverId.driverPhone}}</td>
+                <td class="border text-center p-1 py-2 width ">{{ride.date}} {{ride.timeInString}}</td>
+                <td class="border text-center p-1 py-2 width width">{{ride.startLocation}}</td>
+                <td class="border text-center p-1 py-2 width width">{{ride.endLocation}}</td>
+                <td class="border text-center p-1 py-2">{{ride.typeId.vehicleType}}</td>
+                <td class="border text-center p-1 py-2">
+                    <img [src]="'http://localhost:5000/public/vehicleTypes/' + ride.typeId.vehicleIcon"
+                        onerror="this.src='assets/noImageFound.jpg'" class="my-1 border profile rounded img-fluid "
+                        alt="{{ride.typeId.vehicleIcon }} Icon">
+                </td>
+                <td></td>
+                <td class="border text-center">
+                    <button class="btn btn-success">Accept</button>
+                    <button class="btn btn-danger">Reject</button>
+                </td>
+                <!-- <td class="border text-center p-1 py-2">
+                    <button class="btn btn-info" (click)="AssingBtnClicked(ride)" data-bs-toggle="modal"
+                        data-bs-target="#AssignModal">Assign</button>
+                </td>
+                <td class="border text-center  p-1 py-2">
+                    <button class="btn btn-secondary rounded-circle"><b>i</b></button>
+                    <button class="btn btn-danger btn-close"></button>
+                </td> -->
+            </tr>
+            }
+            }
+        </table>
+        @if(runningRequests && runningRequests.length == 0){
+        <div class="container  d-flex justify-content-center text-danger">
+            <h3>No Rides Found</h3>
+        </div>
+        }
+    </div>
+</div>

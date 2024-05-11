@@ -82,9 +82,6 @@ const getRidesFormDb = async (pages, rideLimit, sort, searchTerm, vehicleType, d
 
 
         const aggregateQuery = [
-            // { $sort: sortStuff }, 
-            // { $skip: (page - 1) * limit },
-            // { $limit: limit },
             {
                 $lookup: {
                     from: 'vehicletypes',
@@ -131,6 +128,19 @@ const getRidesFormDb = async (pages, rideLimit, sort, searchTerm, vehicleType, d
                     "userId.__v": 0,
                     'typeId.__v': 0
                     // 'countryInfo._id': 0,
+                }
+            },
+            {
+                $lookup: {
+                    from: "driverlists",
+                    localField: "driverId",
+                    foreignField: "_id",
+                    as: "driverId"
+                }
+            },
+            {
+                $addFields: {
+                    driverId: { $arrayElemAt: ["$driverId", 0] } // Convert driverId array to object
                 }
             },
             { $match: query },

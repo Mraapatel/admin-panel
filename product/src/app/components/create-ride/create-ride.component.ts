@@ -165,28 +165,28 @@ export class CreateRideComponent {
   */
 
   // /*
-loadDefaultMap() {
-  const loader = new Loader({
-    apiKey: this.API_KEY,
-    libraries: ['places', 'drawing']
-  });
+  loadDefaultMap() {
+    const loader = new Loader({
+      apiKey: this.API_KEY,
+      libraries: ['places', 'drawing']
+    });
 
-  loader.load().then(() => {
-    const mapEle = document.getElementById('map');
-    if (mapEle) {
-      // Load default map without marker
-      this.map = new google.maps.Map(mapEle, {
-        center: { lat: 25.4484, lng: 78.5685 },
-        zoom: 6,
-      });
-      // this.initAutocomplete()
-      this.geocoder = new google.maps.Geocoder();
-    }
-  }).catch(err => {
-    console.error('Error loading Google Maps API:', err);
-  });
-}
-// */
+    loader.load().then(() => {
+      const mapEle = document.getElementById('map');
+      if (mapEle) {
+        // Load default map without marker
+        this.map = new google.maps.Map(mapEle, {
+          center: { lat: 25.4484, lng: 78.5685 },
+          zoom: 6,
+        });
+        // this.initAutocomplete()
+        this.geocoder = new google.maps.Geocoder();
+      }
+    }).catch(err => {
+      console.error('Error loading Google Maps API:', err);
+    });
+  }
+  // */
   getCountryCodes() {
     this._createRideService.getCountryCodes().pipe(
       tap((res) => {
@@ -653,7 +653,8 @@ loadDefaultMap() {
         this.showDetails = false;
         this.userForm.get('userPhone')?.enable();
         this.userForm.get('countryCC')?.enable();
-        this.DirectionsRenderer.setMap(null)
+        this.DirectionsRenderer.setMap(null);
+        this.STOPS = []
       }
     })
     console.log(details);

@@ -34,29 +34,37 @@ const createRideSchema = new Schema({
         type: String,
         required: true,
     },
-    totalDistance:{
-        type:Number,
-        required:true
+    totalDistance: {
+        type: Number,
+        required: true
     },
-    totalTime:{
-        type:Number,
-        required:true
+    totalTime: {
+        type: Number,
+        required: true
     },
-    totalFare:{
-        type:Number,
-        required:true
+    totalFare: {
+        type: Number,
+        required: true
     },
-    startLocation:{
-        type:String,
-        required:true
+    startLocation: {
+        type: String,
+        required: true
     },
-    endLocation:{
-        type:String,
-        required:true
+    endLocation: {
+        type: String,
+        required: true
     },
-    timeInString:{
-        type:String,
-        required:true
+    timeInString: {
+        type: String,
+        required: true
+    },
+    rideStatus: {
+        type: Number,
+        default: null,
+    },
+    driverId: {
+        type: mongoose.Schema.Types.ObjectId,
+        default: null
     }
 })
 

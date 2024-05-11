@@ -1,9 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { SocketIoService } from '../../services/socket-io.service';
-import { ActiveDriver, Ride, VehicleType, singleUser } from '../../models/models.interface';
+import { ActiveDriver, Ride, VehicleType, assignedRidesWithDriver, singleUser } from '../../models/models.interface';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ConfirmRideService } from '../../services/confirm-ride.service';
-import { catchError, of } from 'rxjs';
+import { catchError, findIndex, of } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { CommonModule } from '@angular/common';
 import { RunningRequestService } from '../../services/running-request.service';
@@ -32,11 +32,22 @@ export class ConfirmRideComponent {
   fetchedVehicleTypes: Array<VehicleType> = [];
   selectedRide!: Ride;
   ActiveDrivers: ActiveDriver[] = [];
-  RidesUser!: singleUser
-  selectedDriver!: ActiveDriver
+  RidesUser!: singleUser;
+  selectedDriver!: ActiveDriver;
+  returnedRideInfo!: assignedRidesWithDriver
 
   ngOnInit() {
-    this._runningRequestService.listenToIncomingRides();
+    this._runningRequestService.listenToIncomingRides().subscribe({
+      next: (res: assignedRidesWithDriver) => {
+        this.returnedRideInfo = res
+        let index = this.RidesFetched.findIndex((r) => r._id === this.returnedRideInfo._id)
+        this.RidesFetched[index] = this.returnedRideInfo
+        console.log('this.RidesFetched[index]',this.RidesFetched[index]);
+        console.log('dofffffffffffffffffffffffffffff');       
+      }
+    });
+
+
     this.confirmRideForm = this._fb.group({
       searchTerm: [''],
       rideStatus: [''],
@@ -113,14 +124,12 @@ export class ConfirmRideComponent {
   AssingDriverToRide(driver: ActiveDriver) {
     this.selectedDriver = driver;
     let name = this.selectedDriver.driverName
-    this.selectedRide.assignedDriverEmail = name;
 
-    // console.log('selectedriver', driver);
-    console.log('selectedDriver', this.selectedRide.assignedDriverName);
     console.log('selectedDriver', this.selectedDriver.driverName);
     let data = {
-      rideId:this.selectedRide._id,
-      driverId:driver._id
+      rideId: this.selectedRide._id,
+      driverId: driver._id,
+      rideStatus: 0
     }
     this._socketIoService.emitNewEvent('assignDriverToRide', data);
 

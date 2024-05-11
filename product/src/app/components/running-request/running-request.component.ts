@@ -20,18 +20,23 @@ export class RunningRequestComponent {
 
   runningRequests: Array<assignedRidesWithDriver> = [];
 
-
-
-
-
   ngOnInit() {
-    this._socketIoService.listen('assignedRideWithDriver').subscribe({
-      next: (res: assignedRidesWithDriver) => {
-        console.log(res);
-        this.runningRequests.push(res);
+    let data = {
+      rideId: '',
+      driverId: '',
+      rideStatus: 1
+    }
+
+    this._socketIoService.emitNewEvent('getTheRunningRequests', data)
+    console.log('sent event');
+    this._socketIoService.listen('allAssignedRidesWithDrivers').subscribe({
+      next: (res: assignedRidesWithDriver[]) => {
+        // this.runningRequests = res
+        this.runningRequests.unshift(...res)
+        console.log(this.runningRequests);
       }
-    })
-    // console.log('listning to the incoming rides');
+    });
+
 
     // this._runningRequest.listenToIncomingRides().pipe(
     //   catchError((error) => {
@@ -40,21 +45,26 @@ export class RunningRequestComponent {
     //   })
     // ).subscribe({
     //   next: (res: assignedRidesWithDriver) => {
-    //     this.runningRequests.push(res);
-    //     console.log('this.runningRequests.push(res)', this.runningRequests);
+    //     if (res) {
+    //       this.runningRequests.push(res)
+    //       console.log('this.runningRequestSs.push(res)', this.runningRequests);
+    //     }
+    //     console.log('this.runningRequestSs.push(res)', this.runningRequests);
     //   }
     // })
-    // this._socketIoService.listen('assignedRideWithDriver').pipe(
-    //   catchError((error) => {
-    //     this._toster.error('Error getting the Arrived Requests');
-    //     return of(error)
-    //   })
-    // ).subscribe({
-    //   next: (res: assignedRidesWithDriver) => {
-    //     this.runningRequests.push(res)
-    //     console.log(this.runningRequests);
-    //   }
-    // })
+    this._socketIoService.listen('assignedRideWithDriver').pipe(
+      catchError((error) => {
+        this._toster.error('Error getting the Arrived Requests');
+        return of(error)
+      })
+    ).subscribe({
+      next: (res: assignedRidesWithDriver) => {
+        console.log(res);
+        this.runningRequests.push(res);
+      }
+    })
+
+
   }
 
 

@@ -1,6 +1,6 @@
 const { Server } = require('socket.io');
 const { getDrivers } = require('../controllers/confirmRide-controller');
-const { runnigRequest } = require('../controllers/runningRequest-controller');
+const { runnigRequest, allRunnigRequest } = require('../controllers/runningRequest-controller');
 
 let ioInstance;
 
@@ -14,13 +14,13 @@ function initialize(server) {
     })
 
     ioInstance.on('connection', (socket) => {
-        console.log('new connection ', socket.id);
+        console.log('new connection-------->>>>>>>>>>>> ', socket.id);
         socket.on('formClient', (data) => {
             console.log('formClient event', data);
         })
 
         socket.on('getActiveDriversForAssign', async (data) => {
-            console.log('getDataForAssign', dat   a);
+            console.log('getDataForAssign', data);
             let Drivers = await getDrivers(data.cityId, data.typeId);
             if (Drivers) {
                 socket.emit('ActiveDrivers', Drivers);
@@ -29,10 +29,16 @@ function initialize(server) {
 
         socket.on('assignDriverToRide', async (data) => {
             console.log('assignDriverToRide', data);
-            let assignedRideWithDriver = await runnigRequest(data.rideId, data.driverId);
-            if (assignedRideWithDriver) {
-                ioInstance.emit('assignedRideWithDriver', assignedRideWithDriver);
-            }
+            let assignedRideWithDriver = await runnigRequest(data.rideId, data.driverId, data.rideStatus);
+            ioInstance.emit('assignedRideWithDriver', assignedRideWithDriver);
+        })
+
+        socket.on('getTheRunningRequests', async (data) => {
+            console.log('getTheRunningRequests', data);
+            let assignedRidesWithDrivers = await allRunnigRequest(data.rideStatus);
+            console.log('inside the getTheRunningRequests');
+            socket.emit('allAssignedRidesWithDrivers', assignedRidesWithDrivers);
+            console.log('inside the getTheRunningRequests');
         })
     })
 }

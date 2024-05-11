@@ -379,6 +379,7 @@ export interface Ride {
     vehicleType: string,
     vehicleIcon: string
   };
+  rideStatus:number;
   date: string;
   time: number;
   totalFare: number;
@@ -399,17 +400,19 @@ export interface Ride {
     flagSymbol: string;
     countryCode2: string;
   },
-  // selectedDriver: {
-  assignedDriverEmail: string;
-  assignedDriverName: string;
-  assignedDriverPhone: string;
-  assignedDriverProfile: string;
-  // }  
+  driverId: {
+    _id: string;
+    driverName: string;
+    driverProfile: string;
+    driverEmail: string;
+    driverPhone: string;
+    approveStatus: boolean;
+  } | null
 }
 
 
 export interface assignedRidesWithDriver extends Ride {
-  assignedDriver: {
+  driverId: {
     _id: string;
     driverName: string;
     driverProfile: string;

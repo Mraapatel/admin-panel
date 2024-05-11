@@ -18,8 +18,8 @@
         <div class="input-group mb-2">
             <label for="rideStatus" class="mt-1 me-1">Ride Status :</label>
             <select class="form-select me-3 ms-2 rounded" name="rideStatus" formControlName="rideStatus">
-                <option value="0">Pending</option>
-                <option value="1">Assigning</option>
+                <option value="0">Assigning</option>
+                <option value="1">Pending</option>
                 <option value="2">Confirmed</option>
             </select>
             <input type="text" class="form-control rounded" name="searchTerm" #inputValue
@@ -34,8 +34,16 @@
             Filter</button>
         <button (click)="ClearFilter()" class=" ms-2 btn btn-warning text-white btn-sm my-2">clear Filter</button>
     </form>
-    <div class="table-responsive rounded">
-        <table class="table table-responsive shadow">
+    <div class="table-responsive rounded ">
+        <div class="d-flex justify-content-center align-items-end my-2">
+
+            <button [disabled]="disablePrevBnt()" class="btn btn-dark text-white me-3 shadow"
+                (click)="previousBtn()">Prev</button>
+            <span class="text-center span me-3 pb-3 h-2 ">{{pageNumber}}</span>
+            <button [disabled]="disableNextBnt()" class="btn" class="btn btn-dark text-white shadow"
+                (click)="nextBtn()">Next</button>
+        </div>
+        <table class="table table-responsive shadow overflow-auto">
             <tr>
                 <th class="border text-center p-1 py-2 bg-dark text-white id">Request Id</th>
                 <th class="border text-center p-1 py-2 bg-dark text-white id">User Id</th>
@@ -58,10 +66,37 @@
                 <td class="border text-center p-1 py-2 width">{{ride.startLocation}}</td>
                 <td class="border text-center p-1 py-2 width">{{ride.endLocation}}</td>
                 <td class="border text-center p-1 py-2">{{ride.typeId.vehicleType}}</td>
-                <td class="border text-center p-1 py-2"></td>
+                <td class="border text-center p-1 py-2">
+                    <button class="btn "
+                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightpink' : ride.rideStatus === 1 ? 'orange' : ride.rideStatus === 2 ? 'green' : 'transparent' }">
+
+                        <!-- @if(ride.rideStatus == 0){
+                        Assigning
+                        }@else if -->
+                        @switch(ride.rideStatus){
+                        @case(0){
+                        Assigning
+                        }
+                        @case(1){
+                        pending
+                        }
+                        @case(2){
+                        Confirmed
+                        }
+                        }
+                    </button>
+
+                </td>
                 <td class="border text-center p-1 py-2">
                     <button class="btn btn-info" (click)="AssingBtnClicked(ride)" data-bs-toggle="modal"
-                        data-bs-target="#AssignModal">Assign</button>
+                        data-bs-target="#AssignModal"
+                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightpink' : ride.rideStatus === 1 ? 'orange' : ride.rideStatus === 2 ? 'green' : 'transparent' }">
+                        @if(ride.driverId?.driverName){
+                        {{ride.driverId?.driverName}}
+                        }@else{
+                        Assign
+                        }   
+                    </button>
                 </td>
                 <td class="border text-center  p-1 py-2">
                     <button class="btn btn-secondary rounded-circle"><b>i</b></button>
@@ -77,14 +112,14 @@
         </div>
         }
     </div>
-    <div class="d-flex justify-content-center align-items-end mt-2">
+    <!-- <div class="d-flex justify-content-center align-items-end mt-2">
 
         <button [disabled]="disablePrevBnt()" class="btn btn-dark text-white me-3 shadow"
             (click)="previousBtn()">Prev</button>
         <span class="text-center span me-3 pb-3 h-2 ">{{pageNumber}}</span>
         <button [disabled]="disableNextBnt()" class="btn" class="btn btn-dark text-white shadow"
             (click)="nextBtn()">Next</button>
-    </div>
+    </div> -->
 </div>
 
 
@@ -124,22 +159,22 @@
                         <td>{{ActiveDrivers[0].cityId.formatted_address}}</td>
                         <td>
                             <button class="btn btn-info" data-bs-dismiss="modal" (click)="AssingDriverToRide(driver)">
-                                @if(selectedRide && selectedRide.assignedDriverName ){
+                                <!-- @if(selectedRide  ){
                                     selectedRide.assignedDriverName  
-                                }@else{
-                                    Assign
-                                }
+                                }@else{ -->
+                                Assign
+                                <!-- } -->
                             </button>
                         </td>
                     </tr>
                     }
                 </table>
-                    @if(ActiveDrivers && ActiveDrivers.length == 0){
-                    <div class="container  d-flex justify-content-center">
-                        <h3 class="text-danger">No Active Driver Found</h3>
-                    </div>
-                    <hr>
-                    }
+                @if(ActiveDrivers && ActiveDrivers.length == 0){
+                <div class="container  d-flex justify-content-center">
+                    <h3 class="text-danger">No Active Driver Found</h3>
+                </div>
+                <hr>
+                }
             </div>
             <div class="container table-responsive d-flex justify-content-start">
                 @if(selectedRide){
@@ -181,10 +216,10 @@
                     <tr>
                         <th>Way Points: </th>
                         @for(point of selectedRide.route ;track $index){
-                            <td class="space">:{{$index +1}}-{{point}}</td>
+                        <td class="space">:{{$index +1}}-{{point}}</td>
                         }
                         @if(selectedRide.route && selectedRide.route.length == 0){
-                            <td>: No Way Points for this Ride</td>
+                        <td>: No Way Points for this Ride</td>
                         }
                     </tr>
                     <tr>

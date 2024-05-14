@@ -14,8 +14,8 @@ export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
   let _router  = inject(Router)
 
   _spinnerService.startSPinner();
-  console.log('inside the interceptor');
-  console.log(JWT_TOKEN);
+  // console.log('inside the interceptor');
+  // console.log(JWT_TOKEN);
   
   if (req.url.includes('/authenticate')) {
     console.error('Inside the uthenticate');
@@ -24,7 +24,7 @@ export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
 
   if (JWT_TOKEN) {
     // _loaderService.startSPinner()
-    console.log('inside the if condition ');
+    // console.log('inside the if condition ');
     let tokenReq = req.clone({
       setHeaders: {
         Authorization: `Bearer ${JWT_TOKEN}`
@@ -35,7 +35,7 @@ export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
       .pipe(
         tap((res) => {
           if (res instanceof HttpResponse) {
-            console.log("response got");
+            // console.log("response got");
             _spinnerService.stopSpinner();
           }
 

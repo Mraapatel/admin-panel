@@ -9,7 +9,6 @@ const socket = require('./middlewares/socket-io')
 const app = express();
 const server = require('http').Server(app);
 socket.initialize(server);
-// const io = socket.getIOInstance()
 const Port = process.env.PORT || 5000;
 
 const jwt = require('./routes/jwt_token');
@@ -22,7 +21,8 @@ const user = require('./routes/user');
 const driver = require('./routes/driverList');
 const varifyToken = require('./middlewares/varifyToken');
 const createRide = require('./routes/createRide');
-const confirmRide = require('./routes/confirmRide')
+const confirmRide = require('./routes/confirmRide');
+const runningRequest = require('./routes/runningRequest');
 
 mongoose.connect('mongodb://127.0.0.1:27017/Product')
     .then(() => console.log('connection is successfull...'))
@@ -59,6 +59,8 @@ app.use('/driver', varifyToken, driver);
 app.use('/createRide', createRide);
 
 app.use('/confirmRide', confirmRide);
+
+app.use('/runningRequest', runningRequest);
 
 // app.listen(Port, () => {
 //     console.log(`server is listning to port no:${Port}`);

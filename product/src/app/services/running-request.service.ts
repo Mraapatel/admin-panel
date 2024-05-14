@@ -3,6 +3,7 @@ import { SocketIoService } from './socket-io.service';
 import { Observable, Subscriber, catchError, of, tap } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { assignedRidesWithDriver } from '../models/models.interface';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -11,13 +12,43 @@ export class RunningRequestService {
 
   private _socketIoService = inject(SocketIoService);
   private _toster = inject(ToastrService);
+  private _http = inject(HttpClient);
 
-  currentRunningRequests!: assignedRidesWithDriver
+  currentRunningRequests!: assignedRidesWithDriver;
+  url = 'http://localhost:5000/runningRequest';
 
 
-  constructor() {
-    // this.listenToIncomingRides();
+
+  getAllRunningRequest(data: object) {
+    return this._http.post(`${this.url}/getAllRunningRides`, data);
   }
+
+  driverAcceptedRequest(rideId:string) {
+    return this._http.post(`${this.url}/driverAcceptedRide`,{rideId:rideId});
+  }
+  
+  driverRejectedRequest(data:object) {
+    console.log('inside the running request service', data);
+    
+    return this._http.post(`${this.url}/driverRejectedRide`,data);
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   listenToIncomingRides(): Observable<assignedRidesWithDriver> {
     console.warn('listenToIncomingRides');
@@ -45,6 +76,8 @@ export class RunningRequestService {
         console.log(this.currentRunningRequests);
       })
     );
-
   }
+
+
+
 }   

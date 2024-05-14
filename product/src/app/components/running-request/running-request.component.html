@@ -42,7 +42,7 @@
                 <td></td>
                 <td class="border text-center">
                     <button class="btn btn-success" (click)="driverAcceptedRide(ride._id)">Accept</button>
-                    <button class="btn btn-danger">Reject</button>
+                    <button class="btn btn-danger"  (click)="driverRejectedRide(ride._id , ride.driverId._id)">Reject</button>
                 </td>
                 <!-- <td class="border text-center p-1 py-2">
                     <button class="btn btn-info" (click)="AssingBtnClicked(ride)" data-bs-toggle="modal"

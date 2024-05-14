@@ -65,6 +65,10 @@ const createRideSchema = new Schema({
     driverId: {
         type: mongoose.Schema.Types.ObjectId,
         default: null
+    },
+    driverList: {
+        type: [mongoose.Schema.Types.ObjectId],
+        default: null
     }
 })
 

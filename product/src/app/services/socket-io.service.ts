@@ -46,7 +46,6 @@ export class SocketIoService {
     return new Observable((subscriber) => {
       this.socket.on(event, (data) => {
         subscriber.next(data);
-
       })
     })
   }   

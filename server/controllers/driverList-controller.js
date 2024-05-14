@@ -44,6 +44,10 @@ const driverSchema = new Schema({
     approveStatus: {
         type: Boolean,
         required: true
+    },
+    driverStatus:{
+        type:Number,
+        default:0
     }
 });
 

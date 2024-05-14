@@ -21,6 +21,7 @@ export class ConfirmRideComponent {
   private _confirmRideService = inject(ConfirmRideService);
   private _toster = inject(ToastrService);
   private _runningRequestService = inject(RunningRequestService);
+  private _confirmRiedService = inject(ConfirmRideService)
 
   pageNumber: number = 1;
   totalRides!: number;
@@ -42,8 +43,8 @@ export class ConfirmRideComponent {
         this.returnedRideInfo = res
         let index = this.RidesFetched.findIndex((r) => r._id === this.returnedRideInfo._id)
         this.RidesFetched[index] = this.returnedRideInfo
+        console.log('this.returnedRideInfo', this.returnedRideInfo);
         console.log('this.RidesFetched[index]', this.RidesFetched[index]);
-        console.log('dofffffffffffffffffffffffffffff');
       }
     });
 
@@ -53,11 +54,11 @@ export class ConfirmRideComponent {
         return of(error)
       })).subscribe({
         next: (res: assignedRidesWithDriver) => {
-          let index = this.RidesFetched.findIndex((r)=> r._id = res._id)
+          let index = this.RidesFetched.findIndex((r) => r._id === res._id)
+          console.log(res);
           this.RidesFetched[index].rideStatus = res.rideStatus
         }
       })
-
 
     this.confirmRideForm = this._fb.group({
       searchTerm: [''],
@@ -66,12 +67,12 @@ export class ConfirmRideComponent {
       date: ['']
     });
 
-    this._socketIoService.listen('ActiveDrivers').subscribe({
-      next: ((res: ActiveDriver[]) => {
-        this.ActiveDrivers = res;
-        console.log(this.ActiveDrivers);
-      })
-    })
+    // this._socketIoService.listen('dakfja').subscribe({
+    //   next: ((res: string) => {
+    //     //  this.ActiveDrivers = res;
+    //     console.warn(res);
+    //   })
+    // })
 
     let details = {
       limit: this.limit,
@@ -82,7 +83,8 @@ export class ConfirmRideComponent {
       vechicleType: this.confirmRideForm.get('vechicleType')?.value
     }
     this.fetchRides(details);
-    this.fetcheTypes()
+    this.fetcheTypes();
+    this.listningToRejectedRide();
 
   }
 
@@ -92,9 +94,22 @@ export class ConfirmRideComponent {
     this.RidesUser = ride.userId;
     let data = {
       cityId: this.selectedRide.cityId,
-      typeId: this.selectedRide.typeId._id
+      typeId: this.selectedRide.typeId._id,
+      rideStatus:0
     }
-    this._socketIoService.emitNewEvent('getActiveDriversForAssign', data);
+    // this._socketIoService.emitNewEvent('getActiveDriversForAssign', data);
+    this._confirmRiedService.getDriverForAssignRide(data).pipe(
+      catchError((error) => {
+        this._toster.error('Error fetching the active drivers', 'Error');
+        return of(error)
+      })
+    ).subscribe({
+      next: (res: { message: string, driverArray: ActiveDriver[] }) => {
+        this.ActiveDrivers = res.driverArray;
+        console.log(res);
+
+      }
+    })
   }
 
 
@@ -136,17 +151,36 @@ export class ConfirmRideComponent {
 
   AssingDriverToRide(driver: ActiveDriver) {
     this.selectedDriver = driver;
-    let name = this.selectedDriver.driverName
-
     console.log('selectedDriver', this.selectedDriver.driverName);
     let data = {
       rideId: this.selectedRide._id,
       driverId: driver._id,
       rideStatus: 0
     }
-    this._socketIoService.emitNewEvent('assignDriverToRide', data);
+    // this._socketIoService.emitNewEvent('assignDriverToRide', data);
+    this._confirmRideService.assignDriverToRide(data).subscribe({
+      error: (error) => {
+        if (error.error.message === 'faild to assign driver') {
+          this._toster.error('No Ride found', 'Error')
+        }
+        this._toster.error('Error Occured while ')
+      }
+    })
+  }
 
-
+  listningToRejectedRide() {
+    this._socketIoService.listen('rejectedRideByDriver').pipe(
+      catchError((error) => {
+        this._toster.error('Error getting the acceptedRideWithDriver', 'Error');
+        return of(error)
+      })).subscribe({
+        next: (res: Ride) => {
+          let index = this.RidesFetched.findIndex((r) => r._id === res._id);
+          this.RidesFetched[index].driverId = null;
+          this.RidesFetched[index].rideStatus = res.rideStatus
+          console.log(res);
+        }
+      })
   }
 
 

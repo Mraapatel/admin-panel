@@ -1,6 +1,4 @@
 const { createRide } = require('../models/createRide');
-const { getIOInstance } = require('../middlewares/socket-io');
-const io = getIOInstance();
 const { getRidesFormDb } = require('../utils/fetchRides');
 
 

@@ -576,7 +576,7 @@ export class CreateRideComponent {
     if (this.bookRideForm.get('bookStatus')?.value === 'schedule') {
       if (this.bookRideForm.invalid) {
         this.bookRideForm.markAllAsTouched();
-        this._toastr.error('Please fill the all required fields', 'Error');
+        this._toastr.error('Please fill the all required/valid fields', 'Error');
         return;
       }
       this.storeRideInfo()

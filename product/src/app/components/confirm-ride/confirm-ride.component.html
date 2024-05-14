@@ -67,36 +67,48 @@
                 <td class="border text-center p-1 py-2 width">{{ride.endLocation}}</td>
                 <td class="border text-center p-1 py-2">{{ride.typeId.vehicleType}}</td>
                 <td class="border text-center p-1 py-2">
-                    <button class="btn "
-                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightpink' : ride.rideStatus === 1 ? 'orange' : ride.rideStatus === 2 ? 'green' : 'transparent' }">
+                    <button class="btn"
+                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'yellow' : ride.rideStatus === 1 ? 'orange' : ride.rideStatus === 2 ? 'green' : 'sky' }">
 
-                        <!-- @if(ride.rideStatus == 0){
-                        Assigning
-                        }@else if -->
                         @switch(ride.rideStatus){
+                        <!-- @case(0){
+                        pending
+                        } -->
                         @case(0){
                         Assigning
                         }
                         @case(1){
-                        pending
+                        Accepted
                         }
                         @case(2){
-                        Confirmed
+                        Arrived
+                        }
+                        @case(3){
+                        Picked
+                        }
+                        @case(4){
+                        Started
+                        }
+                        @default{
+                            pending   
                         }
                         }
                     </button>
 
                 </td>
                 <td class="border text-center p-1 py-2">
+                    @if(ride.driverId?.driverName){
+                    <div class="btn"
+                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightpink' : ride.rideStatus === 1 ? 'orange' : ride.rideStatus === 2 ? 'green' : 'sky' }">
+                        {{ride.driverId?.driverName}}
+                    </div>
+                    }@else{
                     <button class="btn btn-info" (click)="AssingBtnClicked(ride)" data-bs-toggle="modal"
                         data-bs-target="#AssignModal"
-                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightpink' : ride.rideStatus === 1 ? 'orange' : ride.rideStatus === 2 ? 'green' : 'transparent' }">
-                        @if(ride.driverId?.driverName){
-                        {{ride.driverId?.driverName}}
-                        }@else{
+                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'sky' : ride.rideStatus === 1 ? 'orange' : ride.rideStatus === 2 ? 'green' : 'sky' }">
                         Assign
-                        }   
                     </button>
+                    }
                 </td>
                 <td class="border text-center  p-1 py-2">
                     <button class="btn btn-secondary rounded-circle"><b>i</b></button>

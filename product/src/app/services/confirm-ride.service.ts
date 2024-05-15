@@ -22,11 +22,15 @@ export class ConfirmRideService {
     return this._http.post<{ message: string, TypesArray: VehicleType[] }>(`${this.url}/getVehicleTypes`, {})
   }
 
-  getDriverForAssignRide(data:object) {
+  getDriverForAssignRide(data: object) {
     return this._http.post<{ message: string, TypesArray: VehicleType[] }>(`${this.url}/getDriverForAssignRide`, data)
   }
 
-  assignDriverToRide(data:object) {
+  assignDriverToRide(data: object) {
     return this._http.post<{ message: string, TypesArray: VehicleType[] }>(`${this.url2}/assingDriverToRide`, data)
+  }
+
+  assignNearestDriver(rideId: string) {
+    return this._http.post<{ message: string, TypesArray: VehicleType[] }>(`${this.url}/assignNearestDriver`, { rideId: rideId })
   }
 }

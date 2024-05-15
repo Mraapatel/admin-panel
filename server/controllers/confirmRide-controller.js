@@ -162,4 +162,26 @@ const getDrivers = async (req, res) => {
     }
 }
 
-module.exports = { getRides, getVehicleTypes, getDrivers }
+const assignNearestDriver = async (req, res) => {
+    try {
+
+        if (req.body) {
+            console.log('Inside the confirmRide -  assignNearestDriver ', req.body);
+
+            let ride = await createRide.findByIdAndUpdate(req.body.rideId, {
+                nearest: true, rideStatus: 1
+            }, { new: true })
+
+            if (ride) {
+                return res.status(200).json({ message: 'The ride will be Assigned' });
+            }
+            return res.status(404).json({ message: 'Some Error occured while assigning ride' });
+        }
+    } catch (e) {
+        response.message = 'Some Error Occured while Feteching drivers'
+        console.log('Error Occured while Feteching drivers', e);
+        return res.status(400).json(response);
+    }
+}
+
+module.exports = { getRides, getVehicleTypes, getDrivers, assignNearestDriver }

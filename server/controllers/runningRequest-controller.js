@@ -38,9 +38,10 @@ const assignDriverToRide = async (req, res) => {
         // }
 
         console.log('Inside the runningRequest controller.js ===>', req.body);
-
-        await createRide.findByIdAndUpdate(req.body.rideId, { rideStatus: req.body.rideStatus, driverId: new mongoose.Types.ObjectId(req.body.driverId) })
-        await Driver.findByIdAndUpdate(req.body.driverId, { driverStatus: 2 })
+        let date = new Date()
+        let time = date.getTime();
+        await createRide.findByIdAndUpdate(req.body.rideId, { assignTime: time, rideStatus: req.body.rideStatus, driverId: new mongoose.Types.ObjectId(req.body.driverId) })
+        await Driver.findByIdAndUpdate(req.body.driverId, { driverStatus: 1 })
 
         const aggregateQuery = [
             {
@@ -135,7 +136,7 @@ const assignDriverToRide = async (req, res) => {
             global.ioInstance.emit('assignedRideWithDriver', assignedRideWithDriver[0]);
             return res.status(200).json(response);
         }
-        
+
         return res.status(404).json(response);
 
         // return assignedRideWithDriver[0]
@@ -262,11 +263,12 @@ const driverAccecptedRide = async (req, res) => {
         Ride: {},
         message: "Faild to Assign Ride"
     }
-
     try {
-        const accecptedRide = await createRide.findByIdAndUpdate(req.body.rideId, {
-            rideStatus: 2
-        }, { new: true })
+
+        const accecptedRide = await createRide.findByIdAndUpdate(req.body.rideId, { rideStatus: 5 }, { new: true });
+        await Driver.findByIdAndUpdate(req.body.driverId, { driverStatus: 5 })
+        console.log('inside the runningRequest-controller--------->', accecptedRide);
+
 
 
         if (accecptedRide) {
@@ -276,7 +278,6 @@ const driverAccecptedRide = async (req, res) => {
             return res.status(200).json(response)
         }
 
-        console.log('inside the runningRequest-controller--------->', accecptedRide);
         return res.status(200).json(response)
 
     } catch (e) {
@@ -296,7 +297,7 @@ const driverRejectedRide = async (req, res) => {
 
     try {
         console.log('inside the runningRequest - driverRejectedRide', req.body);
-        const rejectedRide = await createRide.findByIdAndUpdate(req.body.rideId, { rideStatus: null, driverId: null }, { new: true })
+        const rejectedRide = await createRide.findByIdAndUpdate(req.body.rideId, { rideStatus: 0, driverId: null }, { new: true })
         await Driver.findByIdAndUpdate(req.body.driverId, { driverStatus: 0 })
 
         if (rejectedRide) {

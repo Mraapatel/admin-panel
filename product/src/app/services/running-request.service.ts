@@ -23,14 +23,14 @@ export class RunningRequestService {
     return this._http.post(`${this.url}/getAllRunningRides`, data);
   }
 
-  driverAcceptedRequest(rideId:string) {
-    return this._http.post(`${this.url}/driverAcceptedRide`,{rideId:rideId});
+  driverAcceptedRequest(data: object) {
+    return this._http.post(`${this.url}/driverAcceptedRide`, data);
   }
-  
-  driverRejectedRequest(data:object) {
+
+  driverRejectedRequest(data: object) {
     console.log('inside the running request service', data);
-    
-    return this._http.post(`${this.url}/driverRejectedRide`,data);
+
+    return this._http.post(`${this.url}/driverRejectedRide`, data);
   }
 
 

@@ -11,6 +11,8 @@ const server = require('http').Server(app);
 socket.initialize(server);
 const Port = process.env.PORT || 5000;
 
+const {startCron} = require('../server/utils/cron');
+startCron();
 const jwt = require('./routes/jwt_token');
 const vehicleType = require('./routes/vehicleType')
 const addCounty = require('./routes/addCountry');
@@ -68,4 +70,6 @@ app.use('/runningRequest', runningRequest);
 server.listen(Port, () => {
     console.log(`server is listning to port no:${Port}`);
 });
+
+
 

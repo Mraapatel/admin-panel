@@ -68,17 +68,14 @@
                 <td class="border text-center p-1 py-2">{{ride.typeId.vehicleType}}</td>
                 <td class="border text-center p-1 py-2">
                     <button class="btn"
-                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'yellow' : ride.rideStatus === 1 ? 'orange' : ride.rideStatus === 2 ? 'green' : 'sky' }">
+                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightblue' : ride.rideStatus === 1 ? 'yellow' : ride.rideStatus ===  5? 'green' : 'sky' ,   'color': ride.rideStatus === 5 ? 'white' : 'black' }">
 
                         @switch(ride.rideStatus){
-                        <!-- @case(0){
-                        pending
-                        } -->
                         @case(0){
-                        Assigning
+                        pending
                         }
                         @case(1){
-                        Accepted
+                        Assigning
                         }
                         @case(2){
                         Arrived
@@ -89,9 +86,13 @@
                         @case(4){
                         Started
                         }
-                        @default{
-                            pending   
+                        @case(5){
+                        Accepted
                         }
+                        @case(6){
+                        Accepted
+                        }
+
                         }
                     </button>
 
@@ -99,13 +100,13 @@
                 <td class="border text-center p-1 py-2">
                     @if(ride.driverId?.driverName){
                     <div class="btn"
-                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightpink' : ride.rideStatus === 1 ? 'orange' : ride.rideStatus === 2 ? 'green' : 'sky' }">
+                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightblue' : ride.rideStatus === 1 ? 'orange' : ride.rideStatus === 5 ? 'green' : 'sky' ,'color': ride.rideStatus === 5 ? 'white' : 'black'  }">
                         {{ride.driverId?.driverName}}
                     </div>
                     }@else{
                     <button class="btn btn-info" (click)="AssingBtnClicked(ride)" data-bs-toggle="modal"
                         data-bs-target="#AssignModal"
-                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'sky' : ride.rideStatus === 1 ? 'orange' : ride.rideStatus === 2 ? 'green' : 'sky' }">
+                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightblue' : ride.rideStatus === 1 ? 'orange' : ride.rideStatus === 2 ? 'green' : 'sky' }">
                         Assign
                     </button>
                     }
@@ -119,7 +120,7 @@
             }
         </table>
         @if(RidesFetched && RidesFetched.length == 0){
-        <div class="container  d-flex justify-content-center">
+        <div class="container text-danger  d-flex justify-content-center">
             <h3>No Rides Found</h3>
         </div>
         }
@@ -170,7 +171,7 @@
                         <td>{{selectedRide.typeId.vehicleType}}</td>
                         <td>{{ActiveDrivers[0].cityId.formatted_address}}</td>
                         <td>
-                            <button class="btn btn-info" data-bs-dismiss="modal" (click)="AssingDriverToRide(driver)">
+                            <button class="btn btn-info" data-bs-dismiss="modal" (click)="AssignDriverToRide(driver)">
                                 <!-- @if(selectedRide  ){
                                     selectedRide.assignedDriverName  
                                 }@else{ -->
@@ -183,7 +184,7 @@
                 </table>
                 @if(ActiveDrivers && ActiveDrivers.length == 0){
                 <div class="container  d-flex justify-content-center">
-                    <h3 class="text-danger">No Active Driver Found</h3>
+                    <h3 class="text-danger">No Available Driver Found</h3>
                 </div>
                 <hr>
                 }
@@ -256,7 +257,8 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-danger shadow" data-bs-dismiss="modal">Cancle</button>
-                <button class="btn btn-success shadow" data-bs-dismiss="modal">Assign Any Available Driver</button>
+                <button class="btn btn-success shadow" data-bs-dismiss="modal"
+                    (click)="assignAnyAvailableDriver(selectedRide._id)">Assign Any Available Driver</button>
             </div>
         </div>
     </div>

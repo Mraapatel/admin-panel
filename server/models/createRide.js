@@ -58,17 +58,25 @@ const createRideSchema = new Schema({
         type: String,
         required: true
     },
-    rideStatus: {
+    assignTime: {
         type: Number,
         default: null,
+    },
+    rideStatus: {
+        type: Number,
+        default: 0,
     },
     driverId: {
         type: mongoose.Schema.Types.ObjectId,
         default: null
     },
-    driverList: {
+    nearestdriverList: {
         type: [mongoose.Schema.Types.ObjectId],
         default: null
+    },
+    nearest: {
+        type: Boolean,
+        default: false
     }
 })
 

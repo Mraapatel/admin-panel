@@ -3,7 +3,10 @@ const mongoose = require('mongoose');
 
 
 
-const fetchIdleDrivers = async (cityId, typeId, status) => {
+const fetchIdleDrivers = async (cityId, typeId, status = 0) => {
+    // console.log('idledriver method called ');
+    // console.log('cityid',cityId);
+    // console.log('typeId',typeId);
 
     let fetchedDrivers = await Driver.aggregate(
         [
@@ -58,6 +61,7 @@ const fetchIdleDrivers = async (cityId, typeId, status) => {
         ]
     )
 
+    // console.log('fetchedDrivers----->',fetchedDrivers);
 
     return fetchedDrivers
 }

@@ -1,13 +1,26 @@
 const { createRide } = require('../models/createRide');
 const mongoose = require('mongoose');
 
-const fetchAllRidesByStatus = async (rideStatus) => {
-    const aggregateQuery = [
-        {
+const fetchAllRidesByStatus = async (rideStatus, nearest = false) => {
+
+    let query = {}
+
+    if (nearest) {
+        query = {
             $match: {
-                rideStatus: rideStatus
+                rideStatus: rideStatus,
+                nearest: nearest
             }
-        },
+        }
+    } else {
+        query = {
+            $match: {
+                rideStatus: rideStatus,
+            }
+        }
+    }
+
+    const aggregateQuery = [
         {
             $lookup: {
                 from: "vehicletypes",
@@ -58,10 +71,14 @@ const fetchAllRidesByStatus = async (rideStatus) => {
                 as: "driverId"
             }
         },
-
+        // {
+        //     $unwind: {
+        //         path: "$driverId"
+        //     }
+        // },
         {
-            $unwind: {
-                path: "$driverId"
+            $addFields: {
+                driverId: { $arrayElemAt: ["$driverId", 0] } // Convert driverId array to object
             }
         },
         {
@@ -78,8 +95,12 @@ const fetchAllRidesByStatus = async (rideStatus) => {
         }
     ]
 
+    aggregateQuery.unshift(query);
+    // console.log(aggregateQuery);
+
     const assignedRidesWithDrivers = await createRide.aggregate(aggregateQuery);
 
+    console.log('asssigne', assignedRidesWithDrivers);
     return assignedRidesWithDrivers
 
 }

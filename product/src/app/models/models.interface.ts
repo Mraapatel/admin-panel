@@ -379,7 +379,7 @@ export interface Ride {
     vehicleType: string,
     vehicleIcon: string
   };
-  rideStatus:number;
+  rideStatus: number;
   date: string;
   time: number;
   totalFare: number;
@@ -390,6 +390,7 @@ export interface Ride {
   startLocation: string,
   endLocation: string,
   timeInString: string,
+  nearest: boolean,
   countryInfo: {
     _id: string;
     country: string;

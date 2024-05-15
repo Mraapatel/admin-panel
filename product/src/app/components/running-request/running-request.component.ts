@@ -22,7 +22,7 @@ export class RunningRequestComponent {
 
   ngOnInit() {
     let data = {
-      status: 0
+      status: 1
     }
     // this._socketIoService.emitNewEvent('getTheRunningRequests', data)
     //----------------------------------------------allAssignedRidesWithDrivers-----------------------------------------//
@@ -90,9 +90,13 @@ export class RunningRequestComponent {
       })
   }
 
-  driverAcceptedRide(rideId: string) {
+  driverAcceptedRide(rideId: string , driverId:string) {
+    let data = {
+      rideId:rideId,
+      driverId:driverId
+    }
     // this._socketIoService.emitNewEvent('driverAccecptedRideRequest', { rideId: rideId });
-    this._runningRequestService.driverAcceptedRequest(rideId).pipe(
+    this._runningRequestService.driverAcceptedRequest(data).pipe(
       catchError((error) => {
         this._toster.error('Error confirming the ride', 'Error');
         return of(error)

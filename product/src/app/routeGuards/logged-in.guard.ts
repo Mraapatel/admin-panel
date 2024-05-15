@@ -24,7 +24,7 @@ export const loggedInGuard: CanActivateFn = (route, state) => {
       return of(err)
     })
   ).subscribe()
-  console.log(serviceToken);
+  // console.log(serviceToken);
   
 
 

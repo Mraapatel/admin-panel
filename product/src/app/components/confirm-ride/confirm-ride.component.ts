@@ -95,7 +95,7 @@ export class ConfirmRideComponent {
     let data = {
       cityId: this.selectedRide.cityId,
       typeId: this.selectedRide.typeId._id,
-      rideStatus:0
+      rideStatus: 0
     }
     // this._socketIoService.emitNewEvent('getActiveDriversForAssign', data);
     this._confirmRiedService.getDriverForAssignRide(data).pipe(
@@ -147,15 +147,28 @@ export class ConfirmRideComponent {
 
 
 
+  assignAnyAvailableDriver(rideId: string) {
+    this._confirmRideService.assignNearestDriver(rideId).pipe(
+      catchError((e) => {
+        this._toster.error('Error occured while Assigning drivers', 'Error');
+        return of(e)
+      })
+    ).subscribe({
+      next: (res: Ride) => {
+        let index = this.RidesFetched.findIndex((r) => r._id === res._id)
+        this.RidesFetched[index].nearest = res.nearest;
+        this.selectedRide.nearest = res.nearest;
+      }
+    })
+  }
 
-
-  AssingDriverToRide(driver: ActiveDriver) {
+  AssignDriverToRide(driver: ActiveDriver) {
     this.selectedDriver = driver;
     console.log('selectedDriver', this.selectedDriver.driverName);
     let data = {
       rideId: this.selectedRide._id,
       driverId: driver._id,
-      rideStatus: 0
+      rideStatus: 1
     }
     // this._socketIoService.emitNewEvent('assignDriverToRide', data);
     this._confirmRideService.assignDriverToRide(data).subscribe({

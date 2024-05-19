@@ -12,7 +12,7 @@ socket.initialize(server);
 const Port = process.env.PORT || 5000;
 
 const {startCron} = require('../server/utils/cron');
-startCron();
+// startCron();
 const jwt = require('./routes/jwt_token');
 const vehicleType = require('./routes/vehicleType')
 const addCounty = require('./routes/addCountry');

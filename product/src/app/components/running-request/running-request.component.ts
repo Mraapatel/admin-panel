@@ -58,7 +58,9 @@ export class RunningRequestComponent {
     })
 
     this.listninRremoveRideFormList();
-    this.listningRejectedRide()
+    this.listningRejectedRide();
+    this.listningToCron();
+    this.listningToCronFormManullyAssignedRides()
   }
 
 
@@ -90,10 +92,43 @@ export class RunningRequestComponent {
       })
   }
 
-  driverAcceptedRide(rideId: string , driverId:string) {
+  listningToCron() {
+    this._socketIoService.listen('updateListFromCron').pipe(
+      catchError((error) => {
+        this._toster.error('Error getting the rides form cron', 'Error');
+        return of(error)
+      })).subscribe({
+        next: (res: assignedRidesWithDriver) => {
+          // let index = this.runningRequests.findIndex((r) => r._id = res._id);
+          // if (index !== -1) {
+          //   this.runningRequests[index] = res
+          // }
+          console.log(res);
+        }
+      })
+  }
+
+  listningToCronFormManullyAssignedRides() {
+    this._socketIoService.listen('TimesUpForAssigndRides').pipe(
+      catchError((error) => {
+        this._toster.error('Error getting the rides form cron', 'Error');
+        return of(error)
+      })).subscribe({
+        next: (res: Array<string>) => {
+          this.runningRequests.forEach((r, index) => {
+            if (res.includes(r._id)) {
+              this.runningRequests.splice(index, 1)
+            }
+          })
+          console.log(res);
+        }
+      })
+  }
+
+  driverAcceptedRide(rideId: string, driverId: string) {
     let data = {
-      rideId:rideId,
-      driverId:driverId
+      rideId: rideId,
+      driverId: driverId
     }
     // this._socketIoService.emitNewEvent('driverAccecptedRideRequest', { rideId: rideId });
     this._runningRequestService.driverAcceptedRequest(data).pipe(
@@ -107,7 +142,7 @@ export class RunningRequestComponent {
 
   driverRejectedRide(rideId: string, driverId: string) {
     console.log('driverRejectedRide called');
-    
+
     let data = {
       rideId: rideId,
       driverId: driverId

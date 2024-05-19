@@ -1,106 +1,79 @@
 const cron = require('node-cron');
-const { fetchAllRidesByStatus } = require('./fetchAllRidesByStatus');
+const { fetchAllRidesByStatus, fetchSinglRideInfo } = require('./fetchAllRidesByStatus');
 const { fetchIdleDrivers } = require('./fetchIdleDrivers');
 const { getSettings } = require('../utils/getSettings');
-const { AssignRidToDriver, removeDriverFormRide } = require('./comman');
+const { AssignRidToDriver, removeDriverFormRide, updateRideAndDriverModal } = require('./comman');
+const { assignedRides } = require('./manuallyAssignedRides');
 
 let IdleRides = [];
-let IdleDrivers = []
 let settings = {};
-let currentRidesIndex
-const startCron = () => {
+let RideIds = [];
+let driverIds = []
+// let currentRidesIndex;
+// const startCron = () => {
 
-    cron.schedule('*/10 * * * * *', async () => {
-        settings = await getSettings()
-        console.log('setting.TimeOut', settings.TimeOut);
+const startCron = cron.schedule('*/5 * * * * *', async () => {
 
-        IdleRides = await fetchAllRidesByStatus(1, true);
+    await checkForManual();
+    await assignNewDriverToRide();
+    console.log('djakfj');
 
-        console.log('IdleRidesInside the cron =========>', IdleRides);
 
-        IdleRides.forEach(async (ride, index) => {
-            currentRidesIndex = index;
+}, {
+    scheduled: false
+})
 
-            let drivers = await fetchIdleDrivers(ride.cityId, ride.typeId._id);
-            let Object = {
-                _id: ride._id,
-                idleDrivers: drivers
-            }
-            IdleDrivers.push(Object)
+// }
 
-            if (ride.driverId == null) {
-                assignNewDriverToRide(ride)
-            }
-            // console.log('IdleDrivers',IdleDrivers);
+// startCron.start()
 
-            let dodd = checkTimeOut(ride.assignTime)
-            if (dodd) {
-                if (ride.driverId) {
-                    removeDriverFormRide(ride._id, ride.driverId._id);
-                }
 
-                // if()
-            }
+const assignNewDriverToRide = async (ride) => {
 
-        })
+    IdleRides = await fetchAllRidesByStatus(1 ,true);
+    console.log('idlerides by nearby',IdleRides);
 
-        // console.log('IdleDrivers[0].idleDrivers', IdleDrivers[1].idleDrivers);
-    }, {
-        scheduled: false
-    })
+    // console.log('dddddddddddddxxxxxxxxxxxx');
+    // if (ride.notAssigndDrivers) {
+    //     // console.log('dddddddddddddxxxxxxxxxxxx', ride.notAssigndDrivers);
+    //     if (ride.notAssigndDrivers && ride.notAssigndDrivers.length > 0 && ride.notAssigndDrivers[0]._id) {
+    //         console.log('broooooo', ride.notAssigndDrivers[0]._id);
+    //         await AssignRidToDriver(ride._id, ride.notAssigndDrivers[0]._id);
+    //         console.log('ride if ', ride._id);
+    //         let ridefetched = await fetchSinglRideInfo(ride._id);
+    //         console.log('ridefetched', ridefetched);
+    //         global.ioInstance.emit('updateListFromCron', ridefetched)
+    //     } else {
+    //         if (ride.driverId && ride.driverId._id) {
+    //             removeDriverFormRide(ride._id, ride.driverId._id);
+    //         }
+    //         console.log('Not happeeinfdda');
 
+    //     }
+    // }
 }
 
 
-function checkTimeOut(rideTime) {
-    let currentTime = new Date();
-    let ridesTime = new Date(rideTime);
+const checkForManual = async () => {
+    console.log('workd');
+    let driverIds = []
+    let rideIds = [];
+    let getRidesInfo = await assignedRides();
+    console.log('lendth', getRidesInfo.length);
+    if (getRidesInfo.length > 0) {
+        console.log('workd2');
+        console.log('getRidesInfo', getRidesInfo);
+        rideIds = getRidesInfo[0]._ids
+        driverIds = getRidesInfo[0].driverIds
+        console.log('getRidesInfo', getRidesInfo);
+        console.log('rideid inside cron', rideIds);
+        await updateRideAndDriverModal(rideIds, driverIds)
+        global.ioInstance.emit('TimesUpForAssigndRides', rideIds)
 
-    let timeDifference = (currentTime.getTime() - ridesTime.getTime()) / 1000
-
-    if (timeDifference >= settings.TimeOut) {
-        return true
     }
-    return false
 }
 
 
-async function assignNewDriverToRide(ride) {
-    let driverIndex
-    let index = IdleDrivers.findIndex((driver) => driver._id == ride._id)
-
-    let drivers = IdleDrivers[index].idleDrivers
-    let nearestdriverList = ride.nearestdriverList
-
-    if (nearestdriverList.length > 0) {
-
-        OuterLoop:
-        for (let i = 0; i < drivers.length; i++) {
-            for (let j = 0; j < nearestdriverList.length; j++) {
-                if (
-                    // drivers[i]._id !== nearestdriverList[j]
-                    drivers[i]._id.toString() !== nearestdriverList[j].toString()
-                ) {
-                    driverIndex = i
-                    break OuterLoop;
-                }
-            }
-        }
-        console.log('drivers[driverIndex] ====>', drivers[driverIndex]);
-
-        if (drivers.length > 0) {
-            let driver = await AssignRidToDriver(ride._id, drivers[driverIndex]._id);
-            IdleDrivers[currentRidesIndex].driverId = driver
-        }
-    }
-
-    if (drivers.length > 0) {
-        let driver = await AssignRidToDriver(ride._id, drivers[0]._id);
-
-        IdleDrivers[currentRidesIndex].driverId = driver
-    }
-
-}
 
 
 module.exports = { startCron }

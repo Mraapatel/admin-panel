@@ -604,7 +604,12 @@ export class UserComponent {
     this.selectedCardUser = user;
     this.customerCards = []
     console.log(user.stripCustomerId);
-    this._userService.getCards(user.stripCustomerId).subscribe((res) => {
+    this._userService.getCards(user.stripCustomerId).pipe(
+      catchError((e) => {
+        this._tostr.error('Error While Fetching cards','Error');
+        return of (e)
+      })
+    ).subscribe((res) => {
       console.log(res);
 
       this.customerCards = res.cards;

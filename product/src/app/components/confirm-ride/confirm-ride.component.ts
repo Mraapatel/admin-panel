@@ -85,6 +85,7 @@ export class ConfirmRideComponent {
     this.fetchRides(details);
     this.fetcheTypes();
     this.listningToRejectedRide();
+    this.listningToCronFormManullyAssignedRides()
 
   }
 
@@ -145,7 +146,24 @@ export class ConfirmRideComponent {
 
 
 
+  listningToCronFormManullyAssignedRides() {
+    this._socketIoService.listen('TimesUpForAssigndRides').pipe(
+      catchError((error) => {
+        this._toster.error('Error getting the rides form cron', 'Error');
+        return of(error)
+      })).subscribe({
+        next: (res: Array<string>) => {
+          this.RidesFetched.forEach((r, index) => {
+            if (res.includes(r._id)) {
+               this.RidesFetched[index].driverId = null 
+               this.RidesFetched[index].rideStatus = 0 
 
+            }
+          })
+          console.log(res);
+        }
+      })
+  }
 
   assignAnyAvailableDriver(rideId: string) {
     this._confirmRideService.assignNearestDriver(rideId).pipe(

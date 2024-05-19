@@ -32,4 +32,50 @@ const removeDriverFormRide = async (rideId, driverId) => {
 
 }
 
-module.exports = { AssignRidToDriver, removeDriverFormRide }
+const updateRideAndDriverModal = async (rideIds, driverIds) => {
+    try {
+        console.log(
+            'rideId',rideIds
+        );
+        const filter1 = { _id: { $in: rideIds } }
+
+        const update1 = {
+            $set: {
+                rideStatus: 0,
+                driverId: null
+            }
+        }
+
+        let rideUpdateResult = await createRide.updateMany(filter1, update1);
+        console.log(`${rideUpdateResult.modifiedCount} ride documents updated.`)
+
+        const filter2 = { _id: { $in: driverIds } }
+
+        const update2 = {
+            $set: {
+                driverStatus: 0
+            }
+        }
+
+        let driverUpdateResult = await Driver.updateMany(filter2, update2);
+        console.log(`${driverUpdateResult.modifiedCount} driver documents updated.`)
+        return;
+    } catch (error) {
+        // Handle error
+        console.error('Error updating documents:', error)
+    }
+
+}
+
+
+// const fetchSinglRideInfo = async (rideId)=>{
+//     try{
+//         if(rideId){
+//             let rideInfo = await createRide.aggregate
+//         }
+//     }catch (e){
+//         return null
+//     }
+// }
+
+module.exports = { AssignRidToDriver, removeDriverFormRide, updateRideAndDriverModal }

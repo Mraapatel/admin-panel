@@ -59,7 +59,7 @@ export class CityComponent {
 
 
   ngOnInit() {
-    // this.pageload();
+     this.pageload();
     this._http.getCountry().subscribe((res) => {
       if (Array.isArray(res)) {
         this.countryList = res
@@ -163,7 +163,7 @@ export class CityComponent {
     }
   }
 
-   /*
+  //  /*
   pageload() {
     if (navigator.geolocation) {
       // Get the user's current location
@@ -231,7 +231,7 @@ export class CityComponent {
       console.error('Error loading Google Maps API:', err);
     });
   }
-   */
+  //  */
 
 
   drawingFunction(): void {

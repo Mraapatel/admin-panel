@@ -40,7 +40,7 @@ const assignDriverToRide = async (req, res) => {
         console.log('Inside the runningRequest controller.js ===>', req.body);
         let date = new Date()
         let time = date.getTime();
-        await createRide.findByIdAndUpdate(req.body.rideId, { assignTime: time, rideStatus: req.body.rideStatus, driverId: new mongoose.Types.ObjectId(req.body.driverId) })
+        await createRide.findByIdAndUpdate(req.body.rideId, { assignTime: time, rideStatus: req.body.rideStatus, driverId: new mongoose.Types.ObjectId(req.body.driverId),nearest:false })
         await Driver.findByIdAndUpdate(req.body.driverId, { driverStatus: 1 })
 
         const aggregateQuery = [

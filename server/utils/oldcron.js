@@ -220,3 +220,81 @@ async function assignNewDriverToRide(ride) {
 
 
 module.exports = { startCron }
+
+
+
+
+const assignNewDriverToRide = async (ride) => {
+    IdleRides = await fetchAllRidesByStatus(1, true);
+    // console.log('idlerides by nearby', IdleRides);
+
+    // IdleRides.forEach(async (ride) => {
+
+    for (const ride of IdleRides) {
+console.log('***********************************************************************',ride._id ,'***************************************************************************');
+        // if (ride.notAssigndDrivers ) {
+        // console.log('ddddddddddddd----------in', ride.notAssigndDrivers);
+        if (ride.notAssigndDrivers && ride.notAssigndDrivers.length > 0) {
+            console.log('broooooo', ride.notAssigndDrivers[0]);
+            console.log('ddddddddddddd ---------out', ride);
+
+            let c = await Driver.findById(ride.notAssigndDrivers[0])
+            console.log('cccccccccccc', c);
+            console.log('dddddddddddd', ride.notAssigndDrivers[0]);
+
+
+            if (c && c.driverStatus !== 0) {
+                console.log('00000000000000000000000000000000000000000', c, '0000000000000000000000000000000000000');
+                let updatedRide2 = await createRide.findByIdAndUpdate(ride._id, { rideStatus: 6 }, { new: true });
+                let data = {
+                    rideId: updatedRide2._id,
+                    rideStatus: updatedRide2.rideStatus,
+                }
+                console.log('PutRideOnHold-FromCron',data);
+                global.ioInstance.emit('PutRideOnHold-FromCron', data)
+
+            } else if (c.driverStatus == 0) {
+
+
+                let updatedDriver = await AssignRideToDriver(ride._id, ride.notAssigndDrivers[0], ride.driverId);
+                let updatedRide = ride
+                updatedRide.driverId = updatedDriver
+                console.log('final updated Ride with driver', updatedRide);
+                global.ioInstance.emit('updateListFromCron', updatedRide)
+            }
+        }
+        else {
+
+            console.log('ride inside the else condtion ');
+            console.log('===============================', ride.driverId, '============================');
+
+            await Driver.findByIdAndUpdate(ride.driverId, { driverStatus: 0 })
+
+            let remainingDriver = await Driver.findOne({
+                driverStatus: 1,
+                approveStatus: true,
+                serviceType: ride.typeId._id,
+                cityId: ride.cityId,
+                _id:{$nin:ride.nearestdriverList}
+            })
+
+            console.log('remeianinadfbroooooooooooooooooooooo', remainingDriver);
+            if (remainingDriver == null) {
+                console.log('Inside the null');
+                if (ride.driverId) {
+                    removeDriverFormRide(ride._id);
+                    global.ioInstance.emit('NoDriverRemaining-ByCron', ride._id)
+                }
+            } else {
+                console.log('not Inside the null');
+                global.ioInstance.emit('NoDriverRemaining-ByCron', ride._id)
+            }
+
+            console.log('Not happeeinfdda');
+
+        }
+        // }
+        // })
+    }
+
+}

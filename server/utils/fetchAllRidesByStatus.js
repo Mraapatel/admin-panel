@@ -1,4 +1,3 @@
-const { query } = require('express');
 const { createRide } = require('../models/createRide');
 const mongoose = require('mongoose');
 
@@ -81,7 +80,7 @@ let aggregateQuery = [
 
 const fetchAllRidesByStatus = async (rideStatus, nearest = false) => {
 
-    console.log('cllkajfa');
+    // console.log('cllkajfa');
     let localAggregateQuery
     let query = {};
     let time = new Date().getTime()
@@ -90,8 +89,15 @@ const fetchAllRidesByStatus = async (rideStatus, nearest = false) => {
         const aggregateForCron = [
             {
                 $match: {
-                    rideStatus: 1,
-                    nearest: true
+                    $and: [
+                        {
+                            $or: [
+                                { rideStatus: 1 },
+                                { rideStatus: 6 }
+                            ]
+                        },
+                        { nearest: true }
+                    ]
                 }
             },
             {
@@ -142,6 +148,7 @@ const fetchAllRidesByStatus = async (rideStatus, nearest = false) => {
                     }
                 }
             },
+
             {
                 $lookup: {
                     from: "driverlists",
@@ -156,21 +163,27 @@ const fetchAllRidesByStatus = async (rideStatus, nearest = false) => {
                                 $expr: {
                                     $and: [
                                         {
+                                            $eq: ["$driverStatus", 0]
+                                        },
+                                        {
+                                            $eq: ["$approveStatus", true]
+                                        },
+                                        {
+                                            $eq: [
+                                                "$serviceType",
+                                                "$$typeId"
+                                            ]
+                                        },
+                                        {
+                                            $eq: ["$cityId", "$$cityId"]
+                                        },
+                                        {
                                             $not: {
                                                 $in: [
                                                     "$_id",
                                                     "$$nearestdriverList"
                                                 ]
                                             }
-                                        },
-                                        {
-                                            $eq: ["$driverStatus", 0]
-                                        },
-                                        {
-                                            $eq: ["$serviceType", "$$typeId"]
-                                        },
-                                        {
-                                            $eq: ["$cityId", "$$cityId"]
                                         }
                                     ]
                                 }
@@ -180,23 +193,81 @@ const fetchAllRidesByStatus = async (rideStatus, nearest = false) => {
                             $project: {
                                 _id: 1
                             }
+                        },
+                        {
+                            $limit: 1
                         }
                     ],
                     as: "notAssigndDrivers"
                 }
             },
             {
+                $lookup: {
+                    from: "users",
+                    localField: "userId",
+                    foreignField: "_id",
+                    as: "userId"
+                }
+            },
+            {
+                $unwind: "$userId"
+            },
+            {
+                $lookup: {
+                    from: "countries",
+                    localField: "userId.countryCallingCode",
+                    foreignField: "_id",
+                    as: "countryInfo"
+                }
+            },
+            {
+                $unwind: "$countryInfo"
+            },
+            {
+                $lookup: {
+                    from: "vehicletypes",
+                    localField: "typeId",
+                    foreignField: "_id",
+                    as: "typeId"
+                }
+            },
+            {
+                $unwind: "$typeId"
+            },
+            // {
+            //     $lookup: {
+            //         from: "countries",
+            //         localField: "userId.countryCallingCode",
+            //         foreignField: "_id",
+            //         as: "countryInfo"
+            //     }
+            // },
+            // {
+            //     $unwind: "$countryInfo"
+            // },
+            {
                 $project: {
                     _id: 1,
-                    notAssigndDrivers: '$notAssigndDrivers._id',
-                    driverId: 1
+                    notAssigndDrivers: "$notAssigndDrivers._id",
+                    driverId: 1,
+                    typeId: 1,
+                    userId: 1,
+                    countryInfo: 1,
+                    endLocation: 1,
+                    startLocation: 1,
+                    timeInString: 1,
+                    date: 1,
+                    cityId: 1,
+                    rideStatus: 1,
+                    nearestdriverList: 1,
+                    assignTime:1
                 }
             }
         ]
 
         const assignedRidesWithDrivers = await createRide.aggregate(aggregateForCron);
 
-        console.log('asssigne', assignedRidesWithDrivers);
+        // console.log('asssigne', assignedRidesWithDrivers);
         // console.log(assignedRidesWithDrivers);
         return assignedRidesWithDrivers
     } else {
@@ -227,7 +298,7 @@ const fetchSinglRideInfo = async (rideId) => {
         if (rideId) {
             let query = {
                 $match: {
-                    _id: mongoose.Types.ObjectId(rideId),
+                    _id: new mongoose.Types.ObjectId(rideId),
                 }
             }
             let locacAggregateQuery = aggregateQuery

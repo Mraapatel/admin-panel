@@ -4,10 +4,12 @@ const { Schema } = require('mongoose');
 const createRideSchema = new Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
+        // ref:'User',
         required: true
     },
     typeId: {
         type: mongoose.Schema.Types.ObjectId,
+        // ref:'vehicleType',
         required: true
     },
     cityId: {

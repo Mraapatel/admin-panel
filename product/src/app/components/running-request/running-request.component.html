@@ -27,10 +27,16 @@
                         alt="{{ride.userId.userName }} Icon">
                 </td>
                 <td class="border text-center p-1 py-2 id">{{ride.userId.userName}}</td>
-                <td class="border text-center p-1 py-2">{{ride.countryInfo.countryCallingCode}}
+                <td class="border text-center p-1 py-2">
+                    @if(ride.countryInfo){
+                        {{ride.countryInfo.countryCallingCode}}
+                    }
                     {{ride.userId.userPhone}}</td>
                 <td class="border text-center p-1 py-2">{{ride.driverId.driverName}}</td>
-                <td class="border text-center p-1 py-2 width">{{ride.countryInfo.countryCallingCode}}
+                <td class="border text-center p-1 py-2 width">
+                    @if(ride.countryInfo){
+                        {{ride.countryInfo.countryCallingCode}}
+                    }
                     {{ride.driverId.driverPhone}}</td>
                 <td class="border text-center p-1 py-2 width ">{{ride.date}} {{ride.timeInString}}</td>
                 <td class="border text-center p-1 py-2 width width">{{ride.startLocation}}</td>

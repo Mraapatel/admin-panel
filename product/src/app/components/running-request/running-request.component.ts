@@ -99,10 +99,43 @@ export class RunningRequestComponent {
         return of(error)
       })).subscribe({
         next: (res: assignedRidesWithDriver) => {
-          // let index = this.runningRequests.findIndex((r) => r._id = res._id);
-          // if (index !== -1) {
-          //   this.runningRequests[index] = res
-          // }
+          let index = this.runningRequests.findIndex((r) => r._id === res._id)
+          console.log('index', index);
+          if (index === -1) {
+            this.runningRequests.push(res)
+          } else {
+            this.runningRequests[index] = res;
+          }
+
+          console.log(res);
+        }
+      })
+
+    this._socketIoService.listen('NoDriverRemaining-ByCron').pipe(
+      catchError((error) => {
+        this._toster.error('Error getting the rides form cron', 'Error');
+        return of(error)
+      })).subscribe({
+        next: (res: { rideId: string, rideStatus: number }) => {
+          let index = this.runningRequests.findIndex((r) => r._id == res.rideId);
+          console.warn('NoDriverRemaining', res.rideId)
+
+          this.runningRequests.splice(index, 1)
+          console.log(res);
+        }
+      })
+
+    this._socketIoService.listen('PutRideOnHold-FromCron').pipe(
+      catchError((error) => {
+        this._toster.error('Error getting the rides form cron', 'Error');
+        return of(error)
+      })).subscribe({
+        next: (res: { rideId: string, rideStatus: number }) => {
+          let index = this.runningRequests.findIndex((r) => r._id == res.rideId);
+          if (index !== -1) {
+            console.warn('putrideonhold', res.rideId)
+            this.runningRequests.splice(index, 1);
+          }
           console.log(res);
         }
       })

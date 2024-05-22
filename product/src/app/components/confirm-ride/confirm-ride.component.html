@@ -68,7 +68,7 @@
                 <td class="border text-center p-1 py-2">{{ride.typeId.vehicleType}}</td>
                 <td class="border text-center p-1 py-2">
                     <button class="btn"
-                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightblue' : ride.rideStatus === 1 ? 'yellow' : ride.rideStatus ===  5? 'green' : 'sky' ,   'color': ride.rideStatus === 5 ? 'white' : 'black' }">
+                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightblue' : ride.rideStatus === 1 ? 'yellow' : ride.rideStatus ===  5? 'green' : ride.rideStatus ===  6? 'blue' : 'sky' ,   'color': ride.rideStatus === 5 ? 'white' : 'black' }">
 
                         @switch(ride.rideStatus){
                         @case(0){
@@ -90,7 +90,7 @@
                         Accepted
                         }
                         @case(6){
-                        Accepted
+                        hold
                         }
 
                         }
@@ -98,7 +98,7 @@
 
                 </td>
                 <td class="border text-center p-1 py-2">
-                    @if(ride.driverId?.driverName){
+                    @if(ride.driverId?.driverName ){
                     <div class="btn"
                         [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightblue' : ride.rideStatus === 1 ? 'orange' : ride.rideStatus === 5 ? 'green' : 'sky' ,'color': ride.rideStatus === 5 ? 'white' : 'black'  }">
                         {{ride.driverId?.driverName}}

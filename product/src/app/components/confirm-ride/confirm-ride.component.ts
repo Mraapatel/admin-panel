@@ -85,7 +85,8 @@ export class ConfirmRideComponent {
     this.fetchRides(details);
     this.fetcheTypes();
     this.listningToRejectedRide();
-    this.listningToCronFormManullyAssignedRides()
+    this.listningToCronFormManullyAssignedRides();
+    this.listningToCron()
 
   }
 
@@ -140,7 +141,63 @@ export class ConfirmRideComponent {
 
 
 
+  listningToCron() {
+    this._socketIoService.listen('updateListFromCron').pipe(
+      catchError((error) => {
+        this._toster.error('Error getting the rides form cron', 'Error');
+        return of(error)
+      })).subscribe({
+        next: (res: assignedRidesWithDriver) => {
+          let index = this.RidesFetched.findIndex((r) => r._id === res._id)
+          console.log('index', index);
+          if (index !== -1) {
+            this.RidesFetched[index].driverId = res.driverId;
+            this.RidesFetched[index].rideStatus = res.rideStatus;
+            console.log('inside the updateListFromCron ', res);
 
+          }
+        }
+      })
+
+    this._socketIoService.listen('NoDriverRemaining-ByCron').pipe(
+      catchError((error) => {
+        this._toster.error('Error getting the rides form cron', 'Error');
+        return of(error)
+      })).subscribe({
+        next: (res: { rideId: string, rideStatus: number }) => {
+          let index = this.RidesFetched.findIndex((r) => r._id == res.rideId);
+          console.log('index', index);
+
+          if (index !== -1) {
+            console.warn('NoDriverRemaining-ByCron', res.rideId);
+            this.RidesFetched[index].rideStatus = res.rideStatus;
+            this.RidesFetched[index].driverId = null;
+          }
+          console.log(res);
+          // console.log('this.RidesFetched[index]', this.RidesFetched[index]);
+
+        }
+      })
+
+    this._socketIoService.listen('PutRideOnHold-FromCron').pipe(
+      catchError((error) => {
+        this._toster.error('Error getting the rides form cron', 'Error');
+        return of(error)
+      })).subscribe({
+        next: (res: { rideId: string, rideStatus: number }) => {
+          let index = this.RidesFetched.findIndex((r) => r._id == res.rideId);
+          console.log('index of ride matchd ',index);
+          // console.log('r._id',this.RidesFetched[1].);
+          
+          
+          if (index !== -1) {
+            this.RidesFetched[index].rideStatus = res.rideStatus;
+            this.RidesFetched[index].driverId = null;
+          }
+          console.log(res);
+        }
+      })
+  }
 
 
 
@@ -155,8 +212,8 @@ export class ConfirmRideComponent {
         next: (res: Array<string>) => {
           this.RidesFetched.forEach((r, index) => {
             if (res.includes(r._id)) {
-               this.RidesFetched[index].driverId = null 
-               this.RidesFetched[index].rideStatus = 0 
+              this.RidesFetched[index].driverId = null
+              this.RidesFetched[index].rideStatus = 0
 
             }
           })
@@ -174,8 +231,10 @@ export class ConfirmRideComponent {
     ).subscribe({
       next: (res: Ride) => {
         let index = this.RidesFetched.findIndex((r) => r._id === res._id)
-        this.RidesFetched[index].nearest = res.nearest;
-        this.selectedRide.nearest = res.nearest;
+        if (this.RidesFetched[index].nearest) {
+          this.RidesFetched[index].nearest = res.nearest;
+          this.selectedRide.nearest = res.nearest;
+        }
       }
     })
   }

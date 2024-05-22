@@ -167,6 +167,7 @@ const assignNearestDriver = async (req, res) => {
 
         if (req.body) {
             console.log('Inside the confirmRide -  assignNearestDriver ', req.body);
+            // let time = new Date().getTime();
 
             let ride = await createRide.findByIdAndUpdate(req.body.rideId, {
                 nearest: true, rideStatus: 1

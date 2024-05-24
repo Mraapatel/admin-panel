@@ -1,4 +1,4 @@
-
+const mongoose = require('mongoose');
 const { createRide } = require('../models/createRide');
 
 
@@ -8,6 +8,50 @@ const getRides = async (req, res) => {
         rides: []
     }
     try {
+        let date = req.body.date;
+        let vehicleType = req.body.vechicleType
+        let searchTerm = req.body.searchTerm;
+        let rideStatus = req.body.rideStatus;
+        console.log('inside the ridehistory  - getride--->', req.body);
+
+        let query = {}
+        
+        if (rideStatus) {
+            query = {
+                rideStatus: { $in: [rideStatus] } // Always exclude rideStatus 7 and 8
+            };
+        } else {
+            let query = {
+                rideStatus: { $in: [7, 8] } // Always exclude rideStatus 7 and 8
+            };
+        }
+
+
+
+        if (vehicleType) {
+            query['typeId._id'] = new mongoose.Types.ObjectId(vehicleType);
+        }
+        console.log('date======>', date);
+        if (date) {
+            query.date = date;
+        }
+
+        let searchConditions = [];
+        if (searchTerm) {
+            searchConditions.push(
+                { 'userId.userName': { $regex: new RegExp(searchTerm, 'i') } },
+                { 'userId.userEmail': { $regex: new RegExp(searchTerm, 'i') } },
+                { 'userId.userPhone': { $regex: new RegExp(searchTerm, 'i') } },
+                { date: { $regex: new RegExp(searchTerm, 'i') } }
+            );
+        }
+
+        if (searchConditions.length > 0) {
+            if (!query.$or) {
+                query.$or = [];
+            }
+            query.$or = query.$or.concat(searchConditions);
+        }
 
         const aggregateQuery = [
             {
@@ -77,13 +121,13 @@ const getRides = async (req, res) => {
                     driverId: { $arrayElemAt: ["$driverId", 0] } // Convert driverId array to object
                 }
             },
-            // { $match: query },
+            { $match: query },
             // { $skip: (page - 1) * limit },
             // { $limit: limit },
         ];
 
         let rides = await createRide.aggregate(aggregateQuery)
-        console.log('rides fetched', rides);
+        // console.log('rides fetched', rides);
 
         if (rides.length > 0) {
             response.rides = rides;

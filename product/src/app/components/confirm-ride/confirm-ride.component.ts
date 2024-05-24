@@ -389,6 +389,8 @@ export class ConfirmRideComponent {
       })
     ).subscribe({
       next: (res: Ride) => {
+        console.log(res);
+        
         let index = this.RidesFetched.findIndex((r) => r._id === res._id)
         if (this.RidesFetched[index].nearest) {
           this.RidesFetched[index].nearest = res.nearest;

@@ -11,7 +11,7 @@ import { ConfirmRideService } from '../../services/confirm-ride.service';
 @Component({
   selector: 'app-ride-history',
   standalone: true,
-  imports: [CommonModule , ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './ride-history.component.html',
   styleUrl: './ride-history.component.css'
 })
@@ -35,25 +35,27 @@ export class RideHistoryComponent {
 
     this.rideHistory = this._fb.group({
       searchTerm: [''],
-      rideStatus: [''],
+      rideStatus: [Number],
       vechicleType: [''],
       date: ['']
     });
     this._browserNotification.requestPermission();
-    this.fetchRides();
+    let details = {
+      // limit: this.limit,
+      // page: this.pageNumber,
+      // sort: 'none',
+      date: this.rideHistory.get('date')?.value,
+      rideStatus: null,
+      searchTerm: '',
+      vechicleType: this.rideHistory.get('vechicleType')?.value
+    }
+    this.fetchRides(details);
     this.fetcheTypes();
 
   }
-  // notify() {
-  //   let data = {
-  //     'title': 'Running Requests',
-  //     'alertContent': 'Driver Not Found! - No Driver is Available'
-  //   };
-  //   this._browserNotification.generateNotification(data);
-  // }
 
-  fetchRides() {
-    this._rideHistory.fetchRides().pipe(
+  fetchRides(details: object) {
+    this._rideHistory.fetchRides(details).pipe(
       catchError((e) => {
         console.log('res', e.error.message);
         if (e.status === 404 && e.error.message === 'Currently No rides are available') {
@@ -72,11 +74,33 @@ export class RideHistoryComponent {
   }
 
 
-  searchRides(val:string){
+  searchRides(val: string) {
+    let details = {
+      // limit: this.limit,
+      // page: this.pageNumber,
+      // sort: 'none',
+      date: this.rideHistory.get('date')?.value,
+      rideStatus: parseInt(this.rideHistory.get('rideStatus')?.value),
+      searchTerm: val,
+      vechicleType: this.rideHistory.get('vechicleType')?.value
+    }
+    this.fetchRides(details);
 
   }
-  ClearFilter(){
-
+  ClearFilter() {
+    let formValues = this.rideHistory.value
+    if (!Object.values(formValues).some(value => value !== '')) {
+      this._toster.info('There is nothing to clear', 'Info');
+      return;
+    }
+    this.rideHistory.reset();
+    let details = {
+      date: this.rideHistory.get('date')?.value,
+      rideStatus: parseInt(this.rideHistory.get('rideStatus')?.value),
+      searchTerm: this.rideHistory.get('searchTerm')?.value ,
+      vechicleType: this.rideHistory.get('vechicleType')?.value
+    }
+    this.fetchRides(details)
   }
 
   fetcheTypes() {

@@ -48,13 +48,13 @@ const getRidesFormDb = async (pages, rideLimit, searchTerm, vehicleType, date) =
 
 
         const aggregateQuery = [
-            {
-                $match: {
-                    rideStatus: {
-                        $nin: [7, 8]
-                    }
-                }
-            },
+            // {
+            //     $match: {
+            //         rideStatus: {
+            //             $nin: [7, 8]
+            //         }
+            //     }
+            // },
             {
                 $lookup: {
                     from: 'vehicletypes',
@@ -128,25 +128,33 @@ const getRidesFormDb = async (pages, rideLimit, searchTerm, vehicleType, date) =
         Rides = await createRide.aggregate(aggregateQuery).collation({ locale: 'en', strength: 2 });
         console.log('Rides.length,', Rides.length);
 
-        // if (searchTerm  ) {
-        //     // totalRides = await createRide.countDocuments(query);
-        //     totalRides = await createRide.countDocuments({ $and: [query, { $or: searchConditions }] });
-        //     // totalRides = await createRide.countDocuments(query);
-        // } else {
-        //     console.log('query inside else',query);
-        //     totalRides = await createRide.countDocuments(query);
-        // }
-        aggregateQuery.push({
-            $count: "totalRides"
-        });
+        if (vehicleType) {
 
-        console.log('countQuery ====>', aggregateQuery);
+            aggregateQuery.push({
+                $count: "totalRides"
+            });
 
-        // Execute the aggregation query to count documents
-        const countResult = await createRide.aggregate(aggregateQuery).collation({ locale: 'en', strength: 2 });
+            console.log('countQuery ====>', aggregateQuery);
 
-        // Extract the total number of rides from the count result
-        totalRides = countResult.length > 0 ? countResult[0].totalRides : 0;
+            //   Execute the aggregation query to count documents
+            const countResult = await createRide.aggregate(aggregateQuery).collation({ locale: 'en', strength: 2 });
+
+            //   Extract the total number of rides from the count result
+            totalRides = countResult.length > 0 ? countResult[0].totalRides : 0;
+        } else {
+
+            if (searchTerm) {
+                // totalRides = await createRide.countDocuments(query);
+                totalRides = await createRide.countDocuments({ $and: [query, { $or: searchConditions }] });
+                // totalRides = await createRide.countDocuments(query);
+            } else {
+                console.log('query inside else', query);
+                totalRides = await createRide.countDocuments(query);
+            }
+        }
+
+
+
         console.log('totalRides', totalRides);
 
         return { totalRides: totalRides, Rides: Rides };

@@ -2,6 +2,7 @@
 
 <!-- <button class="btn btn-danger my-3" (click)="notify()">show notification</button> -->
 <div>
+
     <form [formGroup]="rideHistory">
         <div class="input-group my-3">
             <label for="vechicleType" class="mt-1">Vehicle Type :</label>
@@ -25,8 +26,8 @@
                 <option value="8">Canclled</option>
                 <!-- <option value="2">Confirmed</option> -->
             </select>
+
             <input type="text" class="form-control rounded" name="searchTerm" #inputValue
-                
                 placeholder=" search by username, phone number, request-id" formControlName="searchTerm">
             <div class="input-group-append ">
                 <div class="input-group-text bg-dark text-white ps-3 ">Apply filter</div>
@@ -78,7 +79,7 @@
                 <td class="border text-center p-1 py-2 width">{{ride.endLocation}}</td>
                 <td class="border text-center p-1 py-2 width">{{ride.typeId.vehicleType}}</td>
                 <td class="border text-center p-1 py-2 width">
-                    <div class="btn" 
+                    <div class="btn"
                         [ngStyle]="{'background-color':ride.rideStatus === 7 ? 'green' : 'orange' , 'color':'white'}">
                         {{ ride.rideStatus === 7 ? 'Completed' : ride.rideStatus === 8 ? 'Cancelled' : '' }}
                     </div>

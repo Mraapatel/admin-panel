@@ -11,8 +11,8 @@ export class RideHistoryService {
   private url = 'http://localhost:5000/rideHistory';
 
 
-  fetchRides() {
-    return this._http.post<{ message: string, rides: Ride[] }>(`${this.url}/getRidesInHistory`, {})
+  fetchRides(data:object) {
+    return this._http.post<{ message: string, rides: Ride[] }>(`${this.url}/getRidesInHistory`, data)
   }
 
 }

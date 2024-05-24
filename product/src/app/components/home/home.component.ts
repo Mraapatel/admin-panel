@@ -5,6 +5,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'
 import { SpinnerService } from '../../services/spinner.service';
 import { loaderService } from '../../services/loader';
 import { CommonModule } from '@angular/common';
+import { BrowserNotificationService } from '../../services/browser-notification.service';
 
 @Component({
   selector: 'app-home',
@@ -20,8 +21,19 @@ export class HomeComponent {
   // _loaderService = inject(loaderService);
   // spinner:boolean = false
 
+  private _browserNotification = inject(BrowserNotificationService)
+  public count!: number
 
-  constructor(private _authService: AuthServiceService ,public _loaderService:loaderService) {
+  private title = 'Browser Push Notifications!';
+
+  updateCount() {
+    this.count = parseInt(localStorage.getItem('notificationCount')!)
+  }
+
+
+  constructor(private _authService: AuthServiceService, public _loaderService: loaderService) {
+    this._browserNotification.requestPermission();
+    this.updateCount()
     // console.log(this._loaderService.spinnerCounter)
   }
 

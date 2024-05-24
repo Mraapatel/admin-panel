@@ -14,7 +14,7 @@ const getRides = async (req, res) => {
             // console.log(req.body);
 
             // return;
-            let got = await getRidesFormDb(req.body.page, req.body.limit, req.body.sort, req.body.searchTerm, req.body.vechicleType, req.body.date)
+            let got = await getRidesFormDb(req.body.page, req.body.limit, req.body.searchTerm, req.body.vechicleType, req.body.date)
             console.log('got-------->', got);
 
             return res.status(200).json(got);
@@ -185,4 +185,136 @@ const assignNearestDriver = async (req, res) => {
     }
 }
 
-module.exports = { getRides, getVehicleTypes, getDrivers, assignNearestDriver }
+const cancleRide = async (req, res) => {
+    try {
+
+        if (req.body) {
+            console.log('Inside the confirmRide -  cancleRide --> ', req.body);
+            // let time = new Date().getTime();
+
+            let ride = await createRide.findByIdAndUpdate(req.body.rideId, {
+                nearest: false, rideStatus: 8
+            }, { new: true })
+
+            let d = await Driver.findByIdAndUpdate(req.body.driverId, {
+                driverStatus: 0
+            })
+
+
+            if (ride) {
+                let data = {
+                    rideStatus: ride.rideStatus,
+                    rideId: ride._id
+                }
+                global.ioInstance.emit('rideCancledByAdmin', data)
+                return res.status(200).json({ message: 'The ride cancled successfully', rideStatus: ride.rideStatus, rideId: ride._id });
+            }
+            return res.status(404).json({ message: 'Some Error occured while canceling ride' });
+        }
+    } catch (e) {
+        response.message = 'Some Error occured while canceling ride'
+        console.log('Error Occured while canceling ride', e);
+        return res.status(400).json(response);
+    }
+}
+
+
+const rideStarted = async (req, res) => {
+    try {
+
+        if (req.body) {
+            console.log('Inside the confirmRide -  rideStarted --> ', req.body);
+            // let time = new Date().getTime();
+
+            let ride = await createRide.findByIdAndUpdate(req.body.rideId, {
+                rideStatus: 4,
+            }, { new: true })
+
+
+            if (ride) {
+                return res.status(200).json({ message: 'The rideStarted successfully', rideStatus: ride.rideStatus, rideId: ride._id });
+            }
+            return res.status(404).json({ message: 'Some Error occured while starting the ride' });
+        }
+    } catch (e) {
+        response.message = 'Some Error occured while starting the ride'
+        console.log('Error Occured while starting the ride', e);
+        return res.status(400).json(response);
+    }
+}
+
+
+const rideArrived = async (req, res) => {
+    try {
+
+        if (req.body) {
+            console.log('Inside the confirmRide -  rideArrived --> ', req.body);
+            // let time = new Date().getTime();
+
+            let ride = await createRide.findByIdAndUpdate(req.body.rideId, {
+                rideStatus: 2,
+            }, { new: true })
+
+
+            if (ride) {
+                return res.status(200).json({ message: 'The rideArrived successfully',rideStatus: ride.rideStatus, rideId: ride._id  });
+            }
+            return res.status(404).json({ message: 'Some Error occured while Assigning-- rideArrived'});
+        }
+    } catch (e) {
+        response.message = 'Some Error occured while Assigning-- rideArrived'
+        console.log('Error Occured while Assigning-- rideArrived', e);
+        return res.status(400).json(response);
+    }
+}
+
+
+const ridePicked = async (req, res) => {
+    try {
+
+        if (req.body) {
+            console.log('Inside the confirmRide -  ridePicked --> ', req.body);
+            // let time = new Date().getTime();
+
+            let ride = await createRide.findByIdAndUpdate(req.body.rideId, {
+                rideStatus: 3,
+            }, { new: true })
+
+
+            if (ride) {
+                return res.status(200).json({ message: 'The ridePicked successfully', rideStatus: ride.rideStatus, rideId: ride._id });
+            }
+            return res.status(404).json({ message: 'Some Error occured while Assigning-- ridePicked' });
+        }
+    } catch (e) {
+        response.message = 'Some Error occured while Assigning-- ridePicked'
+        console.log('Error Occured while Assigning-- ridePicked', e);
+        return res.status(400).json(response);
+    }
+}
+
+const rideCompleted = async (req, res) => {
+    try {
+
+        if (req.body) {
+            console.log('Inside the confirmRide -  rideCompleted --> ', req.body);
+            // let time = new Date().getTime();
+
+            let ride = await createRide.findByIdAndUpdate(req.body.rideId, {
+                rideStatus: 7,
+            }, { new: true })
+
+
+            if (ride) {
+                return res.status(200).json({ message: 'The rideCompleted successfully' ,rideStatus: ride.rideStatus, rideId: ride._id});
+            }
+            return res.status(404).json({ message: 'Some Error occured while completing ride' });
+        }
+    } catch (e) {
+        response.message = 'Some Error occured while completing ride'
+        console.log('Error Occured while completing ride', e);
+        return res.status(400).json(response);
+    }
+}
+
+module.exports = { getRides, getVehicleTypes, getDrivers, assignNearestDriver, cancleRide, rideStarted, rideArrived, ridePicked, rideCompleted }

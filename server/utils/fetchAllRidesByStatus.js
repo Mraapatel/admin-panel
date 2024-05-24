@@ -260,7 +260,8 @@ const fetchAllRidesByStatus = async (rideStatus, nearest = false) => {
                     cityId: 1,
                     rideStatus: 1,
                     nearestdriverList: 1,
-                    assignTime:1
+                    assignTime:1,
+                    nearest:1
                 }
             }
         ]

@@ -13,6 +13,7 @@ import { SettingService } from '../../services/setting.service';
 import { DateValidator } from '../../validators/date-validator';
 import { TimeValidator } from '../../validators/time-validator';
 import { SocketIoService } from '../../services/socket-io.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 
 interface CityZone {
@@ -386,32 +387,67 @@ export class CreateRideComponent {
 
       // Now you can use the latitude and longitude to check if they are inside a polygon
       const latLng = new google.maps.LatLng(latitude, longitude);
-      for (let i = 0; i < this.CityZones.length; i++) {
+      this._createRideService.checkForStartingPoint(latLng).pipe(
+        catchError((e) => {
+          console.log('not in zone ', e);
+          return of(e)
+        }),
+        tap((res: { cityId: string, message: string } | HttpErrorResponse) => {
+          if ('cityId' in res && res.message === 'Point is Inside of the zone') {
+            this.CityId = res.cityId
+            this.getPricing(this.CityId);
+            console.log('inside the zone', res);
+            this.isInsideTheZone = true;
+            console.log('isisidethezone', this.isInsideTheZone);
 
-        // this.CityZones.forEach((zone) => {
-        if (google.maps.geometry.poly.containsLocation(latLng, this.CityZones[i].coordinates)) {
-          this.CityId = this.CityZones[i]._id;
-          this.getPricing(this.CityId);
+            this._toastr.success('Service is available', 'success');
+            this.FormStop = this.StartField.nativeElement.value
+          }
 
-          console.log('inside the if condition cityId', this.CityId);
+        })
+      ).subscribe({
+        next: () => {
 
-          console.log('checkForPlace inside if()------>');
-          console.log('yes location is inside the zonee');
-          this.FormStop = this.StartField.nativeElement.value
-          this.isInsideTheZone = true;
-          this._toastr.success('Service is available', 'success');
-          break;
+          if (!this.isInsideTheZone) {
+            console.log('isisidethezone', this.isInsideTheZone);
+
+            this._toastr.error('Service is not Available Herejsjjjjjjjjj', 'error');
+            if (this.DirectionsRenderer) this.DirectionsRenderer.setMap(null);
+            console.log('checkForPlace finished------>');
+            return;
+          }
         }
-      }
+      })
 
-      if (!this.isInsideTheZone) {
-        this._toastr.error('Service is not Available Here', 'error');
-        if (this.DirectionsRenderer) this.DirectionsRenderer.setMap(null);
-        console.log('checkForPlace finished------>');
-        return;
-      }
+
+      // for (let i = 0; i < this.CityZones.length; i++) {
+
+      //   if (google.maps.geometry.poly.containsLocation(latLng, this.CityZones[i].coordinates)) {
+      //     this.CityId = this.CityZones[i]._id;
+      //     this.getPricing(this.CityId);
+
+      //     console.log('inside the if condition cityId', this.CityId);
+
+      //     console.log('checkForPlace inside if()------>');
+      //     console.log('yes location is inside the zonee');
+      //     this.FormStop = this.StartField.nativeElement.value
+      //     this.isInsideTheZone = true;
+      //     this._toastr.success('Service is available', 'success');
+      //     break;
+      //   }
+      // }
+      console.log('isisidethezone', this.isInsideTheZone);
+
+      // if (!this.isInsideTheZone) {
+      //   console.log('isisidethezone',this.isInsideTheZone);
+
+      //   this._toastr.error('Service is not Available Herejsjjjjjjjjj', 'error');
+      //   if (this.DirectionsRenderer) this.DirectionsRenderer.setMap(null);
+      //   console.log('checkForPlace finished------>');
+      //   return;
+      // }
     }
-    console.log('checkForPlace finished------>');
+    // console.log('checkForPlace finished------>');
   }
 
 
@@ -447,7 +483,9 @@ export class CreateRideComponent {
           console.log(res);
           this.cities = res.cities
           console.log(this.cities);
-          this.createZonesOfCities()
+          this.TurnAutocomplete();
+
+          // this.createZonesOfCities()
         } else {
           this._toastr.warning('No Cities found', 'Warning');
         }
@@ -654,7 +692,9 @@ export class CreateRideComponent {
         this.userForm.get('userPhone')?.enable();
         this.userForm.get('countryCC')?.enable();
         this.DirectionsRenderer.setMap(null);
-        this.STOPS = []
+        this.STOPS = [];
+        this.map.setCenter({ lat: 25.4484, lng: 78.5685 })
+        this.map.setZoom(6)
       }
     })
     console.log(details);
@@ -675,22 +715,22 @@ export class CreateRideComponent {
     })
   }
 
-  createZonesOfCities() {
-    this.TurnAutocomplete();
-    if (this.cities.length >= 1) {
-      this.CityZones = this.cities.map((co) => (
-        {
-          _id: co._id,
-          coordinates: new google.maps.Polygon({
-            paths: co.coordinates,
-          })
-        }));
-      console.log(this.CityZones);
-    } else {
-      this._toastr.warning("There are nocities are availabele in the country ", 'warning');
-      return;
-    }
-  }
+  // createZonesOfCities() {
+  //   this.TurnAutocomplete();
+  //   if (this.cities.length >= 1) {
+  //     this.CityZones = this.cities.map((co) => (
+  //       {
+  //         _id: co._id,
+  //         coordinates: new google.maps.Polygon({
+  //           paths: co.coordinates,
+  //         })
+  //       }));
+  //     console.log(this.CityZones);
+  //   } else {
+  //     this._toastr.warning("There are nocities are availabele in the country ", 'warning');
+  //     return;
+  //   }
+  // }
 
   get userPhone() {
     return this.userForm.get('userPhone');

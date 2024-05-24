@@ -380,7 +380,7 @@ export class UserComponent {
   }
 
   nextBtn() {
-    if (this.disableNextBnt()) {
+    if (this.disableNextBnt() || this.userFatched.length == 0) {
       this._tostr.warning("Can't perform this action ", "Warning");
       return;
     }

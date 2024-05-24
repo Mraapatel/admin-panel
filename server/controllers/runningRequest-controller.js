@@ -11,36 +11,10 @@ const assignDriverToRide = async (req, res) => {
     }
     try {
 
-
-        // let query
-
-        // if (status == 0) {
-        //     query = [
-        //         {
-        //             $match: {
-        //                 _id: new mongoose.Types.ObjectId(rideId)
-        //             }
-        //         },
-        //         {
-        //             $set: {
-        //                 rideStatus: 0
-        //             }
-        //         }
-        //     ];
-        // } else {
-        //     query = [
-        //         {
-        //             $match: {
-        //                 rideStatus: 0
-        //             }
-        //         }
-        //     ]
-        // }
-
         console.log('Inside the runningRequest controller.js ===>', req.body);
         let date = new Date()
         let time = date.getTime();
-        await createRide.findByIdAndUpdate(req.body.rideId, { assignTime: time, rideStatus: req.body.rideStatus, driverId: new mongoose.Types.ObjectId(req.body.driverId),nearest:false })
+        await createRide.findByIdAndUpdate(req.body.rideId, { assignTime: time, rideStatus: req.body.rideStatus, driverId: new mongoose.Types.ObjectId(req.body.driverId), nearest: false })
         await Driver.findByIdAndUpdate(req.body.driverId, { driverStatus: 1 })
 
         const aggregateQuery = [
@@ -296,8 +270,14 @@ const driverRejectedRide = async (req, res) => {
     }
 
     try {
+        let status
+        if (req.body.nearest) {
+            status = 1
+        } else {
+            status = 0
+        }
         console.log('inside the runningRequest - driverRejectedRide', req.body);
-        const rejectedRide = await createRide.findByIdAndUpdate(req.body.rideId, { rideStatus: 0, driverId: null }, { new: true })
+        const rejectedRide = await createRide.findByIdAndUpdate(req.body.rideId, { rideStatus: status, driverId: null, assignTime: null }, { new: true })
         await Driver.findByIdAndUpdate(req.body.driverId, { driverStatus: 0 })
 
         if (rejectedRide) {

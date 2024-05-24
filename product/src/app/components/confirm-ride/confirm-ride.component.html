@@ -67,8 +67,9 @@
                 <td class="border text-center p-1 py-2 width">{{ride.endLocation}}</td>
                 <td class="border text-center p-1 py-2">{{ride.typeId.vehicleType}}</td>
                 <td class="border text-center p-1 py-2">
+                    <!-- status -->
                     <button class="btn"
-                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightblue' : ride.rideStatus === 1 ? 'yellow' : ride.rideStatus ===  5? 'green' : ride.rideStatus ===  6? 'blue' : 'sky' ,   'color': ride.rideStatus === 5 ? 'white' : 'black' }">
+                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightblue' : ride.rideStatus === 1 ? 'yellow' : ride.rideStatus ===  5? 'green' : ride.rideStatus ===  6? 'blue' :ride.rideStatus ===  3? 'purple' : ride.rideStatus ===  4? 'lightgreen': 'sky' ,   'color': ride.rideStatus === 5 ? 'white' : 'black' }">
 
                         @switch(ride.rideStatus){
                         @case(0){
@@ -98,22 +99,58 @@
 
                 </td>
                 <td class="border text-center p-1 py-2">
+                    <!-- Assign -->
                     @if(ride.driverId?.driverName ){
                     <div class="btn"
-                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightblue' : ride.rideStatus === 1 ? 'orange' : ride.rideStatus === 5 ? 'green' : 'sky' ,'color': ride.rideStatus === 5 ? 'white' : 'black'  }">
+                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightblue' : ride.rideStatus === 1 ? 'orange' : ride.rideStatus === 5 ? 'green' : ride.rideStatus === 3 ? 'green' : 'sky' ,'color': ride.rideStatus === 5 ? 'white' : ride.rideStatus === 3 ? 'white' : 'black'  }">
                         {{ride.driverId?.driverName}}
                     </div>
                     }@else{
                     <button class="btn btn-info" (click)="AssingBtnClicked(ride)" data-bs-toggle="modal"
                         data-bs-target="#AssignModal"
-                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightblue' : ride.rideStatus === 1 ? 'orange' : ride.rideStatus === 2 ? 'green' : 'sky' }">
+                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightblue' : ride.rideStatus === 1 ? 'orange' : ride.rideStatus === 2 ? 'green' :  ride.rideStatus === 6 ? 'transperent' : 'sky' }">
                         Assign
                     </button>
                     }
                 </td>
                 <td class="border text-center  p-1 py-2">
-                    <button class="btn btn-secondary rounded-circle"><b>i</b></button>
-                    <button class="btn btn-danger btn-close"></button>
+                    <!-- Action -->
+                    <button class="btn btn-secondary rounded-circle mb-2" (click)="rideInfo(ride)"
+                        data-bs-toggle="modal" data-bs-target="#infoModal">
+                        <b>i</b>
+                    </button>
+
+                    @if(ride.rideStatus !== 0){
+
+                    @if(ride.rideStatus !== 1 ){
+                    <button class="btn  mb-2 " (click)="ActionBtn(ride.rideStatus , ride._id , ride.driverId?._id)"
+                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightblue' : ride.rideStatus === 1 ? 'yellow' : ride.rideStatus ===  5? 'green' : ride.rideStatus ===  6? 'blue' :ride.rideStatus ===  3? 'purple' : ride.rideStatus ===  4? 'lightgreen': 'sky' ,   'color': ride.rideStatus === 5 ? 'white' : 'black' }">
+
+                        @switch(ride.rideStatus){
+                        @case(2){
+                        Picked
+                        }
+                        @case(3){
+                        Completed
+                        }
+                        @case(4){
+                        Arrived
+                        }
+                        @case(5){
+                        Start
+                        }
+
+                        }
+                    </button>
+                    }
+                    }
+
+                    @if(ride.rideStatus === 1){
+                    <button class="btn btn-secondary rounded-circle"
+                        (click)="cancleTheRide(ride._id , ride.driverId!._id)">
+                        Cancle
+                    </button>
+                    }
                 </td>
             </tr>
             }
@@ -259,6 +296,99 @@
                 <button class="btn btn-danger shadow" data-bs-dismiss="modal">Cancle</button>
                 <button class="btn btn-success shadow" data-bs-dismiss="modal"
                     (click)="assignAnyAvailableDriver(selectedRide._id)">Assign Any Available Driver</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- info modal -->
+
+
+<div class=" modaldiv modal fade  " id="infoModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content ">
+            <div class="modal-header text-center">
+                <h4 class="modal-title">Ride Information</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            @if(rideInfoOfSelectedRide){
+            <div class="text-center my-1">
+
+                <img [src]="'http://localhost:5000/public/userProfile/' + rideInfoOfSelectedRide.userId.userProfile"
+                    onerror="this.src='assets/noImageFound.jpg'" class="my-1 border profile2 rounded img-fluid "
+                    alt="{{rideInfoOfSelectedRide.userId.userName }} Icon">
+            </div>
+            <div class="container table-responsive d-flex justify-content-start">
+                <!-- @if(selectedRide){ -->
+                <table id="InfoTable" class="ms-3">
+
+                    <tr class="text-center">
+
+                    </tr>
+                    <tr>
+                        <th>User Name </th>
+                        <td>: {{rideInfoOfSelectedRide.userId.userName}}</td>
+                    </tr>
+                    <tr>
+                        <th>User Phone</th>
+                        <td> : {{rideInfoOfSelectedRide.countryInfo.countryCallingCode}}
+                            {{rideInfoOfSelectedRide.userId.userPhone}}</td>
+                    </tr>
+                    <tr>
+                        <th>User Email </th>
+                        <td>: {{rideInfoOfSelectedRide.userId.userEmail}}</td>
+                    </tr>
+                    <tr>
+                        <th>Book Date</th>
+                        <td>: {{rideInfoOfSelectedRide.date}}</td>
+                    </tr>
+                    <tr>
+                        <th>Book Time</th>
+                        <td>: {{rideInfoOfSelectedRide.timeInString}}</td>
+                    </tr>
+                    <tr>
+                        <th>PickUp Location </th>
+                        <td>: {{rideInfoOfSelectedRide.startLocation}}</td>
+                    </tr>
+                    <tr>
+                        <th>Drop-Off Location </th>
+                        <td>: {{rideInfoOfSelectedRide.endLocation}}</td>
+                    </tr>
+                    <tr>
+                        <th>Way Points: </th>
+                        @for(point of rideInfoOfSelectedRide.route ;track $index){
+                        <td class="space">:{{$index +1}}-{{point}}</td>
+                        }
+                        @if(rideInfoOfSelectedRide.route && rideInfoOfSelectedRide.route.length == 0){
+                        <td>: No Way Points for this Ride</td>
+                        }
+                    </tr>
+                    <tr>
+                        <th>Service Type </th>
+                        <td>: {{rideInfoOfSelectedRide.typeId.vehicleType}}</td>
+                    </tr>
+                    <tr>
+                        <th>Total Distance </th>
+                        <td>: {{rideInfoOfSelectedRide.totalDistance | number:'1.2-2'}} Km</td>
+                    </tr>
+                    <tr>
+                        <th>Estimated Time </th>
+                        <td> : {{rideInfoOfSelectedRide.totalTime}} m </td>
+                    </tr>
+                    <tr>
+                        <th>Estimated Fare </th>
+                        <td> : {{rideInfoOfSelectedRide.totalFare |number:'1.2-2'}}
+                            {{rideInfoOfSelectedRide.countryInfo.currency}}</td>
+                    </tr>
+
+                </table>
+                <!-- } -->
+            </div>
+            }
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary shadow" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

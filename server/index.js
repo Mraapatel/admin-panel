@@ -25,6 +25,7 @@ const varifyToken = require('./middlewares/varifyToken');
 const createRide = require('./routes/createRide');
 const confirmRide = require('./routes/confirmRide');
 const runningRequest = require('./routes/runningRequest');
+const rideHistory = require('./routes/rideHistory')
 
 mongoose.connect('mongodb://127.0.0.1:27017/Product')
     .then(() => console.log('connection is successfull...'))
@@ -63,6 +64,8 @@ app.use('/createRide', createRide);
 app.use('/confirmRide', confirmRide);
 
 app.use('/runningRequest', runningRequest);
+
+app.use('/rideHistory', rideHistory);
 
 // app.listen(Port, () => {
 //     console.log(`server is listning to port no:${Port}`);

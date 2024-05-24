@@ -26,10 +26,11 @@ export class AuthServiceService {
 
   private loggedAdmin!: string;
   private readonly JWT_TOKEN = 'JWT_TOKEN';
+  public notificationCount!: string
   private isAuthenticated = new BehaviorSubject<boolean>(false)
   private isIdle = new BehaviorSubject<boolean>(false);
   // getToken!: string;
-  private getTokenbs = new BehaviorSubject<string | null >('');
+  private getTokenbs = new BehaviorSubject<string | null>('');
 
 
   constructor() {
@@ -60,9 +61,9 @@ export class AuthServiceService {
   //   return this.getToken
   // }
 
-   public fetchtoken(): Observable<string | null> { 
-     return this.getTokenbs.asObservable();
-   }
+  public fetchtoken(): Observable<string | null> {
+    return this.getTokenbs.asObservable();
+  }
 
   login(user: { username: string, password: string }) {
     return this.http.post<TokenResponse>('http://localhost:5000/authenticate', user)
@@ -74,7 +75,7 @@ export class AuthServiceService {
         }),
         catchError((error) => {
           console.log(error);
-          
+
           if (error.status === 401) {
             // if(error.message)
             this._tostr.error(`${error.error.message}`, 'Error');
@@ -107,7 +108,8 @@ export class AuthServiceService {
 
   private storeJwtToken(jwt: string) {
     localStorage.setItem(this.JWT_TOKEN, jwt);
-    sessionStorage.setItem(this.JWT_TOKEN , jwt);
+    localStorage.setItem('notificationCount', '1');
+    sessionStorage.setItem(this.JWT_TOKEN, jwt);
   }
 
   private checkTokenValidity() {
@@ -121,7 +123,7 @@ export class AuthServiceService {
     this.router.navigate(['login']);
     localStorage.clear();
     // localStorage.removeItem(this.JWT_TOKEN);
-    
+
     this.isAuthenticated.next(false);
     this.stopWatching();
     this.isIdle.next(true);

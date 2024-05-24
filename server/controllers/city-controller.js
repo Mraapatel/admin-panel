@@ -14,11 +14,21 @@ const zoneSchema = new Schema({
         type: String,
         required: true
     },
-    coordinates: {
-        type: [{}],
-        required: true,
+    zone: {
+        type: {
+            type: String,
+            default: 'Polygon',
+            enum: ['Polygon'],
+            required: true
+        },
+        coordinates: {
+            type: [[[Number]]],
+            required: true,
+        }
     }
 });
+
+zoneSchema.index({ zone: '2dsphere' });
 
 const City = mongoose.model('cityZone', zoneSchema);
 
@@ -33,11 +43,16 @@ const addZone = async (req, res) => {
         let newZone = {
             countryId: countryId,
             formatted_address: req.body.cityName,
-            coordinates: req.body.coordinates,
-            place_id:req.body.place_id,
+            place_id: req.body.place_id,
+            zone: {
+                // type: 'Polygon',
+                coordinates: req.body.coordinates[0] // Ensure the coordinates are correctly nested
+            }
         }
+        console.log('newZone.zone.coordinates[0]', newZone.zone.coordinates[0]);
+        // return null
         let isok = await City.findOne({ formatted_address: req.body.cityName });
-        // console.log(isok);
+        console.log('newZone------->', newZone.zone.coordinates[0]);
         if (isok) {
             res.status(500).send({ message: 'The Zone for this city already exists' });
         } else {
@@ -87,9 +102,19 @@ const getCities = async (req, res) => {
 
 const saveChangedZone = async (req, res) => {
     try {
+        console.log('inside the saveChangedZone', req.body);
+        // return
         let isPresent = await City.findOne({ _id: req.body.cityId });
         if (isPresent) {
-            let updatedZone = await City.findByIdAndUpdate({ _id: req.body.cityId }, { coordinates: req.body.coordinates }, { new: true })
+            console.log('city is present');
+            let updatedZone = await City.findByIdAndUpdate(
+                { _id: req.body.cityId },
+                {
+                    zone: {
+                        coordinates: req.body.coordinates,
+                        type:'Polygon'
+                    }
+                }, { new: true })
             return res.status(200).json(updatedZone, { Message: 'The Zone is updated successfully' })
         }
         // console.log(req.body);
@@ -100,4 +125,4 @@ const saveChangedZone = async (req, res) => {
     }
 }
 
-module.exports = { addZone, getCountries, saveChangedZone, getCities }
+module.exports = { City, addZone, getCountries, saveChangedZone, getCities }

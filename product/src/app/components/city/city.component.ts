@@ -7,10 +7,10 @@ import { ToastrService } from 'ngx-toastr';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 interface Cities {
-  coordinates: [{
-    lat: number;
-    lng: number;
-  }],
+  zone: {
+    type: 'Polygon';
+    coordinates: [[[number, number]]];
+  },
   countryId: string,
   formatted_address: string,
   _id: string
@@ -59,7 +59,7 @@ export class CityComponent {
 
 
   ngOnInit() {
-     this.pageload();
+    this.pageload();
     this._http.getCountry().subscribe((res) => {
       if (Array.isArray(res)) {
         this.countryList = res
@@ -157,7 +157,7 @@ export class CityComponent {
 
     this.selectedCountry = cca2;
     console.log(cca2);
-    
+
     if (this.autocomplete) {
       this.autocomplete.setComponentRestrictions({ 'country': this.selectedCountry });
     }
@@ -288,16 +288,22 @@ export class CityComponent {
         const polygon = event.overlay;
         // const path = polygon.getPath().getArray()
         const path = polygon.getPath().getArray();
+        console.log('path------------>', path);
+
         if (this.coordinates) {
-          this.coordinates = [{}]
+          this.coordinates = [[[]]]
         }
 
         // this.editableCountry = false;
         this.countryForm.get('country')?.disable();
         this.countryForm.get('city')?.disable();
 
-        this.coordinates = path.map((latLng) => ({ lat: latLng.lat(), lng: latLng.lng() }));
+        const firstCoordinate = [path[0].lng(), path[0].lat()]
+
+        this.coordinates = [[path.map((latLng) => [latLng.lng(), latLng.lat()])]];
+        this.coordinates[0][0].push(firstCoordinate)
         console.log('Polygon coordinates:', this.coordinates);
+
         // console.log(this.place);
         if (this.drawinPolygon) {
           this.drawinPolygon.setMap(null)
@@ -316,11 +322,11 @@ export class CityComponent {
       this._toastr.warning('Please enter all the details', 'Warning');
       return;
     }
-    if (this.coordinates.length < 2) {
-      console.log('please draw the proper area');
-      this._toastr.warning('Please draw the area properly', 'Warning')
-      return;
-    }
+    // if (this.coordinates.length < 2) {
+    //   console.log('please draw the proper area');
+    //   this._toastr.warning('Please draw the area properly', 'Warning')
+    //   return;
+    // }
     // if (this.countryForm.get('city')?.value !== this.cityName ) {
     //   console.log(this.countryForm.get('city')?.value);
     //   console.log(this.cityName);
@@ -332,9 +338,11 @@ export class CityComponent {
     let placeInfo = {
       countryId: this.countryId,
       cityName: this.place?.formatted_address,
-      place_id:this.place?.place_id,
+      place_id: this.place?.place_id,
       coordinates: this.coordinates
     }
+    console.log('this.coordinates',);
+
 
     this._cityService.saveZone(placeInfo).subscribe((res) => {
       console.log(res);
@@ -373,10 +381,14 @@ export class CityComponent {
   }
 
   cityChoosed(city: Cities) {
-    // if(!city){
-    //   this._toastr.info('No City found','Info');
-    //   return;
-    // }
+
+    console.log('cityChoosed', city.zone.coordinates[0]);
+    let updatedCords = city.zone.coordinates[0].map(pair => ({
+      lat: pair[1], // Assuming latitude is at index 1
+      lng: pair[0]  // Assuming longitude is at index 0
+    }));
+    console.log('updated cor', updatedCords);
+    // return;
 
     if (this.selectedCity) {
       this.selectedCity = null;
@@ -386,12 +398,11 @@ export class CityComponent {
       this.polygon.setMap(null); // Remove polygon from map
       this.polygon = null; // Reset polygon variable
     }
-    let coordinates = city.coordinates;
-    // console.log(coordinates);
-    // const polygonCoords = coordinates.map(coord => new google.maps.LatLng(coord.lat, coord.lng));
+    // let coordinates = city.zone.coordinates;
+
 
     this.polygon = new google.maps.Polygon({
-      paths: city.coordinates,
+      paths: updatedCords,
       strokeColor: "#FF0000",
       strokeOpacity: 0.8,
       strokeWeight: 2,
@@ -401,36 +412,44 @@ export class CityComponent {
     });
 
     this.polygon.setMap(this.map);
-    const newCenter = new google.maps.LatLng(coordinates[0].lat, coordinates[0].lng);
+    const newCenter = new google.maps.LatLng(updatedCords[0].lat, updatedCords[0].lng);
     this.map.setCenter(newCenter);
     this.map.setZoom(9);
 
-    // if (this.updatedPolygonCoordinates) {
-    //   this.updatedPolygonCoordinates = []
-    // }
+
     // Add event listeners for vertex updates
-    google.maps.event.addListener(this.polygon.getPath(), 'set_at', () => {
+    google.maps.event.addListener(this.polygon!.getPath(), 'set_at', () => {
       this.editablezone = false;
       updatePolygonCoordinates.call(this); // Use arrow function to maintain 'this' context
     });
     // Add event listeners for new vertex insertions
-    google.maps.event.addListener(this.polygon.getPath(), 'insert_at', () => {
+    google.maps.event.addListener(this.polygon!.getPath(), 'insert_at', () => {
       this.editablezone = false;
       updatePolygonCoordinates.call(this); // Use arrow function to maintain 'this' context
     });
 
-    google.maps.event.addListener(this.polygon.getPath(), 'remove_at', () => {
+    google.maps.event.addListener(this.polygon!.getPath(), 'remove_at', () => {
       this.editablezone = false;
       updatePolygonCoordinates.call(this);
     });
 
     // Function to update the array of polygon coordinates
     function updatePolygonCoordinates(this: any) {
-      this.updatedPolygonCoordinates = [];
+ 
+      this.updatedPolygonCoordinates = [[]]; // Initialize as empty array
       this.polygon.getPath().getArray().forEach((latLng: google.maps.LatLng) => {
-        this.updatedPolygonCoordinates.push({ lat: latLng.lat(), lng: latLng.lng() });
+        const coordinatePair = [latLng.lng(), latLng.lat()]; // Format: [lng, lat]
+        this.updatedPolygonCoordinates[0].push(coordinatePair); // Push into the first index
+        // console.log('this.updatedPolygonCoordinates', this.updatedPolygonCoordinates);
       });
-      // console.log('Updated Polygon Coordinates:', this.updatedPolygonCoordinates);
+
+      const cord = this.polygon.getPath().getArray();
+      const firstCoordinate = [cord[0].lng(), cord[0].lat()];
+
+      this.updatedPolygonCoordinates[0].push(firstCoordinate); // Push the first coordinate pair
+
+      // Output updated coordinates
+      console.log('Updated Polygon Coordinates:', this.updatedPolygonCoordinates);
     }
   }
 

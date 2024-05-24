@@ -1,3 +1,4 @@
+const { City } = require('./city-controller');
 const { createRide } = require('../models/createRide');
 const { getRidesFormDb } = require('../utils/fetchRides');
 
@@ -14,7 +15,7 @@ const storeRide = async (req, res) => {
             let newRide = {
                 userId: req.body.userId,
                 typeId: req.body.typeId,
-                cityId:req.body.cityId,
+                cityId: req.body.cityId,
                 date: req.body.date,
                 time: req.body.time,
                 totalFare: req.body.totalFare,
@@ -25,7 +26,7 @@ const storeRide = async (req, res) => {
                 startLocation: req.body.startLocation,
                 endLocation: req.body.endLocation,
                 timeInString: req.body.timeInString,
-                
+
             }
 
             let saved = await createRide.create(newRide);
@@ -60,10 +61,49 @@ const getRides = async (req, res) => {
             // console.log(req.body);
 
             // return;
-            let got = await getRidesFormDb(req.body.page, req.body.limit, req.body.sort, req.body.searchTerm, req.body.vechicleType ,req.body.date)
+            let got = await getRidesFormDb(req.body.page, req.body.limit, req.body.sort, req.body.searchTerm, req.body.vechicleType, req.body.date)
             console.log('got-------->', got);
 
             return res.status(200).json(got);
+        } else {
+            response.message = 'Some Error Occured while storing Ride'
+            return res.status(400).json(response);
+        }
+
+
+    } catch (e) {
+        console.log('error while storing ride details', e);
+
+    }
+}
+const checkForStartingPoint = async (req, res) => {
+    try {
+        let response = {
+            message: 'Point is Outside of the zone',
+            cityId: ''
+        }
+        if (req.body) {
+            console.log('inside the createRide - checkForStartingPoint ------->', req.body);
+            // console.log(req.body);
+
+            const region = await City.find({
+                zone: {
+                    $geoIntersects: {
+                        $geometry: {
+                            type: 'Point',
+                            coordinates: [req.body.lng, req.body.lat]
+                        }
+                    }
+                }
+            })
+            console.log('region', region);
+            if (region.length > 0) {
+                response.message = 'Point is Inside of the zone';
+                response.cityId = region[0]._id;
+                return res.status(200).json(response);
+            }
+
+            return res.status(400).json(response);
         } else {
             response.message = 'Some Error Occured while storing Ride'
             return res.status(400).json(response);
@@ -111,7 +151,7 @@ const getVehicleTypes = async (req, res) => {
         ]);
 
         if (vehicleType) {
-             vehicleType.forEach((type) =>{
+            vehicleType.forEach((type) => {
                 response.TypesArray.push(type.type);
             });
             response.message = 'Feteched vehicletypes'
@@ -130,4 +170,4 @@ const getVehicleTypes = async (req, res) => {
     }
 }
 
-module.exports = { storeRide, getRides, getVehicleTypes }
+module.exports = { storeRide, getRides, getVehicleTypes, checkForStartingPoint }

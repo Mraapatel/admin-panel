@@ -2,6 +2,17 @@
   <div class="nevbar bg-dark text-white me-0">
     <div class="bg-dark text-white py-2 ">
       <div class="btn-container ps-1 ">
+        <button type="button" class="btn btn-sm my-1 me-5 btn-primary position-relative">
+          <img src="assets/notificatioIcon.png" class="  img-fluid img-thumbnail rounded " alt="imageno found " height="40px"
+            onerror="this.src='assets/noImageFound.jpg'" width="40px" />
+          @if(count > 0){
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            {{count}}
+            <span class="visually-hidden">unread messages</span>
+          </span>
+          }
+        </button>
+
         <button class="py-2 btn btn-warning " type="button" (click)="logOut()">
           <img src="assets/userlogo.png" class="  img-fluid img-thumbnail rounded " alt="imageno found " height="40px"
             onerror="this.src='assets/noImageFound.jpg'" width="40px" />
@@ -29,7 +40,7 @@
                 <h5 class="pt-1">Confirm Rides</h5>
               </a>
             </li>
-            <li> <a>
+            <li routerLinkActive="active"> <a routerLink="rideHistory">
                 <h5 class="pt-1">Ride History</h5>
               </a>
             </li>
@@ -86,11 +97,12 @@
             <button (click)="start()">start</button>
           </li> -->
         </div>
-        
+
 
 
       </div>
-      <div class=" m-0 content overflow-auto  col col-xxl-10 col-xl-10 col-lg-9 col-md-8 col-sm-12 col-xs-12 col-12 pt-4 px-4 ">
+      <div
+        class=" m-0 content overflow-auto  col col-xxl-10 col-xl-10 col-lg-9 col-md-8 col-sm-12 col-xs-12 col-12 pt-4 px-4 ">
         <!-- <app-admin></app-admin> -->
         <!-- @if(_loaderService.spinnerCounter){
         <div class="overlay show">
@@ -111,12 +123,12 @@
         <!-- } -->
 
         <!-- @if(_loaderService.spinnerCounter){ -->
-          <div class="spinnerconent" *ngIf = "_loaderService.spinnerCounter">
+        <div class="spinnerconent" *ngIf="_loaderService.spinnerCounter">
           <!-- <div class="spinnerconent" > -->
-            <div class="spinnerclass">
-              <mat-progress-spinner color="black" value="50" mode="indeterminate"></mat-progress-spinner>
-            </div>
+          <div class="spinnerclass">
+            <mat-progress-spinner color="black" value="50" mode="indeterminate"></mat-progress-spinner>
           </div>
+        </div>
         <!-- } -->
 
         <router-outlet></router-outlet>

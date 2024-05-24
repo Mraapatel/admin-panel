@@ -4,11 +4,12 @@ import { catchError, of } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { Ride, assignedRidesWithDriver } from '../../models/models.interface';
 import { RunningRequestService } from '../../services/running-request.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-running-request',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './running-request.component.html',
   styleUrl: './running-request.component.css'
 })
@@ -19,6 +20,7 @@ export class RunningRequestComponent {
   private _runningRequestService = inject(RunningRequestService);
 
   runningRequests: Array<assignedRidesWithDriver> = [];
+  selectedRidesInfo!: Ride
 
   ngOnInit() {
     let data = {
@@ -64,6 +66,12 @@ export class RunningRequestComponent {
   }
 
 
+  rideinfo(ride: Ride) {
+    this.selectedRidesInfo = ride
+  }
+
+  //----------------------------------------------acceptedRideWithDriver-----------------------------------------//
+
   listninRremoveRideFormList() {
     this._socketIoService.listen('acceptedRideWithDriver').pipe(
       catchError((error) => {
@@ -78,6 +86,8 @@ export class RunningRequestComponent {
       })
   }
 
+  //----------------------------------------------rejectedRideByDriver-----------------------------------------//
+
   listningRejectedRide() {
     this._socketIoService.listen('rejectedRideByDriver').pipe(
       catchError((error) => {
@@ -91,6 +101,8 @@ export class RunningRequestComponent {
         }
       })
   }
+
+  //----------------------------------------------updateListFromCron / NoDriverRemaining-ByCron /PutRideOnHold-FromCron-----------------------------------------//
 
   listningToCron() {
     this._socketIoService.listen('updateListFromCron').pipe(
@@ -139,7 +151,24 @@ export class RunningRequestComponent {
           console.log(res);
         }
       })
+
+    this._socketIoService.listen('rideCancledByAdmin').pipe(
+      catchError((error) => {
+        this._toster.error('Error getting the rides form cron', 'Error');
+        return of(error)
+      })).subscribe({
+        next: (res: { rideId: string, rideStatus: number }) => {
+          let index = this.runningRequests.findIndex((r) => r._id == res.rideId);
+          if (index !== -1) {
+            console.warn('rideCancledByAdmin', res.rideId)
+            this.runningRequests.splice(index, 1);
+          }
+          console.log(res);
+        }
+      })
   }
+
+  //----------------------------------------------TimesUpForAssigndRides-----------------------------------------//
 
   listningToCronFormManullyAssignedRides() {
     this._socketIoService.listen('TimesUpForAssigndRides').pipe(
@@ -158,10 +187,11 @@ export class RunningRequestComponent {
       })
   }
 
-  driverAcceptedRide(rideId: string, driverId: string) {
+  driverAcceptedRide(rideId: string, driverId: string, nearest: boolean) {
     let data = {
       rideId: rideId,
-      driverId: driverId
+      driverId: driverId,
+      nearest: nearest
     }
     // this._socketIoService.emitNewEvent('driverAccecptedRideRequest', { rideId: rideId });
     this._runningRequestService.driverAcceptedRequest(data).pipe(
@@ -173,12 +203,13 @@ export class RunningRequestComponent {
 
   }
 
-  driverRejectedRide(rideId: string, driverId: string) {
+  driverRejectedRide(rideId: string, driverId: string, nearest: boolean) {
     console.log('driverRejectedRide called');
 
     let data = {
       rideId: rideId,
-      driverId: driverId
+      driverId: driverId,
+      nearest: nearest
     }
     this._runningRequestService.driverRejectedRequest(data).pipe(
       catchError((error) => {

@@ -33,4 +33,24 @@ export class ConfirmRideService {
   assignNearestDriver(rideId: string) {
     return this._http.post<{ message: string, TypesArray: VehicleType[] }>(`${this.url}/assignNearestDriver`, { rideId: rideId })
   }
+
+  cancleRide(rideId: string, driverId: string) {
+    return this._http.post<{ message: string, rideStatus: number, rideId: string }>(`${this.url}/cancleRide`, { rideId: rideId, driverId: driverId })
+  }
+
+  rideStarted(rideId: string, driverId: string) {
+    return this._http.post<{ message: string, rideStatus: number, rideId: string }>(`${this.url}/rideStarted`, { rideId: rideId, driverId: driverId })
+  }
+
+  rideArrived(rideId: string, driverId: string) {
+    return this._http.post<{ message: string, rideStatus: number, rideId: string }>(`${this.url}/rideArrived`, { rideId: rideId, driverId: driverId })
+  }
+
+  ridePicked(rideId: string, driverId: string) {
+    return this._http.post<{ message: string, rideStatus: number, rideId: string }>(`${this.url}/ridePicked`, { rideId: rideId, driverId: driverId })
+  }
+
+  rideCompleted(rideId: string, driverId: string) {
+    return this._http.post<{ message: string, rideStatus: number, rideId: string }>(`${this.url}/rideCompleted`, { rideId: rideId, driverId: driverId })
+  }
 }

@@ -49,11 +49,15 @@ export const routes: Routes = [
                 path: 'createRide', loadComponent: () => import('./components/create-ride/create-ride.component').then(c => c.CreateRideComponent), canActivate: [loggedInGuard], title: 'Create-Ride'
             },
             {
-                path: 'confirmRide', loadComponent: () => import('./components/confirm-ride/confirm-ride.component').then(c => c.ConfirmRideComponent), canActivate: [loggedInGuard], title: 'confirm-Ride'
+                path: 'confirmRide', loadComponent: () => import('./components/confirm-ride/confirm-ride.component').then(c => c.ConfirmRideComponent), canActivate: [loggedInGuard], title: 'Confirm-Ride'
             },
             {
-                // path: 'runningRequest', loadComponent: () => import('./components/running-request/running-request.component').then(c => c.RunningRequestComponent),canActivate:[loggedInGuard], title: 'running-Request'
-                path: 'runningRequest', component: RunningRequestComponent, canActivate: [loggedInGuard], title: 'running-Request'
+                path: 'runningRequest', loadComponent: () => import('./components/running-request/running-request.component').then(c => c.RunningRequestComponent), canActivate: [loggedInGuard], title: 'Running-Request'
+                // path: 'runningRequest', component: RunningRequestComponent, canActivate: [loggedInGuard], title: 'running-Request'
+            },
+            {
+                path: 'rideHistory', loadComponent: () => import('./components/ride-history/ride-history.component').then(c => c.RideHistoryComponent), canActivate: [loggedInGuard], title: 'Ride-History'
+                // path: 'runningRequest', component: RunningRequestComponent, canActivate: [loggedInGuard], title: 'running-Request'
             },
         ]
     },

@@ -28,5 +28,9 @@ export class CreateRideService {
     return this._http.post('http://localhost:5000/createRide/storeRide' ,rideDetails)
   }
 
+  checkForStartingPoint(latLng:object){
+    return this._http.post('http://localhost:5000/createRide/checkForStartingPoint' ,latLng)
+  }
+
 
 }

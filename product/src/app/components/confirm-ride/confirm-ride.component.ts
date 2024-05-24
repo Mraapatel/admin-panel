@@ -3,10 +3,12 @@ import { SocketIoService } from '../../services/socket-io.service';
 import { ActiveDriver, Ride, VehicleType, assignedRidesWithDriver, singleUser } from '../../models/models.interface';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ConfirmRideService } from '../../services/confirm-ride.service';
-import { catchError, findIndex, of } from 'rxjs';
+import { catchError, findIndex, of, tap } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { CommonModule } from '@angular/common';
 import { RunningRequestService } from '../../services/running-request.service';
+import { BrowserNotificationService } from '../../services/browser-notification.service';
+// import { HomeComponent } from '../home/home.component';
 
 @Component({
   selector: 'app-confirm-ride',
@@ -21,12 +23,15 @@ export class ConfirmRideComponent {
   private _confirmRideService = inject(ConfirmRideService);
   private _toster = inject(ToastrService);
   private _runningRequestService = inject(RunningRequestService);
-  private _confirmRiedService = inject(ConfirmRideService)
+  private _confirmRiedService = inject(ConfirmRideService);
+  private _browserNotification = inject(BrowserNotificationService)
+
+  // private _home = inject(HomeComponent)
 
   pageNumber: number = 1;
   totalRides!: number;
   limit: number = 3;
-  sort: string = 'none';
+  // sort: string = 'none';
   searchTerm: string = ''
   RidesFetched!: Array<Ride>;
   confirmRideForm!: FormGroup;
@@ -35,7 +40,8 @@ export class ConfirmRideComponent {
   ActiveDrivers: ActiveDriver[] = [];
   RidesUser!: singleUser;
   selectedDriver!: ActiveDriver;
-  returnedRideInfo!: assignedRidesWithDriver
+  returnedRideInfo!: assignedRidesWithDriver;
+  rideInfoOfSelectedRide!: Ride
 
   ngOnInit() {
     this._runningRequestService.listenToIncomingRides().subscribe({
@@ -67,17 +73,11 @@ export class ConfirmRideComponent {
       date: ['']
     });
 
-    // this._socketIoService.listen('dakfja').subscribe({
-    //   next: ((res: string) => {
-    //     //  this.ActiveDrivers = res;
-    //     console.warn(res);
-    //   })
-    // })
 
     let details = {
       limit: this.limit,
       page: this.pageNumber,
-      sort: 'none',
+      // sort: 'none',
       date: this.confirmRideForm.get('date')?.value,
       searchTerm: '',
       vechicleType: this.confirmRideForm.get('vechicleType')?.value
@@ -114,6 +114,21 @@ export class ConfirmRideComponent {
     })
   }
 
+  notify() {
+    let data = {
+      'title': 'Running Requests',
+      'alertContent': 'Driver Not Found! - No Driver is Available'
+    };
+    this._browserNotification.generateNotification(data);
+  }
+
+  rideInfo(ride: Ride) {
+    // console.log('ride',ride);
+    
+    this.rideInfoOfSelectedRide = ride
+    console.log('this.rideInfoOfSelectedRide',this.rideInfoOfSelectedRide);
+    
+  }
 
 
 
@@ -134,11 +149,152 @@ export class ConfirmRideComponent {
 
 
 
+  cancleTheRide(rideId: string, driverId: string) {
+    this._confirmRideService.cancleRide(rideId, driverId).pipe(
+      catchError((e) => {
+        console.log('error in catchError', e);
+        this._toster.error('Some Error Occured While cancling the ride', 'Error')
+        return of(e)
+      }),
+    ).subscribe({
+      next: (res) => {
+        console.log('res in next', res);
+
+        // if (res.status === 200) {
+        this._toster.success('Ride Cancled Successfully', 'Success');
+        console.log('r._id', this.RidesFetched[0]._id);
+        console.log('res.rideId', res.rideId);
+
+
+        let index = this.RidesFetched.findIndex((r) => r._id === res.rideId);
+        console.log('r');
+
+        if (index !== -1) {
+
+          console.log('index', index);
+          console.log('this.ridesfetched', this.RidesFetched[index]);
+
+          this.RidesFetched.splice(index, 1)
+        }
+        // } else {
+        //   this._toster.error('Enable to Cancle Ride', 'Error')
+        // }
+      }
+    })
+  }
+
+  rideStarted(rideId: string, driverId: string) {
+    this._confirmRideService.rideStarted(rideId, driverId).pipe(
+      catchError((e) => {
+        console.log('error in catchError', e);
+        this._toster.error('Some Error Occured While starting the ride', 'Error')
+        return of(e)
+      }),
+    ).subscribe({
+      next: (res) => {
+        console.log('res in next', res);
+
+        // if (res.status === 200) {
+        this._toster.success('Ride started Successfully', 'Success');
+        console.log('r._id', this.RidesFetched[0]._id);
+        console.log('res.rideId', res.rideId);
+
+        let index = this.RidesFetched.findIndex((r) => r._id == res.rideId);
+        this.RidesFetched[index].rideStatus = res.rideStatus
+        console.log('index', index);
+
+        // } else {
+        //   this._toster.error('Enable to start Ride', 'Error')
+        // }
+      }
+    })
+  }
+
+  rideArrived(rideId: string, driverId: string) {
+    this._confirmRideService.rideArrived(rideId, driverId).pipe(
+      catchError((e) => {
+        console.log('error in catchError', e);
+        this._toster.error('Some Error Occured While Changing Arrived Status of ride', 'Error')
+        return of(e)
+      }),
+    ).subscribe({
+      next: (res) => {
+        console.log('res in next', res);
+
+        // if (res.status === 200) {
+        this._toster.success('Driver Arrived Successfully', 'Success');
+        let index = this.RidesFetched.findIndex((r) => r._id == res.rideId);
+        this.RidesFetched[index].rideStatus = res.rideStatus
+        // } else {
+        //   this._toster.error('Enable to set  Ride Arrived', 'Error')
+        // }
+      }
+    })
+
+  }
+
+  ridePicked(rideId: string, driverId: string) {
+    this._confirmRideService.ridePicked(rideId, driverId).pipe(
+      catchError((e) => {
+        console.log('error in catchError', e);
+        this._toster.error('Some Error Occured While Changing Pick Status of ride', 'Error')
+        return of(e)
+      }),
+    ).subscribe({
+      next: (res) => {
+        console.log('res in next', res);
+
+        // if (res.status === 200) {
+        this._toster.success('user Picked Successfully', 'Success');
+        let index = this.RidesFetched.findIndex((r) => r._id == res.rideId);
+        this.RidesFetched[index].rideStatus = res.rideStatus
+        // } else {
+        //   this._toster.error('Enable to set  User Picked', 'Error')
+        // }
+      }
+    })
+
+  }
+
+  rideCompleted(rideId: string, driverId: string) {
+    this._confirmRideService.rideCompleted(rideId, driverId).pipe(
+      catchError((e) => {
+        console.log('error in catchError', e);
+        this._toster.error('Some Error Occured While seting RideCompleted the ride', 'Error')
+        return of(e)
+      }),
+    ).subscribe({
+      next: (res) => {
+        console.log('res in next', res);
+
+        // if (res.status === 200) {
+        this._toster.success('Ride Completed Successfully', 'Success');
+        let index = this.RidesFetched.findIndex((r) => r._id == res.rideId);
+        this.RidesFetched.splice(index, 1)
+        // } else {
+        //   this._toster.error('Enable set Complete Ride', 'Error')
+        // }
+      }
+    })
+
+  }
 
 
 
+  ActionBtn(rideStatus: number, rideId: string, driverId: string | undefined) {
+
+    if (rideStatus === 5) {
+      this.rideStarted(rideId, driverId!)
+    } else if (rideStatus === 4) {
+      this.rideArrived(rideId, driverId!)
+    } else if (rideStatus === 2) {
+      this.ridePicked(rideId, driverId!)
+    } else if (rideStatus === 3) {
+      this.rideCompleted(rideId, driverId!)
+    }
 
 
+  }
 
 
   listningToCron() {
@@ -172,6 +328,10 @@ export class ConfirmRideComponent {
             console.warn('NoDriverRemaining-ByCron', res.rideId);
             this.RidesFetched[index].rideStatus = res.rideStatus;
             this.RidesFetched[index].driverId = null;
+            // let val = parseInt(localStorage.getItem('notificationCount')!) + 1;
+            // localStorage.setItem('notificationCount', JSON.stringify(val));
+            // this._home.updateCount()
+            this.notify()
           }
           console.log(res);
           // console.log('this.RidesFetched[index]', this.RidesFetched[index]);
@@ -186,10 +346,10 @@ export class ConfirmRideComponent {
       })).subscribe({
         next: (res: { rideId: string, rideStatus: number }) => {
           let index = this.RidesFetched.findIndex((r) => r._id == res.rideId);
-          console.log('index of ride matchd ',index);
+          console.log('index of ride matchd ', index);
           // console.log('r._id',this.RidesFetched[1].);
-          
-          
+
+
           if (index !== -1) {
             this.RidesFetched[index].rideStatus = res.rideStatus;
             this.RidesFetched[index].driverId = null;
@@ -198,8 +358,6 @@ export class ConfirmRideComponent {
         }
       })
   }
-
-
 
 
 
@@ -218,6 +376,7 @@ export class ConfirmRideComponent {
             }
           })
           console.log(res);
+          this.notify()
         }
       })
   }
@@ -299,7 +458,7 @@ export class ConfirmRideComponent {
     let details = {
       limit: this.limit,
       page: this.pageNumber,
-      sort: 'none',
+      // sort: 'none',
       date: this.confirmRideForm.get('date')?.value,
       searchTerm: this.confirmRideForm.get('searchTerm')?.value,
       vechicleType: this.confirmRideForm.get('vechicleType')?.value
@@ -317,7 +476,7 @@ export class ConfirmRideComponent {
     let details = {
       limit: this.limit,
       page: this.pageNumber,
-      sort: 'none',
+      // sort: 'none',
       date: this.confirmRideForm.get('date')?.value,
       searchTerm: this.confirmRideForm.get('searchTerm')?.value,
       vechicleType: this.confirmRideForm.get('vechicleType')?.value
@@ -347,7 +506,7 @@ export class ConfirmRideComponent {
     let details = {
       limit: this.limit,
       page: this.pageNumber,
-      sort: 'none',
+      // sort: 'none',
       date: this.confirmRideForm.get('date')?.value,
       searchTerm: this.confirmRideForm.get('searchTerm')?.value,
       vechicleType: this.confirmRideForm.get('vechicleType')?.value
@@ -367,7 +526,7 @@ export class ConfirmRideComponent {
     let details = {
       limit: this.limit,
       page: this.pageNumber,
-      sort: this.sort,
+      // sort: this.sort,
       date: this.confirmRideForm.get('date')?.value,
       searchTerm: this.confirmRideForm.get('searchTerm')?.value,
       vechicleType: this.confirmRideForm.get('vechicleType')?.value

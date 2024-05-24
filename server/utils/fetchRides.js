@@ -1,57 +1,22 @@
 const { createRide } = require('../models/createRide');
 const mongoose = require('mongoose');
 
-const getRidesFormDb = async (pages, rideLimit, sort, searchTerm, vehicleType, date) => {
+const getRidesFormDb = async (pages, rideLimit, searchTerm, vehicleType, date) => {
 
 
     try {
         console.log('inside getRides---------------');
         const page = pages || 1; // Parse the page number from the query parameter, defaulting to 1 if it's not present
         const limit = rideLimit; // Set the number of documents to return per page
-        // Parse the sort direction from the query parameter, defaulting to ascending
-        let sortStuff
-        if (sort !== 'none') {
-            // sort = req.body.sort; // Parse the sort direction from the query parameter, defaulting to ascending
-            // const sortT = sort
-            if (sort == 'userName') {
-                sortStuff = { [`userId.${sort}`]: 1 }
-                console.log(' [`userId.${sort}`]', { [`userId.${sort}`]: 1 });
-            } else {
-                sortStuff = { [sort]: 1 }
-                console.log('{ [sort]: 1 }', { [sort]: 1 });
-            }
-
-        } else {
-            sort = null
-        }
 
         let totalRides // Get the total number of documents in the collection
 
         let Rides;
-        searchTerm;
 
-        // let query = {};
 
-        // // If searchTerm exists, add conditions to search for userName or userEmail
-        // if (vechileType) {
-        //     query['typeId._id'] = new mongoose.Types.ObjectId(vehicleType)
-        // }
-        // console.log('date======>' ,date);
-        // if (date) {
-        //     query.date = date
-        // }
-
-        // if (searchTerm) {
-        //     query = {
-        //         $or: [
-        //             { 'userId.userName': { $regex: new RegExp(searchTerm, 'i') } },
-        //             { 'userId.userEmail': { $regex: new RegExp(searchTerm, 'i') } },
-        //             { 'userId.userPhone': { $regex: new RegExp(searchTerm, 'i') } },
-        //             { date: { $regex: new RegExp(searchTerm, 'i') } },
-        //         ]
-        //     };
-        // }
-        let query = {};
+        let query = {
+            rideStatus: { $nin: [7, 8] } // Always exclude rideStatus 7 and 8
+        };
 
         if (vehicleType) {
             query['typeId._id'] = new mongoose.Types.ObjectId(vehicleType);
@@ -79,9 +44,17 @@ const getRidesFormDb = async (pages, rideLimit, sort, searchTerm, vehicleType, d
         }
 
         console.log('query------>', query);
+        console.log('searchConditions------>', searchConditions);
 
 
         const aggregateQuery = [
+            {
+                $match: {
+                    rideStatus: {
+                        $nin: [7, 8]
+                    }
+                }
+            },
             {
                 $lookup: {
                     from: 'vehicletypes',
@@ -148,21 +121,32 @@ const getRidesFormDb = async (pages, rideLimit, sort, searchTerm, vehicleType, d
             { $limit: limit },
         ];
 
-
-        if (sort !== null) {
-            aggregateQuery.push({ $sort: sortStuff });
+        if (searchConditions.length > 0) {
+            aggregateQuery.push({ $match: { $or: searchConditions } });
         }
 
         Rides = await createRide.aggregate(aggregateQuery).collation({ locale: 'en', strength: 2 });
         console.log('Rides.length,', Rides.length);
 
-        if (searchTerm) {
-            // totalRides = await createRide.countDocuments(query);
-            totalRides = await createRide.countDocuments({ $and: [query, { $or: searchConditions }] });
-            // totalRides = await createRide.countDocuments(query);
-        } else {
-            totalRides = await createRide.countDocuments(query);
-        }
+        // if (searchTerm  ) {
+        //     // totalRides = await createRide.countDocuments(query);
+        //     totalRides = await createRide.countDocuments({ $and: [query, { $or: searchConditions }] });
+        //     // totalRides = await createRide.countDocuments(query);
+        // } else {
+        //     console.log('query inside else',query);
+        //     totalRides = await createRide.countDocuments(query);
+        // }
+        aggregateQuery.push({
+            $count: "totalRides"
+        });
+
+        console.log('countQuery ====>', aggregateQuery);
+
+        // Execute the aggregation query to count documents
+        const countResult = await createRide.aggregate(aggregateQuery).collation({ locale: 'en', strength: 2 });
+
+        // Extract the total number of rides from the count result
+        totalRides = countResult.length > 0 ? countResult[0].totalRides : 0;
         console.log('totalRides', totalRides);
 
         return { totalRides: totalRides, Rides: Rides };

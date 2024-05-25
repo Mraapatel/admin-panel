@@ -15,7 +15,7 @@ const getRides = async (req, res) => {
         console.log('inside the ridehistory  - getride--->', req.body);
 
         let query = {}
-        
+
         if (rideStatus) {
             query = {
                 rideStatus: { $in: [rideStatus] } // Always exclude rideStatus 7 and 8
@@ -42,7 +42,11 @@ const getRides = async (req, res) => {
                 { 'userId.userName': { $regex: new RegExp(searchTerm, 'i') } },
                 { 'userId.userEmail': { $regex: new RegExp(searchTerm, 'i') } },
                 { 'userId.userPhone': { $regex: new RegExp(searchTerm, 'i') } },
-                { date: { $regex: new RegExp(searchTerm, 'i') } }
+                { date: { $regex: new RegExp(searchTerm, 'i') } },
+                { startLocation: { $regex: new RegExp(searchTerm, 'i') } }, // Example for another field
+                { endLocation: { $regex: new RegExp(searchTerm, 'i') } }, // Example for another field
+                { paymentMethod: { $regex: new RegExp(searchTerm, 'i') } }, // Example for another field
+                // { 'driverId.driverName': { $regex: new RegExp(searchTerm, 'i') } }
             );
         }
 
@@ -127,7 +131,7 @@ const getRides = async (req, res) => {
         ];
 
         let rides = await createRide.aggregate(aggregateQuery)
-        // console.log('rides fetched', rides);
+        console.log('rides fetched', rides);
 
         if (rides.length > 0) {
             response.rides = rides;

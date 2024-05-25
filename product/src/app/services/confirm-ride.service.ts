@@ -34,8 +34,8 @@ export class ConfirmRideService {
     return this._http.post<{ message: string, TypesArray: VehicleType[] }>(`${this.url}/assignNearestDriver`, { rideId: rideId })
   }
 
-  cancleRide(rideId: string, driverId: string) {
-    return this._http.post<{ message: string, rideStatus: number, rideId: string }>(`${this.url}/cancleRide`, { rideId: rideId, driverId: driverId })
+  cancleRide(data:object) {
+    return this._http.post<{ message: string, rideStatus: number, rideId: string }>(`${this.url}/cancleRide`, data)
   }
 
   rideStarted(rideId: string, driverId: string) {

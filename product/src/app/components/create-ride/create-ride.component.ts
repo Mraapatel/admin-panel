@@ -247,9 +247,6 @@ export class CreateRideComponent {
       next: (res) => {
         console.log(res);
         if (res.status == 'success') {
-          // this.userForm.get('userName')?.setValue(res.user.userName);
-          // this.userForm.get('userEmail')?.setValue(res.user.userEmail);
-          // this.userForm.get('userPhone')?.setValue(res.user.userPhone);
           this.userForm.get('userPhone')?.disable();
           this.userForm.get('countryCC')?.disable();
           this.gotUser = res.user

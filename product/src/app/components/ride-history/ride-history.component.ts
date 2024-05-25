@@ -7,6 +7,8 @@ import { Ride, VehicleType } from '../../models/models.interface';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ConfirmRideService } from '../../services/confirm-ride.service';
+import { environment } from '../../../environments/environment.development';
+import { Loader } from '@googlemaps/js-api-loader';
 
 @Component({
   selector: 'app-ride-history',
@@ -22,13 +24,14 @@ export class RideHistoryComponent {
   private _fb = inject(FormBuilder);
   private _confirmRideService = inject(ConfirmRideService)
 
-
-  private title = 'Browser Push Notifications!'
-
   RidesFetched: Ride[] = [];
   rideHistory!: FormGroup;
   fetchedVehicleTypes: Array<VehicleType> = [];
-
+  selectedRide!: Ride
+  API_KEY = environment.API_KEY;
+  map!: google.maps.Map;
+  geocoder!: google.maps.Geocoder;
+  rideRoute!: google.maps.Polyline
 
 
   ngOnInit() {
@@ -51,7 +54,30 @@ export class RideHistoryComponent {
     }
     this.fetchRides(details);
     this.fetcheTypes();
+    this.loadDefaultMap();
 
+  }
+
+  loadDefaultMap() {
+    const loader = new Loader({
+      apiKey: this.API_KEY,
+      libraries: ['places', 'drawing']
+    });
+
+    loader.load().then(() => {
+      const mapEle = document.getElementById('map');
+      if (mapEle) {
+        // Load default map without marker
+        this.map = new google.maps.Map(mapEle, {
+          center: { lat: 25.4484, lng: 78.5685 },
+          zoom: 6,
+        });
+        // this.initAutocomplete()
+        this.geocoder = new google.maps.Geocoder();
+      }
+    }).catch(err => {
+      console.error('Error loading Google Maps API:', err);
+    });
   }
 
   fetchRides(details: object) {
@@ -88,8 +114,10 @@ export class RideHistoryComponent {
 
   }
   ClearFilter() {
+    console.log('dkjakljf', this.rideHistory.get('vechicleType')?.value);
+
     let formValues = this.rideHistory.value
-    if (!Object.values(formValues).some(value => value !== '')) {
+    if (!Object.values(formValues).some(value => value !== '' || null)) {
       this._toster.info('There is nothing to clear', 'Info');
       return;
     }
@@ -97,7 +125,7 @@ export class RideHistoryComponent {
     let details = {
       date: this.rideHistory.get('date')?.value,
       rideStatus: parseInt(this.rideHistory.get('rideStatus')?.value),
-      searchTerm: this.rideHistory.get('searchTerm')?.value ,
+      searchTerm: this.rideHistory.get('searchTerm')?.value,
       vechicleType: this.rideHistory.get('vechicleType')?.value
     }
     this.fetchRides(details)
@@ -115,5 +143,87 @@ export class RideHistoryComponent {
         console.log(this.fetchedVehicleTypes);
       }
     })
+  }
+
+  // rideInfo(ride: Ride) {
+  //   let latLng: [{ lat: number, lng: number }]
+  //   this.selectedRide = ride;
+  //   let address = [ride.startLocation, ...ride.route, ride.endLocation]
+  //   console.log('addessses', address);
+  //   address.forEach((a) => {
+  //     let got = this.getLatLng(a);
+  //     latLng.push(got)
+  //   })
+  //   console.log('latlng', latLng);
+  // }
+
+  // getLatLng(address: string): { lat: number, lng: number } {
+  //   this.geocoder = new google.maps.Geocoder;
+  //   let latlng
+  //   this.geocoder.geocode({ address: address }, (results: google.maps.GeocoderResult[] | null, status: google.maps.GeocoderStatus) => {
+  //     if (status === 'OK' && results) {
+  //       const location = results[0].geometry.location;
+  //       latlng = {
+  //         lat: location.lat(),
+  //         lng: location.lng()
+  //       }
+  //       console.log('latlng', latlng);
+  //     } else {
+  //       console.error('Geocode was not successful for the following reason: ' + status);
+  //     }
+  //   });
+  //   return latlng!
+  // }
+
+  async rideInfo(ride: Ride) {
+    if (this.rideRoute) {
+      console.log('inside the if condtion ');
+      
+      this.rideRoute.setMap(null); // Remove the polyline from the map
+    }
+    let latLng: { lat: number, lng: number }[] = [];
+    this.selectedRide = ride;
+    let address = [ride.startLocation, ...ride.route, ride.endLocation];
+    console.log('addresses', address);
+
+    for (const a of address) {
+      try {
+        let got = await this.getLatLng(a);
+        latLng.push(got);
+      } catch (error) {
+        console.error(`Failed to get lat/lng for address ${a}:`, error);
+      }
+    }
+    console.log('latlng', latLng);
+
+    this.rideRoute = new google.maps.Polyline({
+      path: latLng,
+      geodesic: true,
+      strokeColor: "#FF0000",
+      strokeOpacity: 1.0,
+      strokeWeight: 2,
+    })
+
+    this.map.setCenter(latLng[0])
+    this.map.setZoom(7)
+    this.rideRoute.setMap(this.map)
+  }
+
+
+  getLatLng(address: string): Promise<{ lat: number, lng: number }> {
+    return new Promise((resolve, reject) => {
+      this.geocoder.geocode({ address: address }, (results: google.maps.GeocoderResult[] | null, status: google.maps.GeocoderStatus) => {
+        if (status === google.maps.GeocoderStatus.OK && results) {
+          const location = results[0].geometry.location;
+          const latlng = {
+            lat: location.lat(),
+            lng: location.lng()
+          };
+          resolve(latlng);
+        } else {
+          reject('Geocode was not successful for the following reason: ' + status);
+        }
+      });
+    });
   }
 }

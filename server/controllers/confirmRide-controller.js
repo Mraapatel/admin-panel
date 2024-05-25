@@ -190,16 +190,16 @@ const cancleRide = async (req, res) => {
 
         if (req.body) {
             console.log('Inside the confirmRide -  cancleRide --> ', req.body);
-            // let time = new Date().getTime();
 
             let ride = await createRide.findByIdAndUpdate(req.body.rideId, {
                 nearest: false, rideStatus: 8
             }, { new: true })
 
-            let d = await Driver.findByIdAndUpdate(req.body.driverId, {
-                driverStatus: 0
-            })
-
+            if (req.body.driverId) {
+                 await Driver.findByIdAndUpdate(req.body.driverId, {
+                    driverStatus: 0
+                })
+            }
 
             if (ride) {
                 let data = {
@@ -212,9 +212,9 @@ const cancleRide = async (req, res) => {
             return res.status(404).json({ message: 'Some Error occured while canceling ride' });
         }
     } catch (e) {
-        response.message = 'Some Error occured while canceling ride'
+        response.message = 'Some Error occured at server while canceling ride'
         console.log('Error Occured while canceling ride', e);
-        return res.status(400).json(response);
+        return res.status(500).json(response);
     }
 }
 
@@ -257,9 +257,9 @@ const rideArrived = async (req, res) => {
 
 
             if (ride) {
-                return res.status(200).json({ message: 'The rideArrived successfully',rideStatus: ride.rideStatus, rideId: ride._id  });
+                return res.status(200).json({ message: 'The rideArrived successfully', rideStatus: ride.rideStatus, rideId: ride._id });
             }
-            return res.status(404).json({ message: 'Some Error occured while Assigning-- rideArrived'});
+            return res.status(404).json({ message: 'Some Error occured while Assigning-- rideArrived' });
         }
     } catch (e) {
         response.message = 'Some Error occured while Assigning-- rideArrived'
@@ -306,7 +306,7 @@ const rideCompleted = async (req, res) => {
 
 
             if (ride) {
-                return res.status(200).json({ message: 'The rideCompleted successfully' ,rideStatus: ride.rideStatus, rideId: ride._id});
+                return res.status(200).json({ message: 'The rideCompleted successfully', rideStatus: ride.rideStatus, rideId: ride._id });
             }
             return res.status(404).json({ message: 'Some Error occured while completing ride' });
         }

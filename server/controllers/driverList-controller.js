@@ -18,10 +18,11 @@ const driverSchema = new Schema({
         required: true,
         unique: true,
     },
-    // countryCallingCode: {
-    //     type: String,
-    //     required: true,
-    // },
+    driverStripCustomerId: {
+        type: String,
+        // required: true,
+        unique: true,
+    },
     countryId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
@@ -45,9 +46,9 @@ const driverSchema = new Schema({
         type: Boolean,
         required: true
     },
-    driverStatus:{
-        type:Number,
-        default:0
+    driverStatus: {
+        type: Number,
+        default: 0
     }
 });
 
@@ -78,7 +79,7 @@ const addDriver = async (req, res) => {
                 driverProfile: req.file.filename,
                 driverName: req.body.driverName,
                 driverEmail: req.body.driverEmail,
-                // countryCallingCode: req.body.countryCallingCode,
+                driverStripCustomerId: '',
                 driverPhone: req.body.driverPhone,
                 // serviceType: null,
                 approveStatus: false

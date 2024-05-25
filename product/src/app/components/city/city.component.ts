@@ -414,7 +414,7 @@ export class CityComponent {
     this.polygon.setMap(this.map);
     const newCenter = new google.maps.LatLng(updatedCords[0].lat, updatedCords[0].lng);
     this.map.setCenter(newCenter);
-    this.map.setZoom(9);
+    this.map.setZoom(10);
 
 
     // Add event listeners for vertex updates

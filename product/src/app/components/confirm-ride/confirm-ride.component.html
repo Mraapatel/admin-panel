@@ -119,7 +119,7 @@
                 </td>
                 <td class="border text-center  p-1 py-2">
                     <!-- Action -->
-                    <button class="btn btn-secondary rounded-circle mb-2" (click)="rideInfo(ride)"
+                    <button class="btn btn-secondary btn-sm mx-2 mb-2" (click)="rideInfo(ride)"
                         data-bs-toggle="modal" data-bs-target="#infoModal">
                         <b>i</b>
                     </button>
@@ -149,12 +149,12 @@
                     }
                     }
 
-                    @if(ride.rideStatus === 1){
-                    <button class="btn btn-secondary rounded-circle"
-                        (click)="cancleTheRide(ride._id , ride.driverId!._id)">
+                    <!-- @if(ride.rideStatus === 1){ -->
+                    <button class="btn btn-danger "
+                        (click)="cancleTheRide(ride._id , ride.driverId?._id)">
                         Cancle
                     </button>
-                    }
+                    <!-- } -->
                 </td>
             </tr>
             }

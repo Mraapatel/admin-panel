@@ -46,7 +46,7 @@
         <div class="container text-center h2">
             Ride History
         </div>
-        <table class="table table-responsive shadow overflow-auto">
+        <table class="table table-responsive  overflow-auto">
             <tr>
                 <!-- <th class="border text-center p-1 py-2 bg-dark text-white id">Request Id</th>
                 <th class="border text-center p-1 py-2 bg-dark text-white id">User Id</th> -->
@@ -63,7 +63,8 @@
             </tr>
             @if(RidesFetched){
             @for(ride of RidesFetched;track $index){
-            <tr>
+            <tr class="hover rounded shadow" (click)="rideInfo(ride)" data-bs-toggle="modal"
+                data-bs-target="#infoModal">
                 <!-- <td class="border text-center p-1 py-2 id">{{ride._id}}</td>
                 <td class="border text-center p-1 py-2 id">{{ride.userId._id}}</td> -->
                 <td class="border text-center p-1 py-2 width">{{ride.userId.userName}}</td>
@@ -85,6 +86,7 @@
                     </div>
                 </td>
             </tr>
+            <br>
             }
             }
         </table>
@@ -102,4 +104,110 @@
         <button [disabled]="disableNextBnt()" class="btn" class="btn btn-dark text-white shadow"
             (click)="nextBtn()">Next</button>
     </div> -->
+</div>
+
+<!-- <div id="map" class=" mapBox shadow col  col-xxl-8 col-xl-8 col-lg-8 col-md-12 col-sm-12 col-xs-12 col-12"> -->
+<!-- <div id="map" class=" mapBox">
+
+</div> -->
+
+
+<div class=" modaldiv modal fade  " id="infoModal">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content ">
+            <div class="modal-header text-center">
+                <h4 class="modal-title">Ride Information</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="d-flex ">
+                <div class="first mt-3">
+                    @if(selectedRide){
+                    <div class="ms-4 my-1">
+
+                        <img [src]="'http://localhost:5000/public/userProfile/' + selectedRide.userId.userProfile"
+                            onerror="this.src='assets/noImageFound.jpg'" class="my-1 border profile2 rounded img-fluid "
+                            alt="{{selectedRide.userId.userName }} Icon">
+                    </div>
+                    <table id="InfoTable" class="ms-3">
+                        <tr>
+                            <th>User Name </th>
+                            <td>: {{selectedRide.userId.userName}}</td>
+                        </tr>
+                        <tr>
+                            <th>User Phone</th>
+                            <td> : {{selectedRide.countryInfo.countryCallingCode}}
+                                {{selectedRide.userId.userPhone}}</td>
+                        </tr>
+                        <tr>
+                            <th>User Email </th>
+                            <td>: {{selectedRide.userId.userEmail}}</td>
+                        </tr>
+                        <tr>
+                            <th>Book Date</th>
+                            <td>: {{selectedRide.date}}</td>
+                        </tr>
+                        <tr>
+                            <th>Book Time</th>
+                            <td>: {{selectedRide.timeInString}}</td>
+                        </tr>
+                        <tr>
+                            <th>PickUp Location </th>
+                            <td>: {{selectedRide.startLocation}}</td>
+                        </tr>
+                        <tr>
+                            <th>Drop-Off Location </th>
+                            <td>: {{selectedRide.endLocation}}</td>
+                        </tr>
+                        <tr>
+                            <th>Way Points: </th>
+                            @for(point of selectedRide.route ;track $index){
+                            <td>:{{$index +1}}-{{point}}</td><br>
+                            }
+                            @if(selectedRide.route && selectedRide.route.length == 0){
+                            <td>: No Way Points for this Ride</td>
+                            }
+                        </tr>
+                        <tr>
+                            <th>Service Type </th>
+                            <td>: {{selectedRide.typeId.vehicleType}}</td>
+                        </tr>
+                        <tr>
+                            <th>Total Distance </th>
+                            <td>: {{selectedRide.totalDistance | number:'1.2-2'}} Km</td>
+                        </tr>
+                        <tr>
+                            <th>Estimated Time </th>
+                            <td> : {{selectedRide.totalTime}} m </td>
+                        </tr>
+                        <tr>
+                            <th>Estimated Fare </th>
+                            <td> : {{selectedRide.totalFare |number:'1.2-2'}}
+                                {{selectedRide.countryInfo.currency}}</td>
+                        </tr>
+
+                    </table>
+                    }
+                </div>
+                <div id="map" class=" mapBox me-3 mt-2 float-right">
+
+                </div>
+            </div>
+            <!-- @if(selectedRide){
+            <div class="text-center my-1">
+
+                <img [src]="'http://localhost:5000/public/userProfile/' + selectedRide.userId.userProfile"
+                    onerror="this.src='assets/noImageFound.jpg'" class="my-1 border profile2 rounded img-fluid "
+                    alt="{{selectedRide.userId.userName }} Icon">
+            </div> -->
+            <!-- <div class="container table-responsive d-flex justify-content-start"> -->
+            <!-- @if(selectedRide){ -->
+            <!-- 
+            </div>
+            } -->
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary shadow" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
 </div>

@@ -5,3 +5,26 @@
 .time{
     max-width: 4rem;
 }
+
+.mapBox{
+    height: 80vh;
+    width: 100vh;
+    border-radius: 15px ;
+    /* float: right; */
+}
+.first{
+    height: 80vh;
+    width: 80vh;
+    border-radius: 15px ;
+    /* float: right; */
+}
+
+.hover:hover{
+    cursor: pointer;
+}
+
+.profile2{
+    height: 80px;
+    width: 80px;
+    border-radius: 5px
+}

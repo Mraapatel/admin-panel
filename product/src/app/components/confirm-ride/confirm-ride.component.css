@@ -20,17 +20,17 @@
 }
 
 .width{
-    max-width: 8rem;
+    max-width: 10rem;
 }
 
 /* .orange{
     background-color: ;
 } */
-/* .id{
-    max-width: 8rem;
-    overflow: auto;
+.id{
+    max-width: 13rem;
+    /* overflow: auto;
     border-radius: 20px;
-    border: 3px solid orange;
+    border: 3px solid orange; */
 
-} */
+}
 

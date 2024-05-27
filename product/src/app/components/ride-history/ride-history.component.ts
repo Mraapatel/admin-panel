@@ -85,7 +85,8 @@ export class RideHistoryComponent {
       catchError((e) => {
         console.log('res', e.error.message);
         if (e.status === 404 && e.error.message === 'Currently No rides are available') {
-          this._toster.error('No History found', 'Error')
+          this._toster.error('No History found', 'Error');
+          this.RidesFetched = []
         }
         return throwError(e)
       }),

@@ -46,53 +46,6 @@ const addUser = async (req, res) => {
     try {
         console.log('add User req.body ---->>', req.body);
 
-
-        // let newUser = {}
-
-
-        /*        stripe.customers.create(stripCustomer, async (err, customer) => {
-                    if (err) {
-                        console.log("Some Error Occured" + err);
-                    }
-                    if (customer) {
-                        console.log(customer);
-                        newUser.stripCustomerId = customer.id
-                        try {
-                            if (req.body) {
-                                // let newUser = {
-                                newUser.userProfile = req.file.filename
-                                newUser.userName = req.body.userName
-                                newUser.userEmail = req.body.userEmail
-                                newUser.countryCallingCode = req.body.countryCallingCode
-                                newUser.userPhone = req.body.userPhone
-                                // }
-        
-                                let addedUser = await User.create(newUser);
-        
-                                return res.status(200).send(addedUser, { message: 'added successfully' });
-                                // console.log('done');
-                            }
-                        } catch (e) {
-                            console.log(e);
-                            if (e.code === 11000) {
-                                const field = Object.keys(e.keyValue)[0];
-                                let errorMessage = '';
-                                if (field === 'userEmail') {
-                                    errorMessage = 'Email already exists!';
-                                } else if (field === 'userPhone') {
-                                    errorMessage = 'Phone number already exists!';
-                                }
-                                return res.status(400).json({ error: errorMessage });
-                            }
-                            console.log('Error:', e);
-                            return res.status(500).json({ error: 'Failed to add user' });
-                        }
-                    }
-                    else {
-                        console.log("Unknown Error");
-                    }
-                })*/
-
         if (req.body) {
 
             let existingCCAndP = await User.findOne({ $and: [{ countryCallingCode: req.body.countryCallingCode }, { userPhone: req.body.userPhone }] });
@@ -123,6 +76,9 @@ const addUser = async (req, res) => {
                     name: req.body.userName,
                     email: req.body.userEmail,
                     phone: req.body.userPhone,
+                    metadata: {
+                        customerType: 'User'
+                    }
                 }
 
                 stripe.customers.create(stripCustomer, async (err, customer) => {
@@ -184,37 +140,7 @@ function deleteUploadedFile(fileName) {
         }
     });
 }
-// const getUser = async (req, res) => {
-//     // try {
-//     //     const page = parseInt(req.query.page) || 1; // Parse the page number from the query parameter, defaulting to 1 if it's not present
-//     //     const limit = 2; // Set the number of documents to return per page
 
-//     //     const Users = await User.find({}).skip((page - 1) * limit).limit(limit);
-//     //     if (Users.length === 0) {
-//     //         return res.status(200).json({ Message: 'There are no users' });
-//     //     }
-//     //     res.status(200).json(Users);
-//     // } catch (e) {
-//     //     console.log('Error fetching users:', e);
-//     //     res.status(500).json({ error: 'Failed to fetch users' });
-//     // }
-//     try {
-//         const page = parseInt(req.query.page) || 1; // Parse the page number from the query parameter, defaulting to 1 if it's not present
-//         const limit = 2; // Set the number of documents to return per page
-
-//         const totalUsers = await User.countDocuments(); // Get the total number of documents in the collection
-//         const Users = await User.find({}).skip((page - 1) * limit).limit(limit);
-
-//         if (Users.length === 0) {
-//             return res.status(200).json({ Message: 'There are no users' });
-//         }
-
-//         res.status(200).json({ totalUsers: totalUsers, users: Users });
-//     } catch (e) {
-//         console.log('Error fetching users:', e);
-//         res.status(500).json({ error: 'Failed to fetch users' });
-//     }
-// }
 
 const getUser = async (req, res) => {
     try {
@@ -242,7 +168,7 @@ const getUser = async (req, res) => {
         //     const sortT = req.body.searchTerm
         //     sortStuff = { [sortT]: 1 }
         // }
-        
+
         // If searchTerm exists, add conditions to search for userName or userEmail
         if (searchTerm) {
             query = {
@@ -255,44 +181,7 @@ const getUser = async (req, res) => {
             };
         }
 
-        // if (sort === 'userName') {
-        // sortStuff = { userName: 1 }
-        // Users = await User.find(query).collation({ locale: 'en', strength: 2 }).sort({ userName: 1 }).skip((page - 1) * limit).limit(limit);
-        // if (searchTerm) {
-        //     totalUsers = await User.find(query);
-        // } else {
-        //     totalUsers = await User.countDocuments();
-        // }
-        // console.log(Users);
-        // } else if (sort === 'userEmail') {
-        // sortStuff = { userEmail: 1 }
 
-        // Users = await User.find(query).sort({ userEmail: 1 }).skip((page - 1) * limit).limit(limit);
-        // if (searchTerm) {
-        //     totalUsers = await User.countDocuments(query);
-        // } else {
-        //     totalUsers = await User.countDocuments();
-        // }
-        // } else if (sort === 'userPhone') {
-        // sortStuff = { userPhone: 1 }
-
-        // Users = await User.find(query).sort({ userPhone: 1 }).skip((page - 1) * limit).limit(limit);
-        // if (searchTerm) {
-        //     totalUsers = await User.countDocuments(query);
-        // } else {
-        //     totalUsers = await User.countDocuments();
-        // }
-        // }
-
-        // if (sort === 'none') {
-        // Users = await User.find(query).skip((page - 1) * limit).limit(limit);
-        // if (searchTerm) {
-        //     totalUsers = await User.countDocuments(query);
-        // } else {
-        //     totalUsers = await User.countDocuments();
-        // }
-        // } else {
-        // Users = await User.find(query).collation({ locale: 'en', strength: 2 }).sort(sortStuff).skip(c).limit(limit);
 
         const aggregateQuery = [
             { $match: query },
@@ -376,16 +265,6 @@ const updateUser = async (req, res) => {
                 { new: true })
                 .populate('countryCallingCode');
 
-            // if (updateUser && oldFileName) {
-            //     let profilePath = path.join(__dirname, '../public/userProfile', oldFileName);
-            //     fs.unlink(profilePath, (error) => {
-            //         if (error) {
-            //             console.error('Error occurred while deleting image file', err);
-            //             return res.status(500).send('Internal server error');
-            //         }
-            //         console.log('Image file deleted successfully');
-            //     })
-            // }
             deleteUploadedFile(oldFileName)
             return res.status(200).send(updatedUser);
         } else {
@@ -411,9 +290,6 @@ const updateUser = async (req, res) => {
                 if (req.file) {
                     deleteUploadedFile(req.file.filename);
                 }
-                // else if (field === 'userPhone') {
-                //     errorMessage = 'Phone number already exists!';
-                // }
             }
             return res.status(400).json({ error: errorMessage });
         }
@@ -451,17 +327,6 @@ const deleteUser = async (req, res) => {
         }
 
 
-        // let profilePath = path.join(__dirname, '../public/userProfile', fileName);
-
-        // fs.unlink(profilePath, (error) => {
-        //     if (error) {
-        //         console.error('Error occurred while deleting image file', err);
-        //         return res.status(500).send('Internal server error');
-        //     }
-        //     console.log('Image file deleted successfully');
-        //     // return res.status(200).send('Document and image deleted successfully');
-        // })
-
         console.log('User deleted successfully:', deletedUser);
         return res.status(200).json(deletedUser, { message: 'User deleted successfully' })
     } catch (e) {
@@ -476,11 +341,6 @@ const getCards = async (req, res) => {
         let cardsToSend = [];
         let defaultCardId
 
-        // const paymentMethods = await stripe.paymentMethods.list({
-        //     customer: req.body.stripClientId,
-        //     type: 'card',
-        // });
-        // console.log(paymentMethods.data);
 
         await stripe.customers.retrieve(req.body.stripClientId, (err, customer) => {
             if (err) {

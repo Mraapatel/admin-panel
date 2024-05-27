@@ -10,13 +10,13 @@
     height: 80vh;
     width: 100vh;
     border-radius: 15px ;
-    /* float: right; */
 }
 .first{
     height: 80vh;
     width: 80vh;
     border-radius: 15px ;
-    /* float: right; */
+    overflow: auto;
+    scrollbar-width: none;
 }
 
 .hover:hover{

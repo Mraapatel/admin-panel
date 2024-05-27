@@ -4,9 +4,7 @@ const routes = express.Router();
 const path = require('path')
 
 const { getCities } = require('../controllers/city-controller');
-const {addDriver, getDrivers, updateDriver, deleteDriver ,addService ,approveDriver } = require('../controllers/driverList-controller');
-
-// const { log } = require('console');
+const { addDriver, getDrivers, updateDriver, deleteDriver, addService, approveDriver, storeBankDetails } = require('../controllers/driverList-controller');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -26,9 +24,7 @@ routes.post('/addService', addService);
 
 routes.post('/getCities', getCities);
 
-// routes.post('/setDefaultCard', setDefaultCard);
-
-// routes.post('/deleteCard', deleteCard);
+routes.post('/storeBankDetails', storeBankDetails);
 
 routes.post('/getDrivers', getDrivers);
 

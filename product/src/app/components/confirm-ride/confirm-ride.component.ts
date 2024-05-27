@@ -3,7 +3,7 @@ import { SocketIoService } from '../../services/socket-io.service';
 import { ActiveDriver, Ride, VehicleType, assignedRidesWithDriver, singleUser } from '../../models/models.interface';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ConfirmRideService } from '../../services/confirm-ride.service';
-import { catchError, findIndex, of, tap } from 'rxjs';
+import { catchError,of, tap } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { CommonModule } from '@angular/common';
 import { RunningRequestService } from '../../services/running-request.service';
@@ -75,6 +75,7 @@ export class ConfirmRideComponent {
     let details = {
       limit: this.limit,
       page: this.pageNumber,
+      rideStatus: parseInt(this.confirmRideForm.get('rideStatus')?.value),
       date: this.confirmRideForm.get('date')?.value,
       searchTerm: '',
       vechicleType: this.confirmRideForm.get('vechicleType')?.value
@@ -429,6 +430,7 @@ export class ConfirmRideComponent {
     console.log(this.pageNumber);
     let details = {
       limit: this.limit,
+      rideStatus: parseInt(this.confirmRideForm.get('rideStatus')?.value),
       page: this.pageNumber,
       date: this.confirmRideForm.get('date')?.value,
       searchTerm: this.confirmRideForm.get('searchTerm')?.value,
@@ -446,6 +448,7 @@ export class ConfirmRideComponent {
     console.log(this.pageNumber);
     let details = {
       limit: this.limit,
+      rideStatus: parseInt(this.confirmRideForm.get('rideStatus')?.value),
       page: this.pageNumber,
       date: this.confirmRideForm.get('date')?.value,
       searchTerm: this.confirmRideForm.get('searchTerm')?.value,
@@ -462,11 +465,18 @@ export class ConfirmRideComponent {
         return of(error)
       })
     ).subscribe({
-      next: (res) => {
+      next: (res: { Rides: [Ride], totalRides: number }) => {
         this.RidesFetched = res.Rides;
         this.totalRides = res.totalRides;
         console.log('totalRide', this.totalRides);
         console.log(this.RidesFetched);
+        console.log(res);
+
+        if (res.Rides.length > 0) {
+          this._toster.success('Ride Fetched Successfully', 'Success');
+        } else {
+          this._toster.warning('No Rides Found', 'Warning');
+        }
       }
     })
   }
@@ -480,6 +490,7 @@ export class ConfirmRideComponent {
     }
     let details = {
       limit: this.limit,
+      rideStatus: parseInt(this.confirmRideForm.get('rideStatus')?.value),
       page: this.pageNumber,
       date: this.confirmRideForm.get('date')?.value,
       searchTerm: this.confirmRideForm.get('searchTerm')?.value,
@@ -499,6 +510,7 @@ export class ConfirmRideComponent {
 
     let details = {
       limit: this.limit,
+      rideStatus: parseInt(this.confirmRideForm.get('rideStatus')?.value),
       page: this.pageNumber,
       date: this.confirmRideForm.get('date')?.value,
       searchTerm: this.confirmRideForm.get('searchTerm')?.value,

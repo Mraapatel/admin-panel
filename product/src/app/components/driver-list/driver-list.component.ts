@@ -1,11 +1,12 @@
 import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AddCountryService } from '../../services/add-country.service';
-import { catchError, of, tap } from 'rxjs';
+import { catchError, of, tap, throwError } from 'rxjs';
 import { DriverData, City, VehicleTypeByCountryId } from '../../models/models.interface';
 import { ToastrService } from 'ngx-toastr';
 import { DriverListService } from '../../services/driver-list.service';
 import { VehicleTypeService } from '../../services/vehicle-type.service';
+import { CommonModule } from '@angular/common';
 
 interface CountryInfo {
   country: string;
@@ -24,7 +25,8 @@ interface CountryInfo {
   selector: 'app-driver-list',
   standalone: true,
   imports: [
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    CommonModule
   ],
   templateUrl: './driver-list.component.html',
   styleUrl: './driver-list.component.css'
@@ -53,7 +55,7 @@ export class DriverListComponent {
   citySelected: boolean = false;
   servicePresent!: boolean | null;
   getCitiesOrNot: boolean = true;
-
+  bankDetailsForm!: FormGroup
   // tokenId!: string;
   // customerCards!: Card[];
   // selectedCardUser!: DriverData;
@@ -74,8 +76,46 @@ export class DriverListComponent {
       driverCity: ['', Validators.required],
       driverPhone: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(10)]],
     });
+
+    this.bankDetailsForm = this._fb.group({
+      AccountHolderName: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(30)]],
+      BankName: ['', [Validators.required, Validators.email, Validators.minLength(4), Validators.maxLength(64)]],
+      AccountNumber: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(12)]],
+    });
+
+
     this.getCountryCodes();
     this.getDriver();
+  }
+
+  storeAccountDetails() {
+    let data = {
+      driverId: this.selectedDriver._id,
+      // AccountHolderName: this.bankDetailsForm.get('AccountHolderName')?.value,
+      AccountNumber: this.bankDetailsForm.get('AccountNumber')?.value,
+      BankName: this.bankDetailsForm.get('BankName')?.value,
+    }
+
+    console.log(this.bankDetailsForm.get('AccountHolderName')?.value);
+    console.log(this.bankDetailsForm.get('AccountNumber')?.value);
+    console.log(this.bankDetailsForm.get('BankName')?.value);
+
+    this._driverListService.storeBankDetails(data).pipe(
+      catchError((e) => {
+        console.log('Error while storing the bank account', e);
+        this._tostr.error(e.error.message, 'Error')
+        return throwError(e)
+      })
+    ).subscribe({
+      complete: () => {
+        this.bankDetailsForm.reset();
+        this._tostr.success('The Card is Added', 'Success')
+      }
+    });
+  }
+
+  getDriverId(driver: DriverData) {
+    this.selectedDriver = driver
   }
 
   getCountryCodes() {
@@ -503,7 +543,7 @@ export class DriverListComponent {
   get driverPhone() {
     return this.driverForm.get('driverPhone');
   }
-  
+
   get driverCity() {
     return this.driverForm.get('driverCity');
   }
@@ -523,8 +563,8 @@ export class DriverListComponent {
 
     },
       (error) => {
-        console.log('borrrrrrrrrrrrrrr',error);
-        
+        console.log('borrrrrrrrrrrrrrr', error);
+
         this._tostr.info('Showing main tabel  ', 'info');
         this._tostr.error('No Driver Found', 'Error');
 

@@ -408,7 +408,7 @@ export class CreateRideComponent {
           if (!this.isInsideTheZone) {
             console.log('isisidethezone', this.isInsideTheZone);
 
-            this._toastr.error('Service is not Available Herejsjjjjjjjjj', 'error');
+            this._toastr.error('Service is not Available Here', 'error');
             if (this.DirectionsRenderer) this.DirectionsRenderer.setMap(null);
             console.log('checkForPlace finished------>');
             return;

@@ -1,8 +1,7 @@
 const { createRide } = require('../models/createRide');
 const mongoose = require('mongoose');
 
-const getRidesFormDb = async (pages, rideLimit, searchTerm, vehicleType, date) => {
-
+const getRidesFormDb = async (pages, rideLimit, searchTerm, vehicleType, date, rideStatus) => {
 
     try {
         console.log('inside getRides---------------');
@@ -12,11 +11,21 @@ const getRidesFormDb = async (pages, rideLimit, searchTerm, vehicleType, date) =
         let totalRides // Get the total number of documents in the collection
 
         let Rides;
+        let query = {}
 
-
-        let query = {
-            rideStatus: { $nin: [7, 8] } // Always exclude rideStatus 7 and 8
-        };
+        if (rideStatus) {
+            query = {
+                rideStatus: { $in: [rideStatus] }
+            };
+        } else if (rideStatus === 0) {
+            query = {
+                rideStatus: 0 // Always exclude rideStatus 7 and 8
+            };
+        } else {
+            query = {
+                rideStatus: { $nin: [7, 8] } // Always exclude rideStatus 7 and 8
+            };
+        }
 
         if (vehicleType) {
             query['typeId._id'] = new mongoose.Types.ObjectId(vehicleType);

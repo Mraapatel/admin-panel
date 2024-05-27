@@ -1,7 +1,7 @@
 const cron = require('node-cron');
 const { fetchAllRidesByStatus, fetchSinglRideInfo } = require('./fetchAllRidesByStatus');
-const { fetchIdleDrivers } = require('./fetchIdleDrivers');
-const { getSettings } = require('../utils/getSettings');
+// const { fetchIdleDrivers } = require('./fetchIdleDrivers');
+// const { getSettings } = require('../utils/getSettings');
 const { AssignRideToDriver, removeDriverFormRide, updateRideAndDriverModal } = require('./comman');
 const { assignedRides } = require('./manuallyAssignedRides');
 const { Driver } = require('../controllers/driverList-controller');
@@ -23,14 +23,14 @@ const startCron = cron.schedule('*/1 * * * * *', async () => {
     scheduled: false
 })
 
-// startCron.start()
+startCron.start()
 
 
 const assignNewDriverToRide = async () => {
     IdleRides = await fetchAllRidesByStatus(1, true);
     // console.log('idlerides by nearby', IdleRides);
 
-    // IdleRides.forEach(async (ride) => {
+
     console.log('----------------------------------------------------------------------------------------------------------------------------');
     if (IdleRides.length > 0) {
         for (let i = 0; i < IdleRides.length; i++) {
@@ -171,8 +171,7 @@ const assignNewDriverToRide = async () => {
                 }
 
             }
-            // }
-            // })
+
         }
     }
 

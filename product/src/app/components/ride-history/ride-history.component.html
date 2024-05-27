@@ -51,6 +51,7 @@
                 <!-- <th class="border text-center p-1 py-2 bg-dark text-white id">Request Id</th>
                 <th class="border text-center p-1 py-2 bg-dark text-white id">User Id</th> -->
                 <th class="border text-center p-1 py-2 bg-dark text-white  width">User Name</th>
+                <th class="border text-center p-1 py-2 bg-dark text-white  width">Driver Name</th>
                 <th class="border text-center p-1 py-2 bg-dark text-white time">Pick Up Time</th>
                 <th class="border text-center p-1 py-2 bg-dark text-white width">Pick up address</th>
                 <th class="border text-center p-1 py-2 bg-dark text-white width ">Stop Locations</th>
@@ -68,6 +69,11 @@
                 <!-- <td class="border text-center p-1 py-2 id">{{ride._id}}</td>
                 <td class="border text-center p-1 py-2 id">{{ride.userId._id}}</td> -->
                 <td class="border text-center p-1 py-2 width">{{ride.userId.userName}}</td>
+                @if(ride.driverId?.driverName){
+                <td class="border text-center p-1 py-2 time">{{ride.driverId?.driverName}}</td>
+                }@else{
+                <td class="border text-center p-1 py-2 time">No Driver Assigned</td>
+                }
                 <td class="border text-center p-1 py-2 time">{{ride.date}} {{ride.timeInString}}</td>
                 <td class="border text-center p-1 py-2 width">{{ride.startLocation}}</td>
 
@@ -90,7 +96,7 @@
             }
             }
         </table>
-        @if(RidesFetched && RidesFetched.length == 0){
+        @if(RidesFetched.length === 0){
         <div class="container text-danger  d-flex justify-content-center">
             <h3>No Rides Found</h3>
         </div>
@@ -119,16 +125,17 @@
                 <h4 class="modal-title">Ride Information</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="d-flex ">
-                <div class="first mt-3">
+            <div class="d-flex  mb-2">
+                <div class="first mt-2 me-1">
                     @if(selectedRide){
+                    <h5 class=" ms-3">User Info :</h5>
                     <div class="ms-4 my-1">
 
                         <img [src]="'http://localhost:5000/public/userProfile/' + selectedRide.userId.userProfile"
                             onerror="this.src='assets/noImageFound.jpg'" class="my-1 border profile2 rounded img-fluid "
                             alt="{{selectedRide.userId.userName }} Icon">
                     </div>
-                    <table id="InfoTable" class="ms-3">
+                    <table id="InfoTable" class="ms-3 me-1">
                         <tr>
                             <th>User Name </th>
                             <td>: {{selectedRide.userId.userName}}</td>
@@ -164,7 +171,7 @@
                             <td>:{{$index +1}}-{{point}}</td><br>
                             }
                             @if(selectedRide.route && selectedRide.route.length == 0){
-                            <td>: No Way Points for this Ride</td>
+                            <td class="text-danger">: No Way Points for this Ride</td>
                             }
                         </tr>
                         <tr>
@@ -185,6 +192,35 @@
                                 {{selectedRide.countryInfo.currency}}</td>
                         </tr>
 
+                        <hr>
+
+                        @if(selectedRide.driverId){
+    
+                        <h5 class=" ms-2">Driver Info :</h5>
+    
+                        <div class="ms-4 my-1">
+    
+                            <img [src]="'http://localhost:5000/public/driverProfile/' + selectedRide.driverId.driverProfile"
+                                onerror="this.src='assets/noImageFound.jpg'" class="my-1 border profile2 rounded img-fluid "
+                                alt="{{selectedRide.driverId.driverProfile }} Icon">
+                        </div>
+                        <tr>
+                            <th>Driver Name</th>
+                            <td>: {{selectedRide.driverId.driverName}}</td>
+                        </tr>
+                        <tr>
+                            <th>Driver Phone</th>
+                            <td>:{{selectedRide.countryInfo.countryCallingCode}} {{selectedRide.driverId.driverPhone}}</td>
+                        </tr>
+                        <tr>
+                            <th>Driver Email</th>
+                            <td>: {{selectedRide.driverId.driverEmail}}</td>
+                        </tr>
+                        }@else{
+                            <tr>
+                                <th>No Driver Assigned</th>
+                            </tr> 
+                        }
                     </table>
                     }
                 </div>

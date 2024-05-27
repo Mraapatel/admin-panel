@@ -2,8 +2,8 @@ const mongoose = require('mongoose');
 const { Schema } = require('mongoose');
 const fs = require('fs');
 const path = require('path');
-const { log } = require('console');
-
+const secreat_strip_key = process.env.STRIP_SECREATE_KEY
+const stripe = require('stripe')(secreat_strip_key);
 const driverSchema = new Schema({
     driverName: {
         type: String,
@@ -90,43 +90,114 @@ const addDriver = async (req, res) => {
             let addedDriver = await Driver.create(newDriver);
 
             if (addedDriver) {
-
-                let newUser = await Driver.aggregate([
-                    {
-                        $match: {
-                            // _id:addedDriver._id
-                            _id: new mongoose.Types.ObjectId(addedDriver._id)
-
-                        }
-                    },
-                    {
-                        $lookup: {
-                            from: 'cityzones',
-                            localField: 'cityId',
-                            foreignField: '_id',
-                            as: 'cityId'
-                        }
-                    },
-                    {
-                        $unwind: '$cityId'
-                    },
-                    {
-                        $lookup: {
-                            from: 'countries',
-                            localField: 'countryId',
-                            foreignField: '_id',
-                            as: 'countryId'
-                        }
-                    },
-                    {
-                        $unwind: '$countryId'
+                let stripCustomer = {
+                    name: addedDriver.driverName,
+                    email: addedDriver.driverEmail,
+                    phone: addedDriver.driverPhone,
+                    metadata: {
+                        customerType: 'Driver'
                     }
+                }
 
-                ])
 
-                console.log('newly added user -----------', newUser[0]);
-                return res.status(200).send(newUser[0], { message: 'added successfully' });
+                stripe.customers.create(stripCustomer, async (err, customer) => {
+                    if (err) {
+                        console.log("Some Error Occured" + err);
+                        return res.status(500).json({ error: 'Stripe customer creation failed' });
+                    }
+                    if (customer) {
+                        console.log(customer);
+                        let stripCustomerId = customer.id;
+                        let updatedDriver = await Driver.findByIdAndUpdate(addedDriver._id, { driverStripCustomerId: stripCustomerId })
+                        console.log('done');
+
+                        if (updatedDriver) {
+
+                            let newDriver = await Driver.aggregate([
+                                {
+                                    $match: {
+                                        // _id:addedDriver._id
+                                        _id: new mongoose.Types.ObjectId(updatedDriver._id)
+
+                                    }
+                                },
+                                {
+                                    $lookup: {
+                                        from: 'cityzones',
+                                        localField: 'cityId',
+                                        foreignField: '_id',
+                                        as: 'cityId'
+                                    }
+                                },
+                                {
+                                    $unwind: '$cityId'
+                                },
+                                {
+                                    $lookup: {
+                                        from: 'countries',
+                                        localField: 'countryId',
+                                        foreignField: '_id',
+                                        as: 'countryId'
+                                    }
+                                },
+                                {
+                                    $unwind: '$countryId'
+                                }
+
+                            ])
+
+                            console.log('newly added user -----------', newDriver[0]);
+                            return res.status(200).send(newDriver[0], { message: 'added successfully' });
+                        }
+                        // return res.status(200).send(updatedDriver, { message: 'added successfully' });
+                    }
+                    else {
+                        console.log("Unknown Error");
+                    }
+                })
             }
+
+
+
+
+            // if (addedDriver) {
+
+            //     let newDriver = await Driver.aggregate([
+            //         {
+            //             $match: {
+            //                 // _id:addedDriver._id
+            //                 _id: new mongoose.Types.ObjectId(addedDriver._id)
+
+            //             }
+            //         },
+            //         {
+            //             $lookup: {
+            //                 from: 'cityzones',
+            //                 localField: 'cityId',
+            //                 foreignField: '_id',
+            //                 as: 'cityId'
+            //             }
+            //         },
+            //         {
+            //             $unwind: '$cityId'
+            //         },
+            //         {
+            //             $lookup: {
+            //                 from: 'countries',
+            //                 localField: 'countryId',
+            //                 foreignField: '_id',
+            //                 as: 'countryId'
+            //             }
+            //         },
+            //         {
+            //             $unwind: '$countryId'
+            //         }
+
+            //     ])
+
+            //     console.log('newly added user -----------', newDriver[0]);
+            //     return res.status(200).send(newDriver[0], { message: 'added successfully' });
+            // }
 
             console.log('done');
         }
@@ -184,36 +255,6 @@ const getDrivers = async (req, res) => {
             };
         }
 
-        // if (sort === 'driverName') {
-        // sortStuff = { driverName: 1 }
-        // Drivers = await Driver.find(query).collation({ locale: 'en', strength: 2 }).sort({ driverName: 1 }).skip((page - 1) * limit).limit(limit).populate('serviceType').populate('cityId');
-        // console.log(Driver);
-
-        // if (searchTerm) {
-        //     totalDrivers = await Driver.find(query);
-        // } else {
-        //     totalDrivers = await Driver.countDocuments();
-        // }
-        // console.log(Drivers);
-        // } else if (sort === 'driverEmail') {
-        // sortStuff = { driverEmail: 1 }
-
-        // Drivers = await Driver.find(query).sort({ driverEmail: 1 }).skip((page - 1) * limit).limit(limit).populate('serviceType').populate('cityId');
-        // if (searchTerm) {
-        //     totalDrivers = await Driver.countDocuments(query);
-        // } else {
-        //     totalDrivers = await Driver.countDocuments();
-        // }
-        // } else if (sort === 'driverPhone') {
-        // sortStuff = { driverPhone: 1 }
-
-        // Drivers = await Driver.find(query).sort({ driverPhone: 1 }).skip((page - 1) * limit).limit(limit).populate('serviceType').populate('cityId');
-        // if (searchTerm) {
-        //     totalDrivers = await Driver.countDocuments(query);
-        // } else {
-        //     totalDrivers = await Driver.countDocuments();
-        // }
-        // }
 
         const aggregateQuery = [
             { $match: query },
@@ -250,21 +291,6 @@ const getDrivers = async (req, res) => {
 
         // Drivers = await Driver.aggregate(aggregateQuery).collation({ locale: 'en', strength: 2 });
         Drivers = await Driver.aggregate(aggregateQuery).collation({ locale: 'en', strength: 2 });
-        //     console.log('drivers in the get drivers ' , Drivers);
-        // return 
-        // if (sort === null) {
-        // Drivers = await Driver.find(query).skip((page - 1) * limit).limit(limit).populate('serviceType').populate('cityId');
-        // Drivers = await Driver.find(query).collation({ locale: 'en', strength: 2 }).sort(sortStuff).skip((page - 1) * limit).limit(limit).populate('serviceType').populate('cityId');
-
-        // if (searchTerm) {
-        //     totalDrivers = await Driver.countDocuments(query);
-        // } else {
-        //     totalDrivers = await Driver.countDocuments();
-        // }
-        // } else {
-        //     Drivers = await Driver.find(query).collation({ locale: 'en', strength: 2 }).sort(sortStuff).skip((page - 1) * limit).limit(limit).populate('serviceType').populate('cityId');
-
-        // }
 
         console.log('inside getDrivers---------------', Drivers);
 
@@ -320,31 +346,6 @@ const updateDriver = async (req, res) => {
                     cityId: cityId
                 }, { new: true });
 
-            //  let updated = await Driver.aggregate([
-            //      {
-            //          $match: {
-            //              _id: new mongoose.Types.ObjectId(updatedDriver._id)
-            //          }
-            //      },
-            //      {
-            //          $lookup: {
-            //              from: 'cityzones',
-            //              localField: 'cityId',
-            //              foreignField: '_id',
-            //              as: 'cityL'
-            //          }
-            //      },
-            //      {
-            //          $addFields: {
-            //              cityId: { $arrayElemAt: ['$cityL', 0] }
-            //          }
-            //      },
-            //      {
-            //          $project: {
-            //              cityL: 0
-            //          }
-            //      }
-            //  ])
 
             deleteUploadedFile(oldFileName);
             // return res.status(200).send(updated[0]);
@@ -448,17 +449,6 @@ const deleteDriver = async (req, res) => {
             return res.status(404).json({ message: 'Profile image not found for the Driver' });
         }
 
-
-        // let profilePath = path.join(__dirname, '../public/driverProfile', fileName);
-
-        // fs.unlink(profilePath, (error) => {
-        //     if (error) {
-        //         console.error('Error occurred while deleting image file', err);
-        //         return res.status(500).send('Internal server error');
-        //     }
-        //     console.log('Image file deleted successfully');
-        //     // return res.status(200).send('Document and image deleted successfully');
-        // })
         deleteUploadedFile(fileName);
 
         // console.log('Driver deleted successfully:', deletedDriver);
@@ -483,26 +473,7 @@ const addService = async (req, res) => {
                 console.log('service removed');
                 console.log(updatedDriver);
                 if (updatedDriver) {
-                    //  let updated = await Driver.aggregate([
-                    //      {
-                    //          $match: {
-                    //              _id: new mongoose.Types.ObjectId(updatedDriver._id)
-                    //          }
-                    //      },
-                    //      {
-                    //          $lookup: {
-                    //              from: 'cityzones',
-                    //              localField: 'cityId',
-                    //              foreignField: '_id',
-                    //              as: 'cityId'
-                    //          }
-                    //      },
-                    //      {
-                    //         $unwind:'$cityId'
-                    //      }
 
-                    //  ])
-                    // console.log(updatedDriver);
                     let response = {
                         Driver: updatedDriver,
                         Message: 'Service removed Successfully'
@@ -515,43 +486,7 @@ const addService = async (req, res) => {
                 // let updatedDriver = await Driver.findByIdAndUpdate(driverId, { serviceType: serviceid }, { new: true }).populate('cityId').populate('serviceType');
                 let updatedDriver = await Driver.findByIdAndUpdate(driverId, { serviceType: serviceid }, { new: true });
                 if (updatedDriver) {
-                    // console.log('service added');
-                    // console.log(updatedDriver);
-                    // let updated = await Driver.aggregate([
-                    //     {
-                    //         $match: {
-                    //             _id: new mongoose.Types.ObjectId(updatedDriver._id)
-                    //         }
-                    //     },
-                    //     {
-                    //         $lookup: {
-                    //             from: 'cityzones',
-                    //             localField: 'cityId',
-                    //             foreignField: '_id',
-                    //             as: 'cityL'
-                    //         }
-                    //     },
-                    //     {
-                    //         $lookup: {
-                    //             from: 'vehicletypes',
-                    //             localField: 'serviceType',
-                    //             foreignField: '_id',
-                    //             as: 'serviceTypeL'
-                    //         }
-                    //     },
-                    //     {
-                    //         $addFields: {
-                    //             cityId: { $arrayElemAt: ['$cityL', 0] },
-                    //             serviceType: { $arrayElemAt: ['$serviceTypeL', 0] }
-                    //         }
-                    //     },
-                    //     {
-                    //         $project: {
-                    //             cityL: 0,
-                    //             serviceTypeL: 0
-                    //         }
-                    //     }
-                    // ])
+
                     console.log(updatedDriver);
                     let response = {
                         Driver: updatedDriver,
@@ -561,18 +496,12 @@ const addService = async (req, res) => {
                 }
             }
         }
-        // else{
-        //     console.log('error :');
-        //     return res.status(400).json({ message: 'Not able to assign Service' });
-        // }
 
     } catch (e) {
         console.log('Error Occured:', e);
         return res.status(500).json({ error: 'Failed to add service' });
     }
 }
-
-
 
 
 const approveDriver = async (req, res) => {
@@ -606,6 +535,66 @@ const approveDriver = async (req, res) => {
 }
 
 
+const storeBankDetails = async (req, res) => {
+    let response = {
+        message: 'Some Server side Error has Occured',
+        staus: 500
+    }
+    try {
+        console.log('inside the driverController - storeBankDetails', req.body);
+        if (req.body) {
+            let fetchedDriver = await Driver.findById(req.body.driverId)
+            if (fetchedDriver) {
+                // console.log('Fetcheddriver', fetchedDriver);
+                const token = await stripe.tokens.create({
+                    bank_account: {
+                        account_holder_name: fetchedDriver.driverName,
+                        account_holder_type: "individual",
+                        account_number: req.body.AccountNumber,
+                        country: "US",
+                        currency: "usd",
+                        metadata: {
+                            info: 'Adding card to Driver'
+                        },
+                        routing_number: "110000000"
+                    }
+                })
+
+                if (token) {
+                    console.log("token ", token);
+                    const bankAccount = await stripe.customers.createSource(fetchedDriver.driverStripCustomerId, {
+                        source: token.id
+                    });
+                    console.log('Bank Account Stored ', bankAccount);
+                    if (bankAccount) {
+                        response.message = 'Bank Account Added Successfully';
+                        response.staus = 200
+                        return res.status(200).json(response);
+                    }
+                }
+            }
+            response.staus = 404
+            response.message = 'Error Fetching the Driver'
+            return res.status(404).json(response);
+
+        } else {
+            console.log('some unexprected error occured:');
+            response.message = 'No Request Body found'
+            response.staus = 400
+            return res.status(400).json(response);
+        }
+    } catch (e) {
+        console.log('Error occured:', e);
+        console.log('error.code', e.code);
+        if (e.code == 'bank_account_exists') {
+            response.message = 'The Bank Account is Already Exists'
+            return res.status(500).json(response);
+        }
+        return res.status(500).json(response);
+    }
+}
+
+
 
 
 function deleteUploadedFile(fileName) {
@@ -622,34 +611,9 @@ function deleteUploadedFile(fileName) {
 }
 
 
-module.exports = { Driver, addDriver, getDrivers, updateDriver, deleteDriver, addService, approveDriver }
+module.exports = { Driver, storeBankDetails, addDriver, getDrivers, updateDriver, deleteDriver, addService, approveDriver }
 
 
-// const deleteCard = async (req, res) => {
-//     try {
-//         console.log(req.body);
-//         if (req.body) {
-//             const { customerId, cardId } = req.body;
-//             stripe.customers.deleteSource(customerId, cardId, (err, card) => {
-//                 if (err) {
-//                     console.log("some error occured", err);
-//                 }
-//                 if (card) {
-//                     console.log(card);
-//                     return res.status(200).json(card);
-//                 } else {
-//                     console.log('wtf');
-//                 }
-//             })
-//         }
-//     } catch (e) {
-//         if (error.type === 'StripeCardError') {
-//             console.error('Stripe Card Error:', error.message);
-//         } else {
-//             console.error('An error occurred while deleting the card:', error.message);
-//         }
-//     }
-// }
 
 
 

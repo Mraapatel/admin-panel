@@ -14,7 +14,7 @@ const getRides = async (req, res) => {
             // console.log(req.body);
 
             // return;
-            let got = await getRidesFormDb(req.body.page, req.body.limit, req.body.searchTerm, req.body.vechicleType, req.body.date)
+            let got = await getRidesFormDb(req.body.page, req.body.limit, req.body.searchTerm, req.body.vechicleType, req.body.date, req.body.rideStatus)
             console.log('got-------->', got);
 
             return res.status(200).json(got);
@@ -196,7 +196,7 @@ const cancleRide = async (req, res) => {
             }, { new: true })
 
             if (req.body.driverId) {
-                 await Driver.findByIdAndUpdate(req.body.driverId, {
+                await Driver.findByIdAndUpdate(req.body.driverId, {
                     driverStatus: 0
                 })
             }
@@ -293,6 +293,7 @@ const ridePicked = async (req, res) => {
     }
 }
 
+
 const rideCompleted = async (req, res) => {
     try {
 
@@ -304,8 +305,8 @@ const rideCompleted = async (req, res) => {
                 rideStatus: 7,
             }, { new: true })
 
-
             if (ride) {
+                await Driver.findByIdAndUpdate(ride.driverId, { driverStatus: 0 })
                 return res.status(200).json({ message: 'The rideCompleted successfully', rideStatus: ride.rideStatus, rideId: ride._id });
             }
             return res.status(404).json({ message: 'Some Error occured while completing ride' });

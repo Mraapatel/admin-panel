@@ -133,6 +133,7 @@
                 <th>City</th>
                 <th>Service Details</th>
                 <th>Approve/Decline</th>
+                <th>Bank Details</th>
                 <th>Edit</th>
                 <th>Delete</th>
             </tr>
@@ -157,6 +158,10 @@
                     <button class="btn  btn-sm px-3 my-2 me-1 shadow" (click)="approveOrDecline(driver)"
                         [class.btn-success]="driver.approveStatus" [class.btn-danger]="!driver.approveStatus">{{
                         driver.approveStatus ? 'Approved' : 'Declined' }}</button>
+                </td>
+                <td>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#bankDetailsmodal" (click)="getDriverId(driver)">Add Bank
+                        Details</button>
                 </td>
                 <td>
                     <button class="btn btn-warning btn-sm px-3 my-2 me-1 shadow"
@@ -243,6 +248,91 @@
             </div>
             <div class="modal-footer bg-dark">
                 <button class="btn btn-secondary shadow bg-white text-dark" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- bank details modal -->
+
+<div class="modal fade  " id="bankDetailsmodal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- modal header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Add Bank Details</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <!-- modal body -->
+            <div class="container">
+                <form [formGroup]="bankDetailsForm" (submit)="storeAccountDetails()" id="loginForm"
+                    enctype="multipart/form-data">
+                    <!-- <div class="mb-3">
+                        <label for="AccountHolderName" class="form-label">Account Holder Name:</label>
+                        <input type="text" id="AccountHolderName" name="AccountHolderName" class="form-control"
+                            placeholder="enter your AccountHolderName" formControlName="AccountHolderName">
+                        @if(bankDetailsForm.get('AccountHolderName')?.errors !== null &&
+                        (bankDetailsForm.get('AccountHolderName')?.touched ||
+                        bankDetailsForm.get('AccountHolderName')?.dirty)){
+                        @if(bankDetailsForm.get('AccountHolderName')?.errors?.['required']){
+                        <span class="text-danger">Account Holder Name is required</span>
+                        }
+                        @if(bankDetailsForm.get('AccountHolderName')?.errors?.['minlength']){
+                        <span class="text-danger">Account Holder Name should be <b>4</b> character long</span>
+                        }
+                        @if(bankDetailsForm.get('AccountHolderName')?.errors?.['maxlength']){
+                        <span class="text-danger">character execeded</span>
+                        }
+                        }
+                    </div> -->
+
+                    <div class="mb-3">
+                        <label for="BankName" class="form-label">BankName:</label>
+                        <input type="text" id="BankName" name="BankName" class="form-control"
+                            placeholder="enter BankName" formControlName="BankName">
+                        @if(bankDetailsForm.get('BankName')?.errors !== null &&
+                        (bankDetailsForm.get('BankName')?.touched ||
+                        bankDetailsForm.get('BankName')?.dirty)){
+                        @if(bankDetailsForm.get('BankName')?.errors?.['required']){
+                        <span class="text-danger">BankName is required</span>
+                        }
+                        @if(bankDetailsForm.get('BankName')?.errors?.['minlength']){
+                        <span class="text-danger">BankName should be <b>4</b> character long</span>
+                        }
+                        @if(bankDetailsForm.get('BankName')?.errors?.['maxlength']){
+                        <span class="text-danger">character execeded</span>
+                        }
+                        }
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="AccountNumber" class="form-label">AccountNumber:</label>
+                        <input type="text" id="AccountNumber" name="AccountNumber" class="form-control"
+                            placeholder="enter AccountNumber" formControlName="AccountNumber">
+                        @if(bankDetailsForm.get('AccountNumber')?.errors !== null &&
+                        (bankDetailsForm.get('AccountNumber')?.touched ||
+                        bankDetailsForm.get('AccountNumber')?.dirty)){
+                        @if(bankDetailsForm.get('AccountNumber')?.errors?.['required']){
+                        <span class="text-danger">AccountNumber is required</span>
+                        }
+                        @if(bankDetailsForm.get('AccountNumber')?.errors?.['minlength']){
+                        <span class="text-danger">AccountNumber should be <b>8</b> character long</span>
+                        }
+                        @if(bankDetailsForm.get('AccountNumber')?.errors?.['maxlength']){
+                        <span class="text-danger">character execeded</span>
+                        }
+                        }
+                        
+                    </div>
+                    <div class="mb-3">
+                        <button class="btn btn-info form-control" type="submit" data-bs-dismiss="modal">Submit</button>
+                    </div>
+                </form>
+            </div>
+            <!-- modal footer -->
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

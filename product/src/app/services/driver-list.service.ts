@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { DriverData, Card , City } from '../models/models.interface';
+import { DriverData, Card, City } from '../models/models.interface';
 
 interface DriverDataResponse {
   totalDrivers: number;
@@ -44,20 +44,20 @@ export class DriverListService {
   addService(data: object) {
     return this._http.post<ServiceAddedResponse>('http://localhost:5000/driver/addService', data)
   }
-  
+
   approveOrDecline(data: object) {
     return this._http.post<ServiceAddedResponse>('http://localhost:5000/driver/approve', data)
   }
 
   getCitiesFormCID(data: string) {
-    return this._http.post<City[]>('http://localhost:5000/driver/getCities', {countryId:data});
+    return this._http.post<City[]>('http://localhost:5000/driver/getCities', { countryId: data });
   }
 
 
 
-  // getCards(customerId:string){
-  //   return this._http.post<CardResponse>('http://localhost:5000/User/getCards',{stripClientId:customerId})
-  // }
+  storeBankDetails(formdata: object) {
+    return this._http.post('http://localhost:5000/driver/storeBankDetails', formdata)
+  }
 
   // setDefaultCard(data:object){
   //   return this._http.post('http://localhost:5000/User/setDefaultCard',data);

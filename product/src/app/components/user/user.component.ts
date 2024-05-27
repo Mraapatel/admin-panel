@@ -59,13 +59,6 @@ export class UserComponent {
       userPhone: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(10)]],
     });
 
-    // this.userUpdateForm = this._fb.group({
-    //   userProfile: ['',],
-    //   userName: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(30)]],
-    //   userEmail: ['', [Validators.required, Validators.email, Validators.minLength(4), Validators.maxLength(64)]],
-    //   countryCallingCode: ['', Validators.required],
-    //   userPhone: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(10)]],
-    // });
     this.getCountryCodes();
     this.getUsers();
   }
@@ -149,14 +142,7 @@ export class UserComponent {
       return;
     }
 
-    // if (this.userForm.get('userName')?.value.trim() === '' || this.userForm.get('userEmail')?.value.trim() === '' || this.userForm.get('userPhone')?.value.trim() === '' || this.userForm.get('userProfile')?.value === null) {
-    //   let dname = this.userForm.get('userName')?.value
-    //   this.userForm.get('userName')?.setValue(dname.trim());
-    //   this.userForm.markAllAsTouched();
-    //   this._tostr.error('Please fill in all required fields.', 'Error');
-    //   return;
-    // }
-    if (!this.checkForm()) return;
+     if (!this.checkForm()) return;
 
     // this.validateEmail();
     // this.validatePhone();
@@ -255,12 +241,6 @@ export class UserComponent {
 
 
   updateUser() {
-    // this.ValidateImage = false;
-    // if (this.userForm.get('userName')?.value.trim() === '' || this.userForm.get('userEmail')?.value.trim() === '' || this.userForm.get('userPhone')?.value.trim() === '') {
-    //   this._tostr.error('Please fill the empty fileds.', 'Error');
-    //   return;
-    // }
-
     // console.log(this.userForm.get('userName')?.value.trim());
     if (!this.userForm.valid) {
       this._tostr.error("Please enter valid fields", "Error");
@@ -339,18 +319,6 @@ export class UserComponent {
       this._userService.deleteUser(id).subscribe((res) => {
         console.log(res);
         this.userForm.reset();
-        // let updatedPageNumber = --this.pageNumber
-        // if (this.userFatched.length == 0) {
-        //   let details = {
-        //     page: updatedPageNumber,
-        //     sort: this.sortValue,
-        //     searchTerm: this.searchTerm
-        //   }
-        //   this._userService.getExistingUser(details).subscribe((res) => {
-        //     this.userFatched = res.users;
-        //     this.pageNumber = res.totalUsers;
-        //   })
-        // }
         let data = {
           page: this.pageNumber,
           sort: this.sortValue,
@@ -438,32 +406,8 @@ export class UserComponent {
   }
 
   fatchUsers(data: object) {
-    // let details = {
-    //   page: this.pageNumber,
-    //   sort: this.sortValue,
-    //   searchTerm: this.searchTerm
-    // }
     this._userService.getExistingUser(data)
-    // .pipe(
-    //   tap((res) => {
-    //     console.log(res);
-
-    //   }),
-    //   catchError((err) => {
-    //     if (err.status === 400 && err.error.Message === 'No users found') {
-    //       this._tostr.error('No User Found', 'Error');
-    //     }
-    //     this.searchTag.nativeElement.value = '';
-    //     this.searchTerm = ''
-    //     this.pageNumber = 1;
-    //     this.disablePrevBnt();
-    //     console.log(err.error.Message);
-    //     this.disableNextBnt();
-
-    //     return of(err);
-    //   })
-    // )
-    .subscribe((res) => {
+      .subscribe((res) => {
       console.log('uuuuuuuuuuuuuuuuuuuuuuSuuuuuuuuuuuuuuuu');
       
       console.log('this is it', res);
@@ -527,7 +471,7 @@ export class UserComponent {
   addCard() {
     let user = this.selectedCardUser;
     var handler = (<any>window).StripeCheckout.configure({
-      key: 'pk_test_51P3AGtSBg65kjruEnwiCx3m8luw42cgOh46IuYPsmjBnJXKHGU7n5KE4tcDMdh443fdp5sY2lZSSJhUfat3cpE8Z00yO2WUmgX',
+      key: 'pk_test_51PKFbURvggPBSsNZHM7EzVRAd0C41qQyAhsHDMyp8XxUdjXkZhjsLrkQN0YREobqcQfQOyQmuuIBHO94EHd2TGpc00kWQ3qOBF',
       locale: 'auto',
       token: (token: any) => {
         this.tokenId = token.id;
@@ -588,7 +532,7 @@ export class UserComponent {
       s.src = "https://checkout.stripe.com/checkout.js";
       s.onload = (o) => {
         this.handler = (<any>window).StripeCheckout.configure({
-          key: 'pk_test_51P3AGtSBg65kjruEnwiCx3m8luw42cgOh46IuYPsmjBnJXKHGU7n5KE4tcDMdh443fdp5sY2lZSSJhUfat3cpE8Z00yO2WUmgX',
+          key: 'pk_test_51PKFbURvggPBSsNZHM7EzVRAd0C41qQyAhsHDMyp8XxUdjXkZhjsLrkQN0YREobqcQfQOyQmuuIBHO94EHd2TGpc00kWQ3qOBF',
           locale: 'auto',
           token: function (token: any) {
             console.log(token)

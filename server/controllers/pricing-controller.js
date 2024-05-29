@@ -2,9 +2,6 @@ const mongoose = require('mongoose');
 const { Schema } = require('mongoose');
 
 const pricingSchema = new Schema({
-    // countryName: { type: String, required: true },
-    // cityName: { type: String, required: true },
-    // vehicleType: { type: String, required: true },
     countryId: { type: mongoose.Schema.Types.ObjectId, required: true },
     cityId: { type: mongoose.Schema.Types.ObjectId, required: true },
     typeId: { type: mongoose.Schema.Types.ObjectId, required: true },
@@ -18,11 +15,6 @@ const pricingSchema = new Schema({
 });
 
 const Pricing = mongoose.model('pricing', pricingSchema);
-
-// mongoose.connect('mongodb://127.0.0.1:27017/Product')
-//     .then(() => console.log('connection is successfull...'))
-//     .catch((error) => console.log(error));
-
 
 const addPrice = async (req, res) => {
     try {
@@ -97,38 +89,7 @@ const addPrice = async (req, res) => {
                 },
 
             ])
-            // let response = await Pricing.aggregate([
-            //     {
-            //         $match:{
-            //             _id:new mongoose.Types.ObjectId(newlyAdded._id)
-            //         }
-            //     },
-            //     {
-            //         '$lookup': {
-            //             from: 'vehicletypes',
-            //             localField: 'typeId',
-            //             foreignField: '_id',
-            //             as: 'vehicleTypeL'
-            //         }
-            //     },
-            //     {
-            //         '$lookup': {
-            //             from: 'countries',
-            //             localField: 'countryId',
-            //             foreignField: '_id',
-            //             as: 'countryL'
-            //         }
-            //     },
-            //     {
-            //         '$lookup': {
-            //             from: 'cityzones',
-            //             localField: 'cityId',
-            //             foreignField: '_id',
-            //             as: 'cityL'
-            //         }
-            //     },
-
-            // ])
+         
 
             res.status(200).json(response[0], { message: 'Price saved successfully' });
 
@@ -164,12 +125,7 @@ const getPrice = async (req, res) => {
             {
                 $unwind: '$countryId'
             },
-            // {
-            //     $unwind:{
-            //         path:'$countryL',
-            //         preserveNullAndEmptyArrays: true
-            //     }
-            // },
+  
             {
                 '$lookup': {
                     from: 'cityzones',
@@ -178,14 +134,7 @@ const getPrice = async (req, res) => {
                     as: 'cityId'
                 }
             },
-            // {
-            //     $project: {
-            //         'cityName': 0,
-            //         'countryName': 0,
-            //         'vehicleType': 0,
-            //         '__v': 0
-            //     }
-            // }
+     
             {
                 $unwind: '$cityId'
             }
@@ -306,39 +255,7 @@ const updatePrice = async (req, res) => {
                 $unwind: "$cityId",
             },
         ]);
-        // let response = await Pricing.aggregate([
-        //     {
-        //         $match: {
-        //             _id: new mongoose.Types.ObjectId(req.body.PriceId)
-        //         }
-        //     },
-        //     {
-        //         $lookup: {
-        //             from: 'vehicletypes',
-        //             localField: 'typeId',
-        //             foreignField: '_id',
-        //             as: 'vehicleTypeL'
-        //         }
-        //     },
-        //     {
-        //         $lookup: {
-        //             from: 'countries',
-        //             localField: 'countryId',
-        //             foreignField: '_id',
-        //             as: 'countryL'
-
-        //         }
-        //     },
-        //     {
-        //         $lookup: {
-        //             from: 'cityzones',
-        //             localField: 'cityId',
-        //             foreignField: '_id',
-        //             as: 'cityL'
-        //         }
-        //     }
-        // ]);
-
+       
         console.log(response);
 
         if (updatedPrice && response) {
@@ -358,42 +275,6 @@ const getCity = async (req, res) => {
             console.log('Inside the getCity price.js--->', req.body);
 
             let cities = await Pricing.aggregate([
-                // {
-                //     $match: {
-                //         countryId: new mongoose.Types.ObjectId(req.body.countryId),
-                //     },
-                // },
-                // {
-                //     $group: {
-                //         _id: "$cityId",
-                //     },
-                // },
-                // {
-                //     $lookup: {
-                //         from: "cityzones",
-                //         localField: "_id",
-                //         foreignField: "_id",
-                //         as: "city",
-                //     },
-                // },
-                // {
-                //     $unwind: {
-                //         path: "$city",
-                //     },
-                // },
-                // {
-                //     $project: {
-                //         _id: 0,
-                //         coordinates: "$city.coordinates"
-                //     },
-                // },
-                // {
-                //     $group: {
-                //         _id: null,
-                //         cityCoordinates: { $push: "$coordinates" }
-
-                //     }
-                // }
 
                 {
                     $match: {
@@ -490,10 +371,7 @@ const getCityPricig = async (req, res) => {
                     $project: {
                         __v: 0,
                         "typeId.__v": 0,
-                        // "typeId.vehicleIcon": 0,
-                        // countryId:0,
-                        // cityId:0
-                    },
+                                      },
                 },
             ])
             if (pricing) {
@@ -513,4 +391,4 @@ const getCityPricig = async (req, res) => {
     }
 }
 
-module.exports = { addPrice, getPrice, updatePrice, getCountry, getCity, getCityPricig }
+module.exports = {Pricing, addPrice, getPrice, updatePrice, getCountry, getCity, getCityPricig }

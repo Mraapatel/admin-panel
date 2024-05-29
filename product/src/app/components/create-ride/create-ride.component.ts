@@ -653,7 +653,7 @@ export class CreateRideComponent {
       // route: [this.FormStop, ...this.STOPS, this.ToStop],
       totalDistance: this.totalDistance,
       totalTime: (this.totalTime.hours * 60) + this.totalTime.minutes,
-      totalFare: this.PriceListWithVehicleTypes[index].totalPrice,
+      totalFare: parseFloat(this.PriceListWithVehicleTypes[index].totalPrice.toFixed(2)),
       endLocation: this.ToStop,
       startLocation: this.FormStop,
       route: this.STOPS,

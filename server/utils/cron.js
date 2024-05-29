@@ -23,7 +23,7 @@ const startCron = cron.schedule('*/1 * * * * *', async () => {
     scheduled: false
 })
 
-startCron.start()
+// startCron.start()
 
 
 const assignNewDriverToRide = async () => {

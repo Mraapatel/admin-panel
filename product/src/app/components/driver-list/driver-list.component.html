@@ -160,7 +160,8 @@
                         driver.approveStatus ? 'Approved' : 'Declined' }}</button>
                 </td>
                 <td>
-                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#bankDetailsmodal" (click)="getDriverId(driver)">Add Bank
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#bankDetailsmodal"
+                        (click)="getDriverId(driver)">Add Bank
                         Details</button>
                 </td>
                 <td>
@@ -268,7 +269,7 @@
             <div class="container">
                 <form [formGroup]="bankDetailsForm" (submit)="storeAccountDetails()" id="loginForm"
                     enctype="multipart/form-data">
-                    <!-- <div class="mb-3">
+                    <div class="mb-3">
                         <label for="AccountHolderName" class="form-label">Account Holder Name:</label>
                         <input type="text" id="AccountHolderName" name="AccountHolderName" class="form-control"
                             placeholder="enter your AccountHolderName" formControlName="AccountHolderName">
@@ -282,25 +283,6 @@
                         <span class="text-danger">Account Holder Name should be <b>4</b> character long</span>
                         }
                         @if(bankDetailsForm.get('AccountHolderName')?.errors?.['maxlength']){
-                        <span class="text-danger">character execeded</span>
-                        }
-                        }
-                    </div> -->
-
-                    <div class="mb-3">
-                        <label for="BankName" class="form-label">BankName:</label>
-                        <input type="text" id="BankName" name="BankName" class="form-control"
-                            placeholder="enter BankName" formControlName="BankName">
-                        @if(bankDetailsForm.get('BankName')?.errors !== null &&
-                        (bankDetailsForm.get('BankName')?.touched ||
-                        bankDetailsForm.get('BankName')?.dirty)){
-                        @if(bankDetailsForm.get('BankName')?.errors?.['required']){
-                        <span class="text-danger">BankName is required</span>
-                        }
-                        @if(bankDetailsForm.get('BankName')?.errors?.['minlength']){
-                        <span class="text-danger">BankName should be <b>4</b> character long</span>
-                        }
-                        @if(bankDetailsForm.get('BankName')?.errors?.['maxlength']){
                         <span class="text-danger">character execeded</span>
                         }
                         }
@@ -323,7 +305,25 @@
                         <span class="text-danger">character execeded</span>
                         }
                         }
-                        
+
+                    </div>
+                    <div class="mb-3">
+                        <label for="RoutingNumber" class="form-label">RoutingNumber:</label>
+                        <input type="text" id="RoutingNumber" name="RoutingNumber" class="form-control"
+                            placeholder="enter RoutingNumber" formControlName="RoutingNumber">
+                        @if(bankDetailsForm.get('RoutingNumber')?.errors !== null &&
+                        (bankDetailsForm.get('RoutingNumber')?.touched ||
+                        bankDetailsForm.get('RoutingNumber')?.dirty)){
+                        @if(bankDetailsForm.get('RoutingNumber')?.errors?.['required']){
+                        <span class="text-danger">RoutingNumber is required</span>
+                        }
+                        @if(bankDetailsForm.get('RoutingNumber')?.errors?.['minlength']){
+                        <span class="text-danger">RoutingNumber should be <b>4</b> character long</span>
+                        }
+                        @if(bankDetailsForm.get('RoutingNumber')?.errors?.['maxlength']){
+                        <span class="text-danger">character execeded</span>
+                        }
+                        }
                     </div>
                     <div class="mb-3">
                         <button class="btn btn-info form-control" type="submit" data-bs-dismiss="modal">Submit</button>

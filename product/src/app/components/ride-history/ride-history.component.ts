@@ -179,7 +179,7 @@ export class RideHistoryComponent {
   async rideInfo(ride: Ride) {
     if (this.rideRoute) {
       console.log('inside the if condtion ');
-      
+
       this.rideRoute.setMap(null); // Remove the polyline from the map
     }
     let latLng: { lat: number, lng: number }[] = [];
@@ -199,14 +199,17 @@ export class RideHistoryComponent {
 
     this.rideRoute = new google.maps.Polyline({
       path: latLng,
-      geodesic: true,
+      // geodesic: true,
       strokeColor: "#FF0000",
       strokeOpacity: 1.0,
       strokeWeight: 2,
     })
-
-    this.map.setCenter(latLng[0])
-    this.map.setZoom(7)
+    const bound = new google.maps.LatLngBounds()
+    bound.extend(latLng[0])
+    bound.extend(latLng[latLng.length - 1])
+    this.map.fitBounds(bound);
+    // this.map.setCenter(latLng[0])
+    // this.map.setZoom(10)
     this.rideRoute.setMap(this.map)
   }
 

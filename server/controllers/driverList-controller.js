@@ -49,10 +49,139 @@ const driverSchema = new Schema({
     driverStatus: {
         type: Number,
         default: 0
+    },
+    bankDetailsAdded: {
+        type: Boolean,
+        default: false
     }
 });
 
 const Driver = mongoose.model('DriverList', driverSchema);
+
+// const addDriver = async (req, res) => {
+//     try {
+
+//         if (req.body) {
+
+//             let cCid = new mongoose.Types.ObjectId(req.body.countryId)
+//             let existingCCAndP = await Driver.findOne({ $and: [{ countryId: cCid }, { driverPhone: req.body.driverPhone }] });
+
+//             console.log('yoooooooooo', existingCCAndP);
+//             if (existingCCAndP) {
+//                 let errorMessage = '';
+//                 console.log('called');
+//                 errorMessage = 'Phone number already exists!';
+//                 deleteUploadedFile(req.file.filename);
+//                 return res.status(400).json({ error: errorMessage });
+//             }
+
+//             let countryId = new mongoose.Types.ObjectId(req.body.countryId);
+//             let cityId = new mongoose.Types.ObjectId(req.body.driverCity);
+//             let newDriver = {
+//                 countryId: countryId,
+//                 cityId: cityId,
+//                 driverProfile: req.file.filename,
+//                 driverName: req.body.driverName,
+//                 driverEmail: req.body.driverEmail,
+//                 driverStripCustomerId: '',
+//                 driverPhone: req.body.driverPhone,
+//                 // serviceType: null,
+//                 approveStatus: false
+//             }
+
+
+//             let addedDriver = await Driver.create(newDriver);
+//             console.log('addeddriver====>', addedDriver);
+
+//             if (addedDriver) {
+//                 let stripCustomer = {
+//                     name: addedDriver.driverName,
+//                     email: addedDriver.driverEmail,
+//                     phone: addedDriver.driverPhone,
+//                     metadata: {
+//                         customerType: 'Driver'
+//                     }
+//                 }
+
+
+//                 stripe.customers.create(stripCustomer, async (err, customer) => {
+//                     if (err) {
+//                         console.log("Some Error Occured" + err);
+//                         return res.status(500).json({ error: 'Stripe customer creation failed' });
+//                     }
+//                     if (customer) {
+//                         console.log(customer);
+//                         let stripCustomerId = customer.id;
+//                         let updatedDriver = await Driver.findByIdAndUpdate(addedDriver._id, { driverStripCustomerId: stripCustomerId })
+//                         console.log('done');
+
+//                         if (updatedDriver) {
+
+//                             let newDriver = await Driver.aggregate([
+//                                 {
+//                                     $match: {
+
+//                                         _id: new mongoose.Types.ObjectId(updatedDriver._id)
+
+//                                     }
+//                                 },
+//                                 {
+//                                     $lookup: {
+//                                         from: 'cityzones',
+//                                         localField: 'cityId',
+//                                         foreignField: '_id',
+//                                         as: 'cityId'
+//                                     }
+//                                 },
+//                                 {
+//                                     $unwind: '$cityId'
+//                                 },
+//                                 {
+//                                     $lookup: {
+//                                         from: 'countries',
+//                                         localField: 'countryId',
+//                                         foreignField: '_id',
+//                                         as: 'countryId'
+//                                     }
+//                                 },
+//                                 {
+//                                     $unwind: '$countryId'
+//                                 }
+
+//                             ])
+
+//                             console.log('newly added user -----------', newDriver[0]);
+//                             return res.status(200).send(newDriver[0], { message: 'added successfully' });
+//                         }
+//                     }
+//                     else {
+//                         console.log("Unknown Error");
+//                     }
+//                 })
+//             }
+
+//             console.log('done');
+//         }
+
+//     } catch (e) {
+//         console.log(e);
+//         if (e.code === 11000) {
+//             const field = Object.keys(e.keyValue)[0];
+//             let errorMessage = '';
+//             if (field === 'driverEmail') {
+//                 deleteUploadedFile(req.file.filename);
+//                 errorMessage = 'Email already exists!';
+//             } else if (field === 'driverPhone') {
+//                 deleteUploadedFile(req.file.filename);
+//                 errorMessage = 'Phone number already exists!';
+//             }
+//             return res.status(400).json({ error: errorMessage });
+//         }
+//         console.log('Error:', e);
+//         return res.status(500).json({ error: 'Failed to add Driver' });
+//     }
+// }
+
 
 const addDriver = async (req, res) => {
     try {
@@ -85,120 +214,133 @@ const addDriver = async (req, res) => {
                 approveStatus: false
             }
 
-            console.log(newDriver);
 
             let addedDriver = await Driver.create(newDriver);
+            console.log('newly added driver', addedDriver);
+
+            const accountData = {
+                type: 'express', // Specify the type of account
+                country: 'US',
+                email: addedDriver.driverEmail,
+                business_profile: {
+                    name: addedDriver.driverName,
+                },
+                business_type: 'individual', // or 'company' based on your requirement
+                individual: { // Required if business_type is 'individual'
+                    first_name: addedDriver.driverName.split(' ')[0],
+                    last_name: addedDriver.driverName.split(' ')[1],
+                    email: addedDriver.driverEmail,
+                },
+                metadata: {
+                    customerType: 'Driver'
+                },
+            };
 
             if (addedDriver) {
-                let stripCustomer = {
-                    name: addedDriver.driverName,
-                    email: addedDriver.driverEmail,
-                    phone: addedDriver.driverPhone,
-                    metadata: {
-                        customerType: 'Driver'
-                    }
+                const account = await stripe.accounts.create(accountData);
+
+                console.log('account', account);
+
+                let stripCustomerId = account.id;
+                let updatedDriver = await Driver.findByIdAndUpdate(addedDriver._id, { driverStripCustomerId: stripCustomerId, bankDetailsAdded: true }, { new: true })
+                console.log('done');
+
+                if (updatedDriver) {
+
+                    let newDriver = await Driver.aggregate([
+                        {
+                            $match: {
+                                // _id:addedDriver._id
+                                _id: new mongoose.Types.ObjectId(updatedDriver._id)
+
+                            }
+                        },
+                        {
+                            $lookup: {
+                                from: 'cityzones',
+                                localField: 'cityId',
+                                foreignField: '_id',
+                                as: 'cityId'
+                            }
+                        },
+                        {
+                            $unwind: '$cityId'
+                        },
+                        {
+                            $lookup: {
+                                from: 'countries',
+                                localField: 'countryId',
+                                foreignField: '_id',
+                                as: 'countryId'
+                            }
+                        },
+                        {
+                            $unwind: '$countryId'
+                        }
+
+                    ])
+
+                    console.log('newly added user -----------', newDriver[0]);
+                    return res.status(200).send(newDriver[0], { message: 'added successfully' });
                 }
 
 
-                stripe.customers.create(stripCustomer, async (err, customer) => {
-                    if (err) {
-                        console.log("Some Error Occured" + err);
-                        return res.status(500).json({ error: 'Stripe customer creation failed' });
-                    }
-                    if (customer) {
-                        console.log(customer);
-                        let stripCustomerId = customer.id;
-                        let updatedDriver = await Driver.findByIdAndUpdate(addedDriver._id, { driverStripCustomerId: stripCustomerId })
-                        console.log('done');
+                // stripe.customers.create(stripCustomer, async (err, customer) => {
+                //     if (err) {
+                //         console.log("Some Error Occured" + err);
+                //         return res.status(500).json({ error: 'Stripe customer creation failed' });
+                //     }
+                //     if (customer) {
+                //         console.log(customer);
+                //         let stripCustomerId = customer.id;
+                //         let updatedDriver = await Driver.findByIdAndUpdate(addedDriver._id, { driverStripCustomerId: stripCustomerId })
+                //         console.log('done');
 
-                        if (updatedDriver) {
+                //         if (updatedDriver) {
 
-                            let newDriver = await Driver.aggregate([
-                                {
-                                    $match: {
-                                        // _id:addedDriver._id
-                                        _id: new mongoose.Types.ObjectId(updatedDriver._id)
+                //             let newDriver = await Driver.aggregate([
+                //                 {
+                //                     $match: {
+                //                         // _id:addedDriver._id
+                //                         _id: new mongoose.Types.ObjectId(updatedDriver._id)
 
-                                    }
-                                },
-                                {
-                                    $lookup: {
-                                        from: 'cityzones',
-                                        localField: 'cityId',
-                                        foreignField: '_id',
-                                        as: 'cityId'
-                                    }
-                                },
-                                {
-                                    $unwind: '$cityId'
-                                },
-                                {
-                                    $lookup: {
-                                        from: 'countries',
-                                        localField: 'countryId',
-                                        foreignField: '_id',
-                                        as: 'countryId'
-                                    }
-                                },
-                                {
-                                    $unwind: '$countryId'
-                                }
+                //                     }
+                //                 },
+                //                 {
+                //                     $lookup: {
+                //                         from: 'cityzones',
+                //                         localField: 'cityId',
+                //                         foreignField: '_id',
+                //                         as: 'cityId'
+                //                     }
+                //                 },
+                //                 {
+                //                     $unwind: '$cityId'
+                //                 },
+                //                 {
+                //                     $lookup: {
+                //                         from: 'countries',
+                //                         localField: 'countryId',
+                //                         foreignField: '_id',
+                //                         as: 'countryId'
+                //                     }
+                //                 },
+                //                 {
+                //                     $unwind: '$countryId'
+                //                 }
 
-                            ])
+                //             ])
 
-                            console.log('newly added user -----------', newDriver[0]);
-                            return res.status(200).send(newDriver[0], { message: 'added successfully' });
-                        }
-                        // return res.status(200).send(updatedDriver, { message: 'added successfully' });
-                    }
-                    else {
-                        console.log("Unknown Error");
-                    }
-                })
+                //             console.log('newly added user -----------', newDriver[0]);
+                //             return res.status(200).send(newDriver[0], { message: 'added successfully' });
+                //         }
+                //         // return res.status(200).send(updatedDriver, { message: 'added successfully' });
+                //     }
+                //     else {
+                //         console.log("Unknown Error");
+                //     }
+                // })
             }
-
-
-
-
-            // if (addedDriver) {
-
-            //     let newDriver = await Driver.aggregate([
-            //         {
-            //             $match: {
-            //                 // _id:addedDriver._id
-            //                 _id: new mongoose.Types.ObjectId(addedDriver._id)
-
-            //             }
-            //         },
-            //         {
-            //             $lookup: {
-            //                 from: 'cityzones',
-            //                 localField: 'cityId',
-            //                 foreignField: '_id',
-            //                 as: 'cityId'
-            //             }
-            //         },
-            //         {
-            //             $unwind: '$cityId'
-            //         },
-            //         {
-            //             $lookup: {
-            //                 from: 'countries',
-            //                 localField: 'countryId',
-            //                 foreignField: '_id',
-            //                 as: 'countryId'
-            //             }
-            //         },
-            //         {
-            //             $unwind: '$countryId'
-            //         }
-
-            //     ])
-
-            //     console.log('newly added user -----------', newDriver[0]);
-            //     return res.status(200).send(newDriver[0], { message: 'added successfully' });
-            // }
-
             console.log('done');
         }
 
@@ -431,12 +573,12 @@ const updateDriver = async (req, res) => {
 const deleteDriver = async (req, res) => {
     try {
 
-        // let stripCustomer = await Driver.findById(req.body.id, { _id: false, stripCustomerId: true });
-        // let stripCustomerId = stripCustomer.stripCustomerId
+        let stripCustomer = await Driver.findById(req.body.id);
+        let stripCustomerId = stripCustomer.driverStripCustomerId
         // console.log(stripCustomerId);
 
-        // let deleted = await stripe.customers.del(stripCustomerId);
-        // console.log(deleted);
+        let deleted = await stripe.customers.del(stripCustomerId);
+        console.log(deleted);
         const deletedDriver = await Driver.findByIdAndDelete(req.body.id);
         console.log(req.body);
         if (!deletedDriver) {
@@ -543,30 +685,38 @@ const storeBankDetails = async (req, res) => {
     try {
         console.log('inside the driverController - storeBankDetails', req.body);
         if (req.body) {
-            let fetchedDriver = await Driver.findById(req.body.driverId)
+            let fetchedDriver = await Driver.findById(req.body.driverId);
+
+
+
             if (fetchedDriver) {
                 // console.log('Fetcheddriver', fetchedDriver);
-                const token = await stripe.tokens.create({
-                    bank_account: {
-                        account_holder_name: fetchedDriver.driverName,
-                        account_holder_type: "individual",
-                        account_number: req.body.AccountNumber,
-                        country: "US",
-                        currency: "usd",
-                        metadata: {
-                            info: 'Adding card to Driver'
-                        },
-                        routing_number: "110000000"
-                    }
-                })
+                const dCustomer = await stripe.accounts.retrieve(fetchedDriver.driverStripCustomerId);
+                console.log('dcustomer ===>', dCustomer);
+
+                const token = await stripe.createToken('bank_account', {
+                    account_holder_name: req.body.AccountHolderName,
+                    account_holder_type: "individual",
+                    account_number: req.body.AccountNumber,
+                    country: "US",
+                    currency: "usd",
+                    metadata: {
+                        info: 'Adding card to Driver'
+                    },
+                    routing_number: req.body.RoutingNumber
+                });
 
                 if (token) {
                     console.log("token ", token);
-                    const bankAccount = await stripe.customers.createSource(fetchedDriver.driverStripCustomerId, {
-                        source: token.id
-                    });
-                    console.log('Bank Account Stored ', bankAccount);
+                    const bankAccount = await stripe.accounts.createExternalAccount(
+                        fetchedDriver.driverStripCustomerId,
+                        { external_account: token }
+                    );
+
+                    console.log('Bank account added:', bankAccount);
+                    await Driver.findByIdAndUpdate(fetchedDriver._id, { bankDetailsAdded: true })
                     if (bankAccount) {
+
                         response.message = 'Bank Account Added Successfully';
                         response.staus = 200
                         return res.status(200).json(response);

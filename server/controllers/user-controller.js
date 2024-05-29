@@ -534,4 +534,4 @@ const getSinglUser = async (req, res) => {
 
 
 
-module.exports = { addUser, getUser, updateUser, deleteUser, addCard, getCards, setDefaultCard, deleteCard, getSinglUser }
+module.exports = { User , addUser, getUser, updateUser, deleteUser, addCard, getCards, setDefaultCard, deleteCard, getSinglUser }

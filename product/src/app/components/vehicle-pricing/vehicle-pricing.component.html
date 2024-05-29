@@ -364,14 +364,14 @@
         @for(price of PricingList ;track price){
         <tr class="border text-center">
             <td class="py-1 border">{{price.countryId.country}}</td>
-            <td class="py-1 border">{{price.cityId.formatted_address}}</td>
+            <td class="py-1 border">{{price.cityId.formatted_address}} </td>
             <td class="py-1 border">{{price.typeId.vehicleType}}</td>
-            <td class="py-1 border">{{price.pricePerUnitDistance}}</td>
-            <td class="py-1 border">{{price.pricePerUnitTime_Min}}</td>
-            <td class="py-1 border">{{price.minFare}}</td>
-            <td class="py-1 border">{{price.basePrice}}</td>
-            <td class="py-1 border">{{price.driverProfit}}</td>
-            <td class="py-1 border">{{price.distanceForBasePrice}}</td>
+            <td class="py-1 border">{{price.pricePerUnitDistance}} {{price.countryId.currency}}</td>
+            <td class="py-1 border">{{price.pricePerUnitTime_Min}} {{price.countryId.currency}}</td>
+            <td class="py-1 border">{{price.minFare}} {{price.countryId.currency}}</td>
+            <td class="py-1 border">{{price.basePrice}} {{price.countryId.currency}}</td>
+            <td class="py-1 border">{{price.driverProfit}} %</td>
+            <td class="py-1 border">{{price.distanceForBasePrice}} km</td>
             <td class="py-1 border">{{price.maxSpace}}</td>
             <!-- <button class=" btn btn-info btn-sm my-2" (click)="editBtnClicked(price)" data-bs-toggle="modal" data-bs-target="#editForm">edit</button> -->
             <td>

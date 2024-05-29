@@ -7,6 +7,7 @@ import { ToastrService } from 'ngx-toastr';
 import { DriverListService } from '../../services/driver-list.service';
 import { VehicleTypeService } from '../../services/vehicle-type.service';
 import { CommonModule } from '@angular/common';
+// import { loadStripe } from '@stripe/stripe-js';
 
 interface CountryInfo {
   country: string;
@@ -40,6 +41,8 @@ export class DriverListComponent {
   private _tostr = inject(ToastrService);
   private _vehicleTypeService = inject(VehicleTypeService);
 
+
+  // STRIPE:
   driverForm!: FormGroup;
   driverFatched: Array<DriverData> = [];
   driverFatchedlength!: number;
@@ -79,8 +82,8 @@ export class DriverListComponent {
 
     this.bankDetailsForm = this._fb.group({
       AccountHolderName: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(30)]],
-      BankName: ['', [Validators.required, Validators.email, Validators.minLength(4), Validators.maxLength(64)]],
-      AccountNumber: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(12)]],
+      RoutingNumber: ['110000000', [Validators.required, Validators.email, Validators.minLength(4), Validators.maxLength(64)]],
+      AccountNumber: ['000123456789', [Validators.required, Validators.minLength(8), Validators.maxLength(12)]],
     });
 
 
@@ -91,14 +94,14 @@ export class DriverListComponent {
   storeAccountDetails() {
     let data = {
       driverId: this.selectedDriver._id,
-      // AccountHolderName: this.bankDetailsForm.get('AccountHolderName')?.value,
+      AccountHolderName: this.bankDetailsForm.get('AccountHolderName')?.value,
       AccountNumber: this.bankDetailsForm.get('AccountNumber')?.value,
-      BankName: this.bankDetailsForm.get('BankName')?.value,
+      RoutingNumber: this.bankDetailsForm.get('RoutingNumber')?.value,
     }
 
     console.log(this.bankDetailsForm.get('AccountHolderName')?.value);
     console.log(this.bankDetailsForm.get('AccountNumber')?.value);
-    console.log(this.bankDetailsForm.get('BankName')?.value);
+    console.log(this.bankDetailsForm.get('RoutingNumber')?.value);
 
     this._driverListService.storeBankDetails(data).pipe(
       catchError((e) => {

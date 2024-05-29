@@ -77,7 +77,7 @@
                 <td class="border text-center p-1 py-2">
                     <!-- status -->
                     <button class="btn"
-                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightblue' : ride.rideStatus === 1 ? 'yellow' : ride.rideStatus ===  5? 'green' : ride.rideStatus ===  6? 'blue' :ride.rideStatus ===  3? 'purple' : ride.rideStatus ===  4? 'lightgreen': ride.rideStatus ===  2? 'violet': 'sky' ,   'color': ride.rideStatus === 5 ? 'white' : 'black' }">
+                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightblue' : ride.rideStatus === 1 ? 'yellow' : ride.rideStatus ===  5? 'green' : ride.rideStatus ===  6? 'blue' :ride.rideStatus ===  3? 'purple' : ride.rideStatus ===  4? 'lightgreen': ride.rideStatus ===  2? 'violet': 'sky' ,   'color': ride.rideStatus === 5 ? 'white' : ride.rideStatus === 3 ? 'white' : 'black' }">
 
                         @switch(ride.rideStatus){
                         @case(0){
@@ -110,7 +110,7 @@
                     <!-- Assign -->
                     @if(ride.driverId?.driverName ){
                     <div class="btn"
-                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightblue' : ride.rideStatus === 1 ? 'orange' : ride.rideStatus === 5 ? 'green' : ride.rideStatus === 3 ? 'green' : 'sky' ,'color': ride.rideStatus === 5 ? 'white' : ride.rideStatus === 3 ? 'white' : 'black'  }">
+                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightblue' : ride.rideStatus === 1 ? 'orange' : ride.rideStatus === 5 ? 'green' : ride.rideStatus === 3 ? 'green' : ride.rideStatus === 4 ? 'green'  : ride.rideStatus === 2 ? 'green': 'sky' ,'color': ride.rideStatus === 5 ? 'white' : ride.rideStatus === 3 ? 'white' : ride.rideStatus === 4 ? 'white'  : ride.rideStatus === 2 ? 'white': 'black'  }">
                         {{ride.driverId?.driverName}}
                     </div>
                     }@else{
@@ -131,8 +131,8 @@
                     @if(ride.rideStatus !== 0){
 
                     @if(ride.rideStatus !== 1 ){
-                    <button class="btn  mb-2 " (click)="ActionBtn(ride.rideStatus , ride._id , ride.driverId?._id)"
-                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightblue' : ride.rideStatus === 1 ? 'yellow' : ride.rideStatus ===  5? 'green' : ride.rideStatus ===  6? 'blue' :ride.rideStatus ===  3? 'purple' : ride.rideStatus ===  4? 'lightgreen': 'sky' ,   'color': ride.rideStatus === 5 ? 'white' : 'black' }">
+                    <button class="btn  mb-2 mt-1 me-2 " (click)="ActionBtn(ride.rideStatus , ride._id , ride.driverId?._id)"
+                        [ngStyle]="{ 'background-color': ride.rideStatus === 0 ? 'lightblue' : ride.rideStatus === 1 ? 'yellow' : ride.rideStatus ===  5? 'green' : ride.rideStatus ===  6? 'blue' :ride.rideStatus ===  3? 'purple' : ride.rideStatus ===  4? 'lightgreen'  : ride.rideStatus === 2 ? 'green' : 'sky' ,   'color': ride.rideStatus === 5 ? 'white'  : ride.rideStatus === 2 ? 'white'  : ride.rideStatus === 3 ? 'white' : 'black' }">
 
                         @switch(ride.rideStatus){
                         @case(2){
@@ -153,12 +153,11 @@
                     }
                     }
 
-                    <!-- @if(ride.rideStatus === 1){ -->
-                    <button class="btn btn-danger "
-                        (click)="cancleTheRide(ride._id , ride.driverId?._id)">
+                    @if(ride.rideStatus === 1 || ride.rideStatus === 0){
+                    <button class="btn btn-danger " (click)="cancleTheRide(ride._id , ride.driverId?._id)">
                         Cancle
                     </button>
-                    <!-- } -->
+                    }
                 </td>
             </tr>
             }

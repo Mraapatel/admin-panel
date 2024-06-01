@@ -48,8 +48,8 @@
         </div>
         <table class="table table-responsive  overflow-auto">
             <tr>
-                <!-- <th class="border text-center p-1 py-2 bg-dark text-white id">Request Id</th>
-                <th class="border text-center p-1 py-2 bg-dark text-white id">User Id</th> -->
+                <!-- <th class="border text-center p-1 py-2 bg-dark text-white id">Request Id</th> -->
+                <th class="border text-center p-1 py-2 bg-dark text-white id">Ride Id</th>
                 <th class="border text-center p-1 py-2 bg-dark text-white  width">User Name</th>
                 <th class="border text-center p-1 py-2 bg-dark text-white  width">Driver Name</th>
                 <th class="border text-center p-1 py-2 bg-dark text-white time">Pick Up Time</th>
@@ -58,6 +58,7 @@
                 <th class="border text-center p-1 py-2 bg-dark text-white width">Drop off address</th>
                 <th class="border text-center p-1 py-2 bg-dark text-white width">Service Type</th>
                 <th class="border text-center p-1 py-2 bg-dark text-white width">Type</th>
+                <th class="border text-center p-1 py-2 bg-dark text-white width">Download</th>
                 <!-- <th class="border text-center p-1 py-2 bg-dark text-white">Status</th>
                 <th class="border text-center p-1 py-2 bg-dark text-white">Assign</th>
                 <th class="border text-center p-1 py-2 bg-dark text-white">Action</th> -->
@@ -68,6 +69,7 @@
                 data-bs-target="#infoModal">
                 <!-- <td class="border text-center p-1 py-2 id">{{ride._id}}</td>
                 <td class="border text-center p-1 py-2 id">{{ride.userId._id}}</td> -->
+                <td class="border text-center p-1 py-2 width">{{ride.Ride_index}}</td>
                 <td class="border text-center p-1 py-2 width">{{ride.userId.userName}}</td>
                 @if(ride.driverId?.driverName){
                 <td class="border text-center p-1 py-2 time">{{ride.driverId?.driverName}}</td>
@@ -90,6 +92,11 @@
                         [ngStyle]="{'background-color':ride.rideStatus === 7 ? 'green' : 'orange' , 'color':'white'}">
                         {{ ride.rideStatus === 7 ? 'Completed' : ride.rideStatus === 8 ? 'Cancelled' : '' }}
                     </div>
+                </td>
+                <td class="border text-center p-1 py-2 width">
+                    <button class="btn btn-sm border download" (click)="downloadRideInfo(ride)" >
+                        <img src="../../../assets/icons8-download.gif" alt="Download" height="15px" width="15px">
+                    </button>
                 </td>
             </tr>
             <br>

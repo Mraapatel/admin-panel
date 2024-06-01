@@ -261,7 +261,8 @@ const fetchAllRidesByStatus = async (rideStatus, nearest = false) => {
                     rideStatus: 1,
                     nearestdriverList: 1,
                     assignTime:1,
-                    nearest:1
+                    nearest:1,
+                    settings:1
                 }
             }
         ]
@@ -287,8 +288,6 @@ const fetchAllRidesByStatus = async (rideStatus, nearest = false) => {
         // console.log('asssigne', assignedRidesWithDrivers);
         return assignedRidesWithDrivers
     }
-
-
 }
 
 

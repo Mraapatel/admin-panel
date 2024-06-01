@@ -142,7 +142,7 @@ export class UserComponent {
       return;
     }
 
-     if (!this.checkForm()) return;
+    if (!this.checkForm()) return;
 
     // this.validateEmail();
     // this.validatePhone();
@@ -408,32 +408,32 @@ export class UserComponent {
   fatchUsers(data: object) {
     this._userService.getExistingUser(data)
       .subscribe((res) => {
-      console.log('uuuuuuuuuuuuuuuuuuuuuuSuuuuuuuuuuuuuuuu');
-      
-      console.log('this is it', res);
-      this.userFatched = res.users;
-      console.log('uuuuuuuuuuuuuuuuuuuuuuSuuuuuuuuuuuuuuuu');
-      this.totalUsers = res.totalUsers;
-      if (this.userFatched) {
-        if (this.userFatched.length > -1) {
-          this.userFatchedlength = this.userFatched.length
-        } else { this.userFatchedlength = -1 }
-      }
-    },
-      (error) => {
-        console.log('borrrrrrrrrrrrrrr', error);
+        console.log('uuuuuuuuuuuuuuuuuuuuuuSuuuuuuuuuuuuuuuu');
 
-        this._tostr.info('Showing main tabel  ', 'info');
-        this._tostr.error('No User Found', 'Error');
+        console.log('this is it', res);
+        this.userFatched = res.users;
+        console.log('uuuuuuuuuuuuuuuuuuuuuuSuuuuuuuuuuuuuuuu');
+        this.totalUsers = res.totalUsers;
+        if (this.userFatched) {
+          if (this.userFatched.length > -1) {
+            this.userFatchedlength = this.userFatched.length
+          } else { this.userFatchedlength = -1 }
+        }
+      },
+        (error) => {
+          console.log('borrrrrrrrrrrrrrr', error);
 
-        console.log(error.error.Message);
-        this.searchTag.nativeElement.value = '';
-        this.searchTerm = ''
-        this.pageNumber = 1;
-        this.disablePrevBnt();
-        console.log(error.error.Message);
-        this.disableNextBnt();
-      });
+          this._tostr.info('Showing main tabel  ', 'info');
+          this._tostr.error('No User Found', 'Error');
+
+          console.log(error.error.Message);
+          this.searchTag.nativeElement.value = '';
+          this.searchTerm = ''
+          this.pageNumber = 1;
+          this.disablePrevBnt();
+          console.log(error.error.Message);
+          this.disableNextBnt();
+        });
   }
 
   clearAll() {
@@ -481,6 +481,9 @@ export class UserComponent {
           stripClientId: user.stripCustomerId,
           userId: user._id,
         };
+        console.log('token' ,details);
+        // return;
+        
         this._userService.addCard(details).pipe(
           tap((res) => {
             this.customerCards.unshift(res);
@@ -488,18 +491,6 @@ export class UserComponent {
             if (this.customerCards.length == 1) {
               this.getCards(user);
             }
-            // this._userService.getCards(user.stripCustomerId).pipe(
-            //   tap((res) => {
-            //     this.customerCards = res.cards;
-            //     this.defaultCardId = res.defaultCardId;
-            //   }),
-            //   catchError((error) => {
-            //     this._tostr.error('Some Error Occured while fetching cards', 'Error');
-            //     return of(error)
-            //   })
-            // ).subscribe()
-
-            // this.getCardsFormServer(user);
           }),
           catchError((error) => {
             if (error.error.message == 'Enable to add Card') {
@@ -550,8 +541,8 @@ export class UserComponent {
     console.log(user.stripCustomerId);
     this._userService.getCards(user.stripCustomerId).pipe(
       catchError((e) => {
-        this._tostr.error('Error While Fetching cards','Error');
-        return of (e)
+        this._tostr.error('Error While Fetching cards', 'Error');
+        return of(e)
       })
     ).subscribe((res) => {
       console.log(res);

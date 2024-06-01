@@ -11,7 +11,7 @@ const server = require('http').Server(app);
 socket.initialize(server);
 const Port = process.env.PORT || 5000;
 
-const {startCron} = require('../server/utils/cron');
+const { startCron } = require('../server/utils/cron');
 // startCron();
 const jwt = require('./routes/jwt_token');
 const vehicleType = require('./routes/vehicleType')
@@ -25,7 +25,8 @@ const varifyToken = require('./middlewares/varifyToken');
 const createRide = require('./routes/createRide');
 const confirmRide = require('./routes/confirmRide');
 const runningRequest = require('./routes/runningRequest');
-const rideHistory = require('./routes/rideHistory')
+const rideHistory = require('./routes/rideHistory');
+const test = require ('./routes/test');
 
 mongoose.connect('mongodb://127.0.0.1:27017/Product')
     .then(() => console.log('connection is successfull...'))
@@ -66,6 +67,8 @@ app.use('/confirmRide', confirmRide);
 app.use('/runningRequest', runningRequest);
 
 app.use('/rideHistory', rideHistory);
+
+app.use('/test', test);
 
 // app.listen(Port, () => {
 //     console.log(`server is listning to port no:${Port}`);

@@ -19,6 +19,16 @@ function initialize(server) {
             console.log('formClient event', data);
         })
 
+
+        // db.collection.aggregate([
+        //     { $group: { _id: null, maxIndex: { $max: "$index" } } }
+        //   ])
+
+        // db.collection.updateOne(
+        //     { _id: newDocumentId },
+        //     { $set: { index: { $add: ["$maxIndex", 1] } } }
+        //   )
+
         // socket.on('getActiveDriversForAssign', async (data) => {
         //     console.log('getDataForAssign', data);
         //     let Drivers = await getDrivers(data.cityId, data.typeId);

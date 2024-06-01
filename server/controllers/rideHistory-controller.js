@@ -42,6 +42,9 @@ const getRides = async (req, res) => {
                 { 'userId.userName': { $regex: new RegExp(searchTerm, 'i') } },
                 { 'userId.userEmail': { $regex: new RegExp(searchTerm, 'i') } },
                 { 'userId.userPhone': { $regex: new RegExp(searchTerm, 'i') } },
+                { 'driverId.driverPhone': { $regex: new RegExp(searchTerm, 'i') } },
+                { 'driverId.driverEmail': { $regex: new RegExp(searchTerm, 'i') } },
+                { 'driverId.driverName': { $regex: new RegExp(searchTerm, 'i') } },
                 { date: { $regex: new RegExp(searchTerm, 'i') } },
                 { startLocation: { $regex: new RegExp(searchTerm, 'i') } }, // Example for another field
                 { endLocation: { $regex: new RegExp(searchTerm, 'i') } }, // Example for another field
@@ -100,19 +103,6 @@ const getRides = async (req, res) => {
 
             },
             {
-                $project: {
-                    __v: 0,
-                    'countryInfo.countryCode2': 0,
-                    'countryInfo.flagSymbol': 0,
-                    'countryInfo.timeZone': 0,
-                    'countryInfo.countryCode': 0,
-                    'countryInfo.__v': 0,
-                    "userId.countryCallingCode": 0,
-                    "userId.__v": 0,
-                    'typeId.__v': 0
-                }
-            },
-            {
                 $lookup: {
                     from: "driverlists",
                     localField: "driverId",
@@ -125,7 +115,43 @@ const getRides = async (req, res) => {
                     driverId: { $arrayElemAt: ["$driverId", 0] } // Convert driverId array to object
                 }
             },
+            {
+                $project: {
+                    __v: 0,
+                    _id: 0,
+                    time: 0,
+                    assignTime: 0,
+                    nearestdriverList: 0,
+                    // rideStatus: 0,
+                    'countryInfo.countryCode2': 0,
+                    'countryInfo.flagSymbol': 0,
+                    'countryInfo.timeZone': 0,
+                    'countryInfo.countryCode': 0,
+                    'countryInfo.__v': 0,
+                    'countryInfo._id': 0,
+                    "userId.countryCallingCode": 0,
+                    "userId.stripCustomerId": 0,
+                    "userId._id": 0,
+                    "driverId._id": 0,
+                    "driverId.cityId": 0,
+                    "driverId.countryId": 0,
+                    "driverId.driverStatus": 0,
+                    "driverId.approveStatus": 0,
+                    "driverId.bankDetailsAdded": 0,
+                    "driverId.driverStripCustomerId": 0,
+                    "driverId.serviceType": 0,
+                    "driverId.__v": 0,
+                    "userId.__v": 0,
+                    'typeId.__v': 0,
+                    'typeId._id': 0,
+                    'typeId.vehicleIcon': 0,
+                    'cityId': 0,
+
+
+                }
+            },
             { $match: query },
+
             // { $skip: (page - 1) * limit },
             // { $limit: limit },
         ];

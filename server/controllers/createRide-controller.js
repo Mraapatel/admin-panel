@@ -76,6 +76,8 @@ const getRides = async (req, res) => {
 
     }
 }
+
+
 const checkForStartingPoint = async (req, res) => {
     try {
         let response = {

@@ -51,9 +51,9 @@
             <button [disabled]="disableNextBnt()" class="btn" class="btn btn-dark text-white shadow"
                 (click)="nextBtn()">Next</button>
         </div>
-        <table class="table table-responsive shadow overflow-auto">
+        <table class="table table-responsive  overflow-auto">
             <tr>
-                <th class="border text-center p-1 py-2 bg-dark text-white id">Request Id</th>
+                <th class="border text-center p-1 py-2 bg-dark text-white id">Ride Id</th>
                 <!-- <th class="border text-center p-1 py-2 bg-dark text-white id">User Id</th> -->
                 <th class="border text-center p-1 py-2 bg-dark text-white">Pick Up Time</th>
                 <th class="border text-center p-1 py-2 bg-dark text-white">User Name</th>
@@ -66,8 +66,8 @@
             </tr>
             @if(RidesFetched){
             @for(ride of RidesFetched;track $index){
-            <tr>
-                <td class="border text-center p-1 py-2 id">{{ride._id}}</td>
+            <tr class="hover rounded shadow">
+                <td class="border text-center p-1 py-2 id">{{ride.Ride_index}}</td>
                 <!-- <td class="border text-center p-1 py-2 id">{{ride.userId._id}}</td> -->
                 <td class="border text-center p-1 py-2">{{ride.date}}</td>
                 <td class="border text-center p-1 py-2">{{ride.userId.userName}}</td>
@@ -160,6 +160,7 @@
                     }
                 </td>
             </tr>
+            <br>
             }
             }
         </table>

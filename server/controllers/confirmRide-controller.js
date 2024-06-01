@@ -6,8 +6,10 @@ const { Pricing } = require('../controllers/pricing-controller');
 const mongoose = require('mongoose');
 const { getRidesFormDb } = require('../utils/fetchRides');
 const { fetchIdleDrivers } = require('../utils/fetchIdleDrivers');
+const { addFunds } = require('../utils/addFunds')
 const secreat_strip_key = process.env.STRIP_SECREATE_KEY
 const stripe = require('stripe')(secreat_strip_key);
+
 
 const getRides = async (req, res) => {
     try {
@@ -301,14 +303,16 @@ const ridePicked = async (req, res) => {
 
 const rideCompleted = async (req, res) => {
     let response = {
-        message: 'Error Occured while completing ride',
-        status: 500
+        userPayment: 'Error Occured while completing ride',
+        driverPayment: 'Error Occured while completing ride',
+        status: 500,
+        rideStatus: null,
+        rideId: '',
     }
     try {
 
         if (req.body) {
             console.log('Inside the confirmRide -  rideCompleted --> ', req.body);
-            // let time = new Date().getTime();
 
             let ride = await createRide.findByIdAndUpdate(req.body.rideId, {
                 rideStatus: 7,
@@ -316,85 +320,136 @@ const rideCompleted = async (req, res) => {
 
             if (ride) {
                 await Driver.findByIdAndUpdate(ride.driverId, { driverStatus: 0 });
-                await doPayment(ride)
+                // await addFunds()
+                response.rideId = ride._id;
+                response.rideStatus = ride.rideStatus
+                response.status = 200;
+                let userPayment = await collectFormUser(ride);
+                let driverPayment = await payToDriver(ride);
+                response.userPayment = userPayment;
+                response.driverPayment = driverPayment
+
+                if (userPayment.length > 37) {
+                    response.status = 201;
+                }
+                return res.status(200).json(response)
             }
 
-            return res.status(404).json({ message: 'Some Error occured while completing ride' });
+            response.userPayment = 'Not able to find the ride';
+            response.status = 404;
+            return res.status(404).json(response);
         }
     } catch (e) {
-        response.message = 'Some Error occured while completing ride'
+        response.userPayment = 'Some Error occured while completing ride'
         console.log('Error Occured while completing ride', e);
         return res.status(500).json(response);
     }
 }
 
 
-async function doPayment(ride) {
-    let response = {
-        message: 'Not able to deduct the Money form the Client',
-        status: 500,
-        paymentStatus: ''
-    }
+async function collectFormUser(ride) {
     if (ride.paymentMethod === 'card') {
         let user = await User.findById(ride.userId);
+        // done
         if (user.stripCustomerId) {
             const customer = await stripe.customers.retrieve(user.stripCustomerId)
             console.log('Customer===>', customer);
-
+            // done
             if (customer.default_source) {
                 console.log('default Card is present');
-                let charged = await createCharge(user.stripCustomerId, ride.totalFare, user.userName)
-                if (charged) {
-                    let dCustomer = await checkForDriver(ride.driverId);
-                    if (dCustomer) {
-                        let payableAmount = await amountPayble(ride.cityId, ride.typeId, ride.totalFare);
-                        let payout = await createPayout(dCustomer.id, payableAmount)
-                        if (payout) {
-                            console.log('all the conditions were true', payout);
-                            // return res.status(200).json({ message: 'The rideCompleted successfully', rideStatus: ride.rideStatus, rideId: ride._id });
-                            return true
+                return await createCharge(user.stripCustomerId, ride.totalFare, customer.default_source, user.userName)
 
-                        } else {
-                            console.log('last condition were not  true', payout);
-                            // return res.status(200).json({ message: 'Not able to pay to the driver', rideStatus: ride.rideStatus, rideId: ride._id });
-                            return false
-                        }
-                    } else {
-                        response.message = "Driver don't have Account";
-                        response.status = 200;
-                        response.paymentStatus = 'Fare collected form the User';
-                        console.log("don't get the dcustomer form the checkForDriver");
-                        return res.status(200).json({ message: 'The rideCompleted successfully', rideStatus: ride.rideStatus, rideId: ride._id });
-                    }
-                } else {
-                    console.log("don't got the charge from the createcharge");
-                }
             } else {
-                console.log('default Card is not present');
+                console.log(' users default Card is not present');
+                return 'User do not have Card Added';
             }
         }
-        return res.status(200).json({ message: 'The rideCompleted successfully', rideStatus: ride.rideStatus, rideId: ride._id });
+        return `User do not have Customer Id`;
     } else {
-
-        return res.status(200).json({ message: 'The rideCompleted successfully', rideStatus: ride.rideStatus, rideId: ride._id });
+        return 'Payment method for Ride was Cash';
     }
 }
 
-async function createCharge(customerId, amount, userName) {
+async function payToDriver(ride) {
     try {
-        console.log('customerId', customerId);
-        console.log('amount', amount);
-        const Charge = await stripe.charges.create({
-            amount: amount * 100,  // Amount in cents ($20.00)
-            currency: 'usd',
-            customer: customerId,
-            description: `Ride fare of the ${userName}`,
-        })
-        console.log('charge ', Charge);
-        return Charge
+        let dCustomer = await checkForDriver(ride.driverId);
+        // done
+        if (dCustomer) {
+            let payableAmount = await amountPayble(ride.cityId, ride.typeId, ride.totalFare);
+            console.log('payable ammount', payableAmount);
+            let payout = await createPayout(dCustomer.id, payableAmount)
+            // done
+            if (payout) {
+                console.log('all the conditions were true', payout.object);
+                return 'Collected From User and Paid to Driver also';
+            } else {
+                console.log('last condition were not  true', payout);
+                return 'Collected From User but unable Pay to Driver ';
+            }
+        } else {
+            return 'Driver do not have Account';
+        }
+
     } catch (e) {
         console.log('Error Occured While Charging the Customer', e);
         return null
+    }
+}
+
+
+async function createCharge(customerId, amount, paymentMethodId, userName) {
+    try {
+        console.log('customerId', customerId);
+        console.log('amount', amount);
+        console.log('paymentMethodId', paymentMethodId);
+
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: amount * 100,  // Amount in cents
+            currency: 'usd',
+            customer: customerId,
+            description: `Ride fare of ${userName}`,
+            payment_method: paymentMethodId, // Existing payment method ID
+            payment_method_types: ['card'],
+            receipt_email: 'example@gmail.com',
+            metadata: {
+                order_id: '6735',
+                user_name: userName
+            },
+            shipping: {
+                name: userName,
+                address: {
+                    line1: '1234 Main Street',
+                    city: 'San Francisco',
+                    state: 'CA',
+                    postal_code: '94111',
+                    country: 'US'
+                }
+            },
+            setup_future_usage: 'off_session', // Save the payment method for future off-session use
+            // statement_descriptor: 'CUSTOM RIDE',
+            capture_method: 'automatic',
+            confirm: true,
+            // confirmation_method: 'automatic',
+            return_url: 'http://localhost:4200/home/rideHistory'
+        });
+
+        if (paymentIntent.status === 'succeeded') {
+            console.log('Payment successful:', paymentIntent);
+            return 'Payment Collected From the User'
+            // Payment succeeded, handle success scenario (redirect user, update UI, etc.)
+        } else if (paymentIntent.status === 'requires_action') {
+            console.log('failure of payment:', paymentIntent);
+            return paymentIntent.next_action.redirect_to_url.url
+            // window.location.replace(paymentIntent.next_action.redirect_to_url.url);
+        } else {
+            console.log('else condition', paymentIntent);
+        }
+
+        console.log('charge ', paymentIntent);
+        return 'Not able Collect From User'
+    } catch (e) {
+        console.log('Error Occured While Charging the Customer', e);
+        return 'Error Occured While Charging the Customer'
     }
 }
 
@@ -403,16 +458,21 @@ async function checkForDriver(driverId) {
     try {
         let driver = await Driver.findById(driverId);
 
-        console.log("driver iin checkfordriver---------->", driver);
         console.log("driverId", driverId);
+        console.log("driver iin checkfordriver---------->", driver);
 
         if (driver) {
-            const dCustomer = await stripe.customers.retrieve(driver.driverStripCustomerId);
-            console.log('dcustomer ===>', dCustomer);
-
-            if (dCustomer.default_source) {
-                return dCustomer;
-            }
+            return new Promise((resolve, reject) => {
+                stripe.accounts.retrieve(driver.driverStripCustomerId, (err, dCustomer) => {
+                    if (err) {
+                        console.error(err);
+                        reject(err);
+                    } else {
+                        console.log('dcustomer ===>', dCustomer.id);
+                        resolve(dCustomer);
+                    }
+                });
+            });
         }
         return null;
     } catch (e) {
@@ -421,14 +481,14 @@ async function checkForDriver(driverId) {
     }
 }
 
-async function createPayout(default_source, amount) {
+async function createPayout(customerId, amount) {
     try {
         console.log('amount', amount);
-        console.log('default_source', default_source);
+        console.log('default_source', customerId);
         const payout = await stripe.transfers.create({
-            amount: 100,
+            amount: amount * 100,
             currency: 'usd',
-            destination: default_source,
+            destination: customerId,
         })
 
         return payout
@@ -448,17 +508,16 @@ async function amountPayble(cityId, typeId, amount) {
             let t = amount * pricing.driverProfit;
             let l = t / 100
             console.log('t', t);
-            console.log('l', l);
-            return l
+            console.log('l', parseFloat(l.toFixed(2)));
+            return parseFloat(l.toFixed(2));
         } else {
-            return null
+            return null;
         }
     } catch (e) {
         console.log("some Error Occured in amountPayble", e);
-        return null
+        return null;
     }
 }
-
 
 
 module.exports = { getRides, getVehicleTypes, getDrivers, assignNearestDriver, cancleRide, rideStarted, rideArrived, ridePicked, rideCompleted }

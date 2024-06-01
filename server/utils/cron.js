@@ -141,7 +141,6 @@ const assignNewDriverToRide = async () => {
                     let d = await Driver.findById(new mongoose.Types.ObjectId('6645d6cd6338fc54614de0ff'))
                     console.log('dddddddddddd', d);
                 }
-
                 console.log('remaining driver ------------>', remainingDriver);
 
                 if (remainingDriver) {
@@ -166,10 +165,8 @@ const assignNewDriverToRide = async () => {
                     console.log('updatedRide4=========>', updatedRide4);
                     global.ioInstance.emit('NoDriverRemaining-ByCron', data)
                     console.log('NoDriverRemaining-ByCron event inside the else 2" -else ');
-
                     // }
                 }
-
             }
 
         }

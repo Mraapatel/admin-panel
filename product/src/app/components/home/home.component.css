@@ -23,7 +23,8 @@
 }
 
 .content {
-    /* overflow: auto; */
+    overflow: auto; 
+    scrollbar-width: none;
     /* position: relative; */
     margin: -10px;
     height: 100%;

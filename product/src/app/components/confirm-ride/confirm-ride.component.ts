@@ -3,12 +3,25 @@ import { SocketIoService } from '../../services/socket-io.service';
 import { ActiveDriver, Ride, VehicleType, assignedRidesWithDriver, singleUser } from '../../models/models.interface';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ConfirmRideService } from '../../services/confirm-ride.service';
-import { catchError,of, tap } from 'rxjs';
+import { catchError, of, tap } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { CommonModule } from '@angular/common';
 import { RunningRequestService } from '../../services/running-request.service';
 import { BrowserNotificationService } from '../../services/browser-notification.service';
+import { HttpClient } from '@angular/common/http';
+import { loadStripe, Stripe } from '@stripe/stripe-js';
+
 // import { HomeComponent } from '../home/home.component';
+
+
+
+interface RideComp_Res {
+  userPayment: string;
+  driverPayment: string;
+  status: number;
+  rideStatus: number | null;
+  rideId: string;
+}
 
 @Component({
   selector: 'app-confirm-ride',
@@ -24,9 +37,12 @@ export class ConfirmRideComponent {
   private _toster = inject(ToastrService);
   private _runningRequestService = inject(RunningRequestService);
   private _confirmRiedService = inject(ConfirmRideService);
-  private _browserNotification = inject(BrowserNotificationService)
+  private _browserNotification = inject(BrowserNotificationService);
+  private _http = inject(HttpClient)
   // private _home = inject(HomeComponent)
 
+
+  STRIPE!: Stripe | null;
   pageNumber: number = 1;
   totalRides!: number;
   limit: number = 3;
@@ -47,7 +63,7 @@ export class ConfirmRideComponent {
         this.returnedRideInfo = res
         let index = this.RidesFetched.findIndex((r) => r._id === this.returnedRideInfo._id)
         this.RidesFetched[index] = this.returnedRideInfo
-        console.log('this.returnedRideInfo', this.returnedRideInfo);
+        // console.log('this.returnedRideInfo', this.returnedRideInfo);
         console.log('this.RidesFetched[index]', this.RidesFetched[index]);
       }
     });
@@ -84,8 +100,20 @@ export class ConfirmRideComponent {
     this.fetcheTypes();
     this.listningToRejectedRide();
     this.listningToCronFormManullyAssignedRides();
-    this.listningToCron()
+    this.listningToCron();
+    this.loadStripe()
 
+  }
+
+  async loadStripe() {
+    if (!this.STRIPE) {
+      try {
+        this.STRIPE = await loadStripe('pk_test_51PKFbURvggPBSsNZHM7EzVRAd0C41qQyAhsHDMyp8XxUdjXkZhjsLrkQN0YREobqcQfQOyQmuuIBHO94EHd2TGpc00kWQ3qOBF');
+      } catch (error) {
+        console.error('Error loading Stripe SDK:', error);
+      }
+    }
+    return this.STRIPE;
   }
 
 
@@ -231,8 +259,9 @@ export class ConfirmRideComponent {
 
   }
 
-  // ----------------------------------------------------rideCompleted--------------------------------------------
 
+
+  // ----------------------------------------------------rideCompleted--------------------------------------------
 
   rideCompleted(rideId: string, driverId: string) {
     this._confirmRideService.rideCompleted(rideId, driverId).pipe(
@@ -242,17 +271,21 @@ export class ConfirmRideComponent {
         return of(e)
       }),
     ).subscribe({
-      next: (res) => {
+      next: (res: RideComp_Res) => {
         console.log('res in next', res);
-
-        this._toster.success('Ride Completed Successfully', 'Success');
-        let index = this.RidesFetched.findIndex((r) => r._id == res.rideId);
-        this.RidesFetched.splice(index, 1)
-
+        if (res.status == 201) {
+          window.location.replace(res.userPayment);
+        } else {
+          this._toster.success(res.userPayment, 'Success');
+          this._toster.success(res.driverPayment, 'Success');
+          let index = this.RidesFetched.findIndex((r) => r._id == res.rideId);
+          this.RidesFetched.splice(index, 1)
+        }
       }
     })
-
   }
+
+
 
   ActionBtn(rideStatus: number, rideId: string, driverId: string | undefined) {
 
@@ -264,6 +297,20 @@ export class ConfirmRideComponent {
       this.ridePicked(rideId, driverId!)
     } else if (rideStatus === 3) {
       this.rideCompleted(rideId, driverId!)
+      // let clientKey
+      // this._http.post('http://localhost:5000/test', {}).subscribe({
+      //   next: (res) => {
+      //     clientKey = res
+      //   }
+      // });
+      // const items = [{ id: "xl-tshirt" }];
+      // const appearance = {
+      //   theme: 'stripe',
+      // };
+
+      // let   elements = this.STRIPE!.elements({ appearance, clientKey });
+
+
     }
   }
 
@@ -483,7 +530,8 @@ export class ConfirmRideComponent {
 
   searchRides(val: string) {
     let formValues = this.confirmRideForm.value
-
+    console.log('dateeeee',this.confirmRideForm.get('date')?.value);
+    
     if (!Object.values(formValues).some(value => value !== '')) {
       this._toster.info('There is nothing to Apply', 'Info');
       return;

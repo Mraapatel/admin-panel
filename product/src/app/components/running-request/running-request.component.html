@@ -1,9 +1,11 @@
 <div>
     <div class="table-responsive rounded">
-        <div class="d-flex justify-content-center">
-            <h2>Running Requests</h2>
+        <div class="d-flex flex-column justify-content-center  ">
+            <h2 class="text-center">Running Requests</h2>
+            <h6 class="text-center">Accept Time Out <span class="text-danger">{{TimeOut}}</span></h6>
         </div>
         <table class="table table-responsive shadow">
+
             <tr>
                 <th class="border text-center p-1 py-2 bg-dark text-white id">User Profile</th>
                 <th class="border text-center p-1 py-2 bg-dark text-white id">User Name</th>
@@ -54,7 +56,8 @@
                         (click)="driverRejectedRide(ride._id , ride.driverId._id , ride.nearest)">Reject</button>
                 </td>
                 <td class="border text-center">
-                    <button class="btn btn-sm btn-primary mx-2" (click)="rideinfo(ride)"  data-bs-toggle="modal" data-bs-target="#infoModal">Info</button>
+                    <button class="btn btn-sm btn-primary mx-2" (click)="rideinfo(ride)" data-bs-toggle="modal"
+                        data-bs-target="#infoModal">Info</button>
                 </td>
                 <!-- <td class="border text-center p-1 py-2">
                     <button class="btn btn-info" (click)="AssingBtnClicked(ride)" data-bs-toggle="modal"

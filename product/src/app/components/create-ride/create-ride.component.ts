@@ -638,20 +638,27 @@ export class CreateRideComponent {
 
   storeRideInfo() {
     let todaysDate = new Date();
+    let d = `${todaysDate.getDate()}`;
+    let m = `${todaysDate.getMonth() + 1}`;
     console.log('todaysDate', todaysDate);
+    if (todaysDate.getMonth() + 1 < 10) {
+      m = `0${todaysDate.getMonth() + 1}`
+    }
+    if (todaysDate.getDate() < 10) {
+      d = `0${todaysDate.getDate()}`
+    }
     let time = `${todaysDate.getHours()}:${todaysDate.getMinutes() + 1}`
-    // let totalFare 
     let index = this.PriceListWithVehicleTypes.findIndex((p) => p.typeId === this.bookRideForm.get('serviceType')?.value)
     let details = {
       userId: this.gotUser?._id,
       typeId: this.bookRideForm.get('serviceType')?.value,
       cityId: this.CityId,
-      date: `${todaysDate.getFullYear()}-${todaysDate.getMonth() + 1}-${todaysDate.getDate()}`,
+      date: `${todaysDate.getFullYear()}-${m}-${d}`,
+      // date: this.bookRideForm.get('bookingDate')?.value,
       time: todaysDate.getTime(),
       timeInString: time,
       paymentMethod: this.bookRideForm.get('paymentMethod')?.value,
-      // route: [this.FormStop, ...this.STOPS, this.ToStop],
-      totalDistance: this.totalDistance,
+      totalDistance: parseFloat(this.totalDistance!.toFixed(2)),
       totalTime: (this.totalTime.hours * 60) + this.totalTime.minutes,
       totalFare: parseFloat(this.PriceListWithVehicleTypes[index].totalPrice.toFixed(2)),
       endLocation: this.ToStop,
@@ -659,6 +666,9 @@ export class CreateRideComponent {
       route: this.STOPS,
     }
     console.log('totaltime.hours/', (this.totalTime.hours / 60));
+    console.log('details', details);
+    // return
+
     // return
 
 

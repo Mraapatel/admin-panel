@@ -65,6 +65,7 @@ export interface DriverData {
   driverName: string;
   driverPhone: string;
   driverProfile: string;
+  bankDetailsAdded:boolean;
 
   cityId: {
     countryId: string,
@@ -83,13 +84,13 @@ export interface DriverData {
     _id: string
   };
 
-  // serviceType: {
-  //   vehicleIcon: string;
-  //   vehicleType: string;
-  //   _id: string;
-  // } | null;
+   serviceType: {
+     vehicleIcon: string;
+     vehicleType: string;
+     _id: string;
+   } | null;
 
-  serviceType: string
+  // serviceType: string
 
   _id: string;
 }
@@ -380,6 +381,7 @@ export interface Ride {
     vehicleIcon: string
   };
   rideStatus: number;
+  Ride_index:number
   date: string;
   time: number;
   totalFare: number;
@@ -408,7 +410,10 @@ export interface Ride {
     driverEmail: string;
     driverPhone: string;
     approveStatus: boolean;
-  } | null
+  } | null,
+  settings:{
+    TimeOut:number
+  }
 }
 
 

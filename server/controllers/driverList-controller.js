@@ -4,6 +4,15 @@ const fs = require('fs');
 const path = require('path');
 const secreat_strip_key = process.env.STRIP_SECREATE_KEY
 const stripe = require('stripe')(secreat_strip_key);
+// stripe.accounts.update(
+//     'acct_1PM1y9RokFntEKS9',
+//     {
+//         tos_acceptance: {
+//             date: 1717049035,
+//             ip: '8.8.8.8',
+//         },
+//     }
+// ).then(value => console.log(value)).catch()
 const driverSchema = new Schema({
     driverName: {
         type: String,
@@ -219,20 +228,49 @@ const addDriver = async (req, res) => {
             console.log('newly added driver', addedDriver);
 
             const accountData = {
-                type: 'express', // Specify the type of account
+                type: 'custom', // or 'express'
                 country: 'US',
                 email: addedDriver.driverEmail,
                 business_profile: {
                     name: addedDriver.driverName,
+                    url: 'www.bhavesh.com', // Replace with actual URL
+                    mcc: '5734', // Merchant Category Code
+                    support_phone: '+12025550123', // Support phone number
+                    support_email: 'support@example.com', // Support email
+                    support_url: 'www.example.com/support', // Support URL
                 },
-                business_type: 'individual', // or 'company' based on your requirement
-                individual: { // Required if business_type is 'individual'
-                    first_name: addedDriver.driverName.split(' ')[0],
-                    last_name: addedDriver.driverName.split(' ')[1],
+                business_type: 'individual', // or 'company'
+                individual: {
+                    first_name: addedDriver.driverName,
+                    last_name: addedDriver.driverName,
                     email: addedDriver.driverEmail,
+                    phone: '+12025550123',
+                    dob: {
+                        day: 12,
+                        month: 12,
+                        year: 1995
+                    },
+                    address: {
+                        city: 'LA',
+                        country: 'US',
+                        line1: 'LA',
+                        line2: 'LA',
+                        postal_code: '95014',
+                        state: 'WA'
+                    },
+                    ssn_last_4: '0000',
+                    id_number: '000000000', // You should never hardcode sensitive information like this. Use secure methods to handle it.
+                },
+                capabilities: {
+                    card_payments: { requested: true },
+                    transfers: { requested: true }
                 },
                 metadata: {
                     customerType: 'Driver'
+                },
+                tos_acceptance: {
+                    date: Math.floor(Date.now() / 1000),
+                    ip: '8.8.8.8',
                 },
             };
 
@@ -242,7 +280,8 @@ const addDriver = async (req, res) => {
                 console.log('account', account);
 
                 let stripCustomerId = account.id;
-                let updatedDriver = await Driver.findByIdAndUpdate(addedDriver._id, { driverStripCustomerId: stripCustomerId, bankDetailsAdded: true }, { new: true })
+                let updatedDriver = await Driver.findByIdAndUpdate(addedDriver._id, { driverStripCustomerId: stripCustomerId }, { new: true })
+                console.log('update driver', updateDriver);
                 console.log('done');
 
                 if (updatedDriver) {
@@ -284,68 +323,12 @@ const addDriver = async (req, res) => {
                     return res.status(200).send(newDriver[0], { message: 'added successfully' });
                 }
 
-
-                // stripe.customers.create(stripCustomer, async (err, customer) => {
-                //     if (err) {
-                //         console.log("Some Error Occured" + err);
-                //         return res.status(500).json({ error: 'Stripe customer creation failed' });
-                //     }
-                //     if (customer) {
-                //         console.log(customer);
-                //         let stripCustomerId = customer.id;
-                //         let updatedDriver = await Driver.findByIdAndUpdate(addedDriver._id, { driverStripCustomerId: stripCustomerId })
-                //         console.log('done');
-
-                //         if (updatedDriver) {
-
-                //             let newDriver = await Driver.aggregate([
-                //                 {
-                //                     $match: {
-                //                         // _id:addedDriver._id
-                //                         _id: new mongoose.Types.ObjectId(updatedDriver._id)
-
-                //                     }
-                //                 },
-                //                 {
-                //                     $lookup: {
-                //                         from: 'cityzones',
-                //                         localField: 'cityId',
-                //                         foreignField: '_id',
-                //                         as: 'cityId'
-                //                     }
-                //                 },
-                //                 {
-                //                     $unwind: '$cityId'
-                //                 },
-                //                 {
-                //                     $lookup: {
-                //                         from: 'countries',
-                //                         localField: 'countryId',
-                //                         foreignField: '_id',
-                //                         as: 'countryId'
-                //                     }
-                //                 },
-                //                 {
-                //                     $unwind: '$countryId'
-                //                 }
-
-                //             ])
-
-                //             console.log('newly added user -----------', newDriver[0]);
-                //             return res.status(200).send(newDriver[0], { message: 'added successfully' });
-                //         }
-                //         // return res.status(200).send(updatedDriver, { message: 'added successfully' });
-                //     }
-                //     else {
-                //         console.log("Unknown Error");
-                //     }
-                // })
             }
             console.log('done');
         }
 
     } catch (e) {
-        console.log(e);
+        // console.log(e);
         if (e.code === 11000) {
             const field = Object.keys(e.keyValue)[0];
             let errorMessage = '';
@@ -423,7 +406,20 @@ const getDrivers = async (req, res) => {
             },
             {
                 $unwind: '$countryId'
-            }
+            },
+            {
+                $lookup: {
+                    from: 'vehicletypes',
+                    localField: 'serviceType',
+                    foreignField: '_id',
+                    as: 'serviceType'
+                }
+            },
+            {
+                $addFields: {
+                    serviceType: { $arrayElemAt: ["$serviceType", 0] } // Convert driverId array to object
+                }
+            },
         ];
 
         if (sort !== null) {
@@ -474,33 +470,61 @@ const updateDriver = async (req, res) => {
         let updatedDriver
 
         console.log('--------------------');
-        let cityId = new mongoose.Types.ObjectId(req.body.driverCity);
+        let newcityId = new mongoose.Types.ObjectId(req.body.driverCity);
+        let oldCityId
         let driverProfile = req.file ? req.file : undefined
         if (driverProfile) {
-            let oldFileNameObj = await Driver.findById(id, { driverProfile: true, _id: false });
+            let driver = await Driver.findById(id);
+            let oldFileNameObj = driver.driverProfile;
+            oldCityId = driver.cityId
             let oldFileName = oldFileNameObj.driverProfile;
-            updatedDriver = await Driver.findByIdAndUpdate(id,
-                {
-                    driverName: req.body.driverName,
-                    driverEmail: req.body.driverEmail,
-                    driverPhone: req.body.driverPhone,
-                    driverProfile: req.file.filename,
-                    cityId: cityId
-                }, { new: true });
 
+            if (newcityId == oldCityId) {
+                updatedDriver = await Driver.findByIdAndUpdate(id,
+                    {
+                        driverName: req.body.driverName,
+                        driverEmail: req.body.driverEmail,
+                        driverPhone: req.body.driverPhone,
+                        driverProfile: req.file.filename,
+                        cityId: newcityId
+                    }, { new: true });
+            } else {
+                updatedDriver = await Driver.findByIdAndUpdate(id,
+                    {
+                        driverName: req.body.driverName,
+                        driverEmail: req.body.driverEmail,
+                        driverPhone: req.body.driverPhone,
+                        driverProfile: req.file.filename,
+                        cityId: newcityId,
+                        serviceType: null
+                    }, { new: true });
+
+            }
 
             deleteUploadedFile(oldFileName);
             // return res.status(200).send(updated[0]);
         } else {
-            updatedDriver = await Driver.findByIdAndUpdate(id,
-                {
-                    driverName: req.body.driverName,
-                    driverEmail: req.body.driverEmail,
-                    driverPhone: req.body.driverPhone,
-                    cityId: cityId
-                }, { new: true });
+            if (oldCityId == newcityId) {
 
-            console.log('----==========');
+                updatedDriver = await Driver.findByIdAndUpdate(id,
+                    {
+                        driverName: req.body.driverName,
+                        driverEmail: req.body.driverEmail,
+                        driverPhone: req.body.driverPhone,
+                        cityId: newcityId
+                    }, { new: true });
+
+                console.log('----==========');
+            } else {
+                updatedDriver = await Driver.findByIdAndUpdate(id,
+                    {
+                        driverName: req.body.driverName,
+                        driverEmail: req.body.driverEmail,
+                        driverPhone: req.body.driverPhone,
+                        cityId: newcityId,
+                        serviceType: null
+                    }, { new: true });
+            }
         }
 
         let updated = await Driver.aggregate([
@@ -530,17 +554,20 @@ const updateDriver = async (req, res) => {
             },
             {
                 $unwind: '$countryId'
-            }
-            //  {
-            //     $addFields: {
-            //         cityId: { $arrayElemAt: ['$cityL', 0] }
-            //     }
-            // },
-            // {
-            //     $project: {
-            //         cityL: 0
-            //     }
-            // }
+            },
+            {
+                $lookup: {
+                    from: 'vehicletypes',
+                    localField: 'serviceType',
+                    foreignField: '_id',
+                    as: 'serviceType'
+                }
+            },
+            {
+                $addFields: {
+                    serviceType: { $arrayElemAt: ["$serviceType", 0] } // Convert driverId array to object
+                }
+            },
         ])
 
 
@@ -568,8 +595,6 @@ const updateDriver = async (req, res) => {
 
 }
 
-
-
 const deleteDriver = async (req, res) => {
     try {
 
@@ -577,7 +602,7 @@ const deleteDriver = async (req, res) => {
         let stripCustomerId = stripCustomer.driverStripCustomerId
         // console.log(stripCustomerId);
 
-        let deleted = await stripe.customers.del(stripCustomerId);
+        let deleted = await stripe.accounts.del(stripCustomerId);
         console.log(deleted);
         const deletedDriver = await Driver.findByIdAndDelete(req.body.id);
         console.log(req.body);
@@ -628,10 +653,53 @@ const addService = async (req, res) => {
                 // let updatedDriver = await Driver.findByIdAndUpdate(driverId, { serviceType: serviceid }, { new: true }).populate('cityId').populate('serviceType');
                 let updatedDriver = await Driver.findByIdAndUpdate(driverId, { serviceType: serviceid }, { new: true });
                 if (updatedDriver) {
+                    let updated = await Driver.aggregate([
+                        {
+                            $match: {
+                                _id: new mongoose.Types.ObjectId(updatedDriver._id)
+                            }
+                        },
+                        {
+                            $lookup: {
+                                from: 'cityzones',
+                                localField: 'cityId',
+                                foreignField: '_id',
+                                as: 'cityId'
+                            }
+                        },
+                        {
+                            $unwind: '$cityId'
+                        },
+                        {
+                            $lookup: {
+                                from: 'countries',
+                                localField: 'countryId',
+                                foreignField: '_id',
+                                as: 'countryId'
+                            }
+                        },
+                        {
+                            $unwind: '$countryId'
+                        },
+                        {
+                            $lookup: {
+                                from: 'vehicletypes',
+                                localField: 'serviceType',
+                                foreignField: '_id',
+                                as: 'serviceType'
+                            }
+                        },
+                        {
+                            $addFields: {
+                                serviceType: { $arrayElemAt: ["$serviceType", 0] } // Convert driverId array to object
+                            }
+                        },
+                    ])
 
+                    console.log('update *******' ,updated[0]);
                     console.log(updatedDriver);
                     let response = {
-                        Driver: updatedDriver,
+                        Driver: updated[0],
                         Message: 'Service Added Successfully'
                     }
                     res.status(200).json(response);
@@ -694,23 +762,23 @@ const storeBankDetails = async (req, res) => {
                 const dCustomer = await stripe.accounts.retrieve(fetchedDriver.driverStripCustomerId);
                 console.log('dcustomer ===>', dCustomer);
 
-                const token = await stripe.createToken('bank_account', {
-                    account_holder_name: req.body.AccountHolderName,
-                    account_holder_type: "individual",
-                    account_number: req.body.AccountNumber,
-                    country: "US",
-                    currency: "usd",
-                    metadata: {
-                        info: 'Adding card to Driver'
-                    },
-                    routing_number: req.body.RoutingNumber
-                });
+                // const token = await stripe.createToken('bank_account', {
+                //     account_holder_name: req.body.AccountHolderName,
+                //     account_holder_type: "individual",
+                //     account_number: req.body.AccountNumber,
+                //     country: "US",
+                //     currency: "usd",
+                //     metadata: {
+                //         info: 'Adding card to Driver'
+                //     },
+                //     routing_number: req.body.RoutingNumber
+                // });
 
-                if (token) {
-                    console.log("token ", token);
+                if (req.body.token) {
+                    console.log("token ", req.body.token);
                     const bankAccount = await stripe.accounts.createExternalAccount(
                         fetchedDriver.driverStripCustomerId,
-                        { external_account: token }
+                        { external_account: req.body.token }
                     );
 
                     console.log('Bank account added:', bankAccount);
@@ -743,8 +811,6 @@ const storeBankDetails = async (req, res) => {
         return res.status(500).json(response);
     }
 }
-
-
 
 
 function deleteUploadedFile(fileName) {

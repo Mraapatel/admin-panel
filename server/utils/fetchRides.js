@@ -38,10 +38,14 @@ const getRidesFormDb = async (pages, rideLimit, searchTerm, vehicleType, date, r
         let searchConditions = [];
         if (searchTerm) {
             searchConditions.push(
+                // { Ride_index : { $eq: parseInt(searchTerm) } },
                 { 'userId.userName': { $regex: new RegExp(searchTerm, 'i') } },
                 { 'userId.userEmail': { $regex: new RegExp(searchTerm, 'i') } },
                 { 'userId.userPhone': { $regex: new RegExp(searchTerm, 'i') } },
-                { date: { $regex: new RegExp(searchTerm, 'i') } }
+                { date: { $regex: new RegExp(searchTerm, 'i') } },
+                { startLocation: { $regex: new RegExp(searchTerm, 'i') } }, // Example for another field
+                { endLocation: { $regex: new RegExp(searchTerm, 'i') } }, // Example for another field
+                { paymentMethod: { $regex: new RegExp(searchTerm, 'i') } },
             );
         }
 

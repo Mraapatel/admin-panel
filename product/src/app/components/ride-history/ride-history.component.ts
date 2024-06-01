@@ -146,6 +146,54 @@ export class RideHistoryComponent {
     })
   }
 
+  downloadRideInfo( ride: Ride) {
+    // event.stopPropagation();
+
+    const csvData = this.convertToCSV(ride);
+    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'trip_history.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+  }
+
+  convertToCSV(data: Ride) {
+    const flatData = this.flattenObject(data);
+    const header = Object.keys(flatData).join(',');
+    const row = Object.values(flatData).map(value => {
+      if (Array.isArray(value)) {
+        return `"${value.join(',')}"`;
+      }
+      return `"${value}"`;
+    }).join(',');
+
+    return [header, row].join('\n');
+  }
+
+  flattenObject(ob: any): any {
+    const toReturn: any = {};
+
+    for (const i in ob) {
+      if (!ob.hasOwnProperty(i)) continue;
+
+      if (typeof ob[i] === 'object' && ob[i] !== null && !Array.isArray(ob[i])) {
+        const flatObject = this.flattenObject(ob[i]);
+        for (const x in flatObject) {
+          if (!flatObject.hasOwnProperty(x)) continue;
+          toReturn[i + '.' + x] = flatObject[x];
+        }
+      } else {
+        toReturn[i] = ob[i];
+      }
+    }
+    return toReturn;
+  }
+
   // rideInfo(ride: Ride) {
   //   let latLng: [{ lat: number, lng: number }]
   //   this.selectedRide = ride;

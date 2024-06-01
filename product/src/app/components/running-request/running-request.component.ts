@@ -20,7 +20,8 @@ export class RunningRequestComponent {
   private _runningRequestService = inject(RunningRequestService);
 
   runningRequests: Array<assignedRidesWithDriver> = [];
-  selectedRidesInfo!: Ride
+  selectedRidesInfo!: Ride;
+  TimeOut!: number | undefined;
 
   ngOnInit() {
     let data = {
@@ -111,6 +112,7 @@ export class RunningRequestComponent {
         return of(error)
       })).subscribe({
         next: (res: assignedRidesWithDriver) => {
+          this.TimeOut = res.settings.TimeOut
           let index = this.runningRequests.findIndex((r) => r._id === res._id)
           console.log('index', index);
           if (index === -1) {

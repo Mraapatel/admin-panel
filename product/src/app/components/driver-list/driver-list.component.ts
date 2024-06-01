@@ -7,7 +7,8 @@ import { ToastrService } from 'ngx-toastr';
 import { DriverListService } from '../../services/driver-list.service';
 import { VehicleTypeService } from '../../services/vehicle-type.service';
 import { CommonModule } from '@angular/common';
-// import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe, Stripe } from '@stripe/stripe-js';
+
 
 interface CountryInfo {
   country: string;
@@ -42,7 +43,7 @@ export class DriverListComponent {
   private _vehicleTypeService = inject(VehicleTypeService);
 
 
-  // STRIPE:
+  STRIPE!: Stripe | null;
   driverForm!: FormGroup;
   driverFatched: Array<DriverData> = [];
   driverFatchedlength!: number;
@@ -89,32 +90,99 @@ export class DriverListComponent {
 
     this.getCountryCodes();
     this.getDriver();
+    this.loadStripe()
   }
 
-  storeAccountDetails() {
-    let data = {
-      driverId: this.selectedDriver._id,
-      AccountHolderName: this.bankDetailsForm.get('AccountHolderName')?.value,
-      AccountNumber: this.bankDetailsForm.get('AccountNumber')?.value,
-      RoutingNumber: this.bankDetailsForm.get('RoutingNumber')?.value,
-    }
-
-    console.log(this.bankDetailsForm.get('AccountHolderName')?.value);
-    console.log(this.bankDetailsForm.get('AccountNumber')?.value);
-    console.log(this.bankDetailsForm.get('RoutingNumber')?.value);
-
-    this._driverListService.storeBankDetails(data).pipe(
-      catchError((e) => {
-        console.log('Error while storing the bank account', e);
-        this._tostr.error(e.error.message, 'Error')
-        return throwError(e)
-      })
-    ).subscribe({
-      complete: () => {
-        this.bankDetailsForm.reset();
-        this._tostr.success('The Card is Added', 'Success')
+  async loadStripe() {
+    if (!this.STRIPE) {
+      try {
+        this.STRIPE = await loadStripe('pk_test_51PKFbURvggPBSsNZHM7EzVRAd0C41qQyAhsHDMyp8XxUdjXkZhjsLrkQN0YREobqcQfQOyQmuuIBHO94EHd2TGpc00kWQ3qOBF');
+      } catch (error) {
+        console.error('Error loading Stripe SDK:', error);
       }
-    });
+    }
+    return this.STRIPE;
+  }
+
+  // async createToken(event: Event) {
+  //   event.preventDefault();
+  //   const stripe = await this.loadStripe();
+  //   if (stripe) {
+  //     // const cardDetails = {
+  //     const card = {
+  //       number: '4000000000000077',
+  //       exp_month: 12,
+  //       exp_year: 2025,
+  //       cvc: '123',
+  //     }
+  //     // };
+
+  //     const { token, error } = await stripe.createToken('card', {
+  //       number: card.number,
+  //       exp_month: card.exp_month,
+  //       exp_year: card.exp_year,
+  //       cvc: card.cvc
+  //     }).then()
+
+  //     if (error) {
+  //       console.error('Error creating token:', error);
+  //     } else {
+  //       console.log('Token created:', token);
+
+  //     }
+  //   }
+  // }
+
+
+  async storeAccountDetails() {
+    // this.STRIPE = await this.loadStripe();
+    if (this.STRIPE) {
+      const { token, error } = await this.STRIPE.createToken('bank_account', {
+        account_holder_name: this.bankDetailsForm.get('AccountHolderName')?.value,
+        account_holder_type: "individual",
+        account_number: this.bankDetailsForm.get('AccountNumber')?.value,
+        country: "US",
+        currency: "usd",
+        routing_number: this.bankDetailsForm.get('RoutingNumber')?.value
+      });
+
+      if (error) {
+        console.error('Error creating token:', error);
+      } else {
+        console.log('Token created:', token);
+        // Send the token to your server to store the driver's bank account details
+        // this.storeAccountDetails(token!.id);
+      }
+      let data = {
+        driverId: this.selectedDriver._id,
+        token: token!.id
+        // AccountHolderName: this.bankDetailsForm.get('AccountHolderName')?.value,
+        // AccountNumber: this.bankDetailsForm.get('AccountNumber')?.value,
+        // RoutingNumber: this.bankDetailsForm.get('RoutingNumber')?.value,
+      }
+
+
+      console.log(this.bankDetailsForm.get('AccountHolderName')?.value);
+      console.log(this.bankDetailsForm.get('AccountNumber')?.value);
+      console.log(this.bankDetailsForm.get('RoutingNumber')?.value);
+
+      this._driverListService.storeBankDetails(data).pipe(
+        catchError((e) => {
+          console.log('Error while storing the bank account', e);
+          this._tostr.error(e.error.message, 'Error')
+          return throwError(e)
+        })
+      ).subscribe({
+        complete: () => {
+          this.bankDetailsForm.reset();
+          let index = this.driverFatched.findIndex((d) => d._id === this.selectedDriver._id)
+          this.driverFatched[index].bankDetailsAdded = true
+          this._tostr.success('The Bank Account is Added', 'Success');
+        }
+      });
+    } else {
+      this._tostr.error('Not enable to create token', 'error')
+    }
   }
 
   getDriverId(driver: DriverData) {
@@ -698,7 +766,7 @@ export class DriverListComponent {
 
           this.driverFatched[index].serviceType = res.Driver.serviceType;
           this._tostr.warning('Service removed', 'Warning');
-          this.selectedDriver.serviceType = 'none';
+          this.selectedDriver.serviceType = null;
         }
       }),
       catchError((err) => {

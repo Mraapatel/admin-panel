@@ -13,10 +13,19 @@ const { addFunds } = require('../utils/addFunds');
 routes.post("/", async (req, res) => {
     try {
 
+        // ----------------------------------------------------------------
+        let sting = '5e7dcf4c17affa9547de69d96dffc6d1'
+        let length = sting.length
 
-       let data =  await stripe.paymentMethods.retrieve(req.body.defaultSource);
-       let thereedSecure = data.card.three_d_secure_usage
-        // //  Create a PaymentIntent with the order amount and currency
+
+        // ----------------------------------------------------------------
+        
+        //    let data =  await stripe.paymentMethods.retrieve(req.body.defaultSource);
+        //    let thereedSecure = data.card.three_d_secure_usage
+
+        // ----------------------------------------------------------------
+
+       // //  Create a PaymentIntent with the order amount and currency
         //  const paymentIntent = await stripe.paymentIntents.create({
         //      amount: 10000,
         //      currency: "usd",
@@ -30,8 +39,13 @@ routes.post("/", async (req, res) => {
         //      clientSecret: paymentIntent,
         //  });
 
+        // ----------------------------------------------------------------
+
         // let deleted = await stripe.accounts.del(req.body.cusotmerId);
-        res.send({ thereedSecure })
+
+        // ----------------------------------------------------------------
+        console.log('lendth', length);
+        res.send(length)
     } catch (e) {
         console.log(e);
         res.send(e)

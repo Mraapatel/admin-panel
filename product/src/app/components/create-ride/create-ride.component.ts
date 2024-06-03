@@ -722,6 +722,13 @@ export class CreateRideComponent {
     })
   }
 
+  dateSelected(){
+    // let today = new Date()
+    // let choosedDate = new Date(this.bookRideForm.get('bookingDate')?.value)
+    // console.log(choosedDate.getDate());
+    
+    this.bookRideForm.get('booktime')?.setValue('');
+  }
   // createZonesOfCities() {
   //   this.TurnAutocomplete();
   //   if (this.cities.length >= 1) {

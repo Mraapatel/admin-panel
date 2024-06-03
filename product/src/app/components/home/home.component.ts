@@ -6,6 +6,8 @@ import { SpinnerService } from '../../services/spinner.service';
 import { loaderService } from '../../services/loader';
 import { CommonModule } from '@angular/common';
 import { BrowserNotificationService } from '../../services/browser-notification.service';
+import { SocketIoService } from '../../services/socket-io.service';
+import { tap } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -16,7 +18,7 @@ import { BrowserNotificationService } from '../../services/browser-notification.
 })
 export class HomeComponent {
 
-  // private _authService = inject(AuthServiceService);
+  private _socketIoService = inject(SocketIoService);
   _spinnerService = inject(SpinnerService);
   // _loaderService = inject(loaderService);
   // spinner:boolean = false
@@ -26,20 +28,32 @@ export class HomeComponent {
 
   private title = 'Browser Push Notifications!';
 
-  updateCount() {
-    this.count = parseInt(localStorage.getItem('notificationCount')!)
+  updateCount(count: number) {
+    // this.count = parseInt(localStorage.getItem('notificationCount')!)
+    this.count = count
   }
 
 
   constructor(private _authService: AuthServiceService, public _loaderService: loaderService) {
     this._browserNotification.requestPermission();
-    this.updateCount()
+    // this.updateCount()
     // console.log(this._loaderService.spinnerCounter)
-  }
 
-  // start() {
-  //   this._spinnerService.startSPinner();
-  // }
+  }
+  ngOnInit() {
+    console.log('home component');
+    this.getCount();
+  }
+  getCount() {
+    this._socketIoService.emitNewEvent('getCount', {});
+
+    this._socketIoService.listen('updatedCount').pipe(
+      tap((res) => {
+        console.log('updaed count', res);
+        this.updateCount(res);
+      })
+    ).subscribe()
+  }
 
   logOut() {
     this._authService.logout();

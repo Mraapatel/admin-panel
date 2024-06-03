@@ -235,7 +235,7 @@
 
                 @if(bookRideForm.get('bookStatus')?.value === 'schedule' ){
                 <div class="d-flex ">
-                    <input type="date" class="form-control m-2 " formControlName="bookingDate">
+                    <input type="date" class="form-control m-2 " formControlName="bookingDate" (input)="dateSelected()">
                     <input type="time" class="form-control m-2 " formControlName="booktime">
                 </div>
                 <div class="d-flex">

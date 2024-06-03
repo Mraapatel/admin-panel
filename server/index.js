@@ -3,7 +3,9 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
 const path = require('path');
-const socket = require('./middlewares/socket-io')
+const socket = require('./middlewares/socket-io');
+
+global.NotificationCount = null ;
 
 
 const app = express();
@@ -27,6 +29,7 @@ const confirmRide = require('./routes/confirmRide');
 const runningRequest = require('./routes/runningRequest');
 const rideHistory = require('./routes/rideHistory');
 const test = require ('./routes/test');
+const allkeys = require('./routes/allKey');
 
 mongoose.connect('mongodb://127.0.0.1:27017/Product')
     .then(() => console.log('connection is successfull...'))
@@ -69,6 +72,8 @@ app.use('/runningRequest', runningRequest);
 app.use('/rideHistory', rideHistory);
 
 app.use('/test', test);
+
+app.use('/allkeys', allkeys);
 
 // app.listen(Port, () => {
 //     console.log(`server is listning to port no:${Port}`);

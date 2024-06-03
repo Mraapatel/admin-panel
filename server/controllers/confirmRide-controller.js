@@ -6,7 +6,8 @@ const { Pricing } = require('../controllers/pricing-controller');
 const mongoose = require('mongoose');
 const { getRidesFormDb } = require('../utils/fetchRides');
 const { fetchIdleDrivers } = require('../utils/fetchIdleDrivers');
-const { addFunds } = require('../utils/addFunds')
+const { addFunds } = require('../utils/addFunds');
+const { sendEmail } = require('../utils/email');
 const secreat_strip_key = process.env.STRIP_SECREATE_KEY
 const stripe = require('stripe')(secreat_strip_key);
 
@@ -404,7 +405,7 @@ async function createCharge(customerId, amount, paymentMethodId, userName) {
         console.log('paymentMethodId', paymentMethodId);
 
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: amount * 100,  // Amount in cents
+            amount: 2 * 100,  // Amount in cents
             currency: 'usd',
             customer: customerId,
             description: `Ride fare of ${userName}`,
@@ -432,6 +433,9 @@ async function createCharge(customerId, amount, paymentMethodId, userName) {
             // confirmation_method: 'automatic',
             return_url: 'http://localhost:4200/home/rideHistory'
         });
+
+
+        await sendEmail('haramilond@gmail.com', userName, amount, 'stripe.com');
 
         if (paymentIntent.status === 'succeeded') {
             console.log('Payment successful:', paymentIntent);

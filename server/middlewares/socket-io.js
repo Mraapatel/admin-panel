@@ -19,6 +19,30 @@ function initialize(server) {
             console.log('formClient event', data);
         })
 
+        socket.on('updateCount', async (data) => {
+            console.log('updateCount event catched', data);
+            global.NotificationCount++
+            console.log('global' ,global.NotificationCount);
+            // console.log('socket object',socket);
+            socket.emit('updatedCount', global.NotificationCount);
+
+        })
+
+        socket.on('updateCountDes', async (data) => {
+            console.log('updateCountDes event catched', data);
+            global.NotificationCount--
+            console.log('global iin des ' ,global.NotificationCount);
+            // console.log('socket object',socket);
+            socket.emit('updatedCount', global.NotificationCount);
+        })
+
+        socket.on('getCount', async (data) => {
+            console.log('getCount event catched', data);
+            // global.NotificationCount--
+            console.log('global iin des ' ,global.NotificationCount);
+            // console.log('socket object',socket);
+            socket.emit('updatedCount', global.NotificationCount);
+        })
 
         // db.collection.aggregate([
         //     { $group: { _id: null, maxIndex: { $max: "$index" } } }
@@ -53,7 +77,7 @@ function initialize(server) {
         //     global.ioInstance.emit('acceptedRideWithDriver', accecptedRide)
         // })
     })
-    
+
 }
 
 

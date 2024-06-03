@@ -201,7 +201,11 @@ export class RunningRequestComponent {
         this._toster.error('Error confirming the ride', 'Error');
         return of(error)
       })
-    ).subscribe()
+    ).subscribe({
+      next:(res)=>{
+        this._socketIoService.emitNewEvent('updateCountDes', {});
+      }
+    })
 
   }
 

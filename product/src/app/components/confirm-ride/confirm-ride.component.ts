@@ -10,9 +10,7 @@ import { RunningRequestService } from '../../services/running-request.service';
 import { BrowserNotificationService } from '../../services/browser-notification.service';
 import { HttpClient } from '@angular/common/http';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
-
-// import { HomeComponent } from '../home/home.component';
-
+import { HomeComponent } from '../home/home.component';
 
 
 interface RideComp_Res {
@@ -38,8 +36,9 @@ export class ConfirmRideComponent {
   private _runningRequestService = inject(RunningRequestService);
   private _confirmRiedService = inject(ConfirmRideService);
   private _browserNotification = inject(BrowserNotificationService);
-  private _http = inject(HttpClient)
-  // private _home = inject(HomeComponent)
+  private _http = inject(HttpClient);
+
+  private _home = inject(HomeComponent)
 
 
   STRIPE!: Stripe | null;
@@ -260,7 +259,6 @@ export class ConfirmRideComponent {
   }
 
 
-
   // ----------------------------------------------------rideCompleted--------------------------------------------
 
   rideCompleted(rideId: string, driverId: string) {
@@ -274,6 +272,7 @@ export class ConfirmRideComponent {
       next: (res: RideComp_Res) => {
         console.log('res in next', res);
         if (res.status == 201) {
+          this._toster.info('Please complete the Payment by clicking Complete ', 'Success');
           window.location.replace(res.userPayment);
         } else {
           this._toster.success(res.userPayment, 'Success');
@@ -346,9 +345,9 @@ export class ConfirmRideComponent {
             console.warn('NoDriverRemaining-ByCron', res.rideId);
             this.RidesFetched[index].rideStatus = res.rideStatus;
             console.log('notify', this.RidesFetched[index].userId.userName);
-
             this.notify(this.RidesFetched[index].userId.userName)
             this.RidesFetched[index].driverId = null;
+            this._socketIoService.emitNewEvent('updateCount', {});
           }
           console.log(res);
         }
@@ -385,9 +384,11 @@ export class ConfirmRideComponent {
             if (res.includes(r._id)) {
               this.RidesFetched[index].driverId = null
               this.RidesFetched[index].rideStatus = 0
+              this.notify(this.RidesFetched[index].userId.userName )
             }
-            this.notify(this.RidesFetched[index].userId.userName)
           })
+
+          this._socketIoService.emitNewEvent('updateCount', {});
           console.log(res);
         }
       })
@@ -405,11 +406,13 @@ export class ConfirmRideComponent {
       next: (res: Ride) => {
         console.log(res);
 
-        let index = this.RidesFetched.findIndex((r) => r._id === res._id)
-        if (this.RidesFetched[index].nearest) {
-          this.RidesFetched[index].nearest = res.nearest;
-          this.selectedRide.nearest = res.nearest;
-        }
+        let index = this.RidesFetched.findIndex((r) => r._id === this.selectedRide._id)
+        // if (this.RidesFetched[index].nearest) {
+          this.RidesFetched[index].nearest = true;
+          // this.RidesFetched[index].nearest = res.nearest;
+          this.selectedRide.nearest = true;
+          // this.selectedRide.nearest = res.nearest;
+        // }
       }
     })
   }
@@ -530,8 +533,8 @@ export class ConfirmRideComponent {
 
   searchRides(val: string) {
     let formValues = this.confirmRideForm.value
-    console.log('dateeeee',this.confirmRideForm.get('date')?.value);
-    
+    console.log('dateeeee', this.confirmRideForm.get('date')?.value);
+
     if (!Object.values(formValues).some(value => value !== '')) {
       this._toster.info('There is nothing to Apply', 'Info');
       return;

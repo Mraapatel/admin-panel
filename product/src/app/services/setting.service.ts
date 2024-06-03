@@ -6,10 +6,22 @@ import { Settings } from '../models/models.interface';
   providedIn: 'root'
 })
 export class SettingService {
-  private _http  = inject(HttpClient)
+  private _http = inject(HttpClient)
 
   constructor() { }
   getSettings() {
     return this._http.get<Settings>('http://localhost:5000/setting')
+  }
+
+
+  storeKeys(data: object) {
+    return this._http.post<{
+      message: string,
+      status: number
+    }>('http://localhost:5000/allkeys', data)
+  }
+
+  getAllKeys() {
+    return this._http.post('http://localhost:5000/allkeys/getKeys ', {})
   }
 }

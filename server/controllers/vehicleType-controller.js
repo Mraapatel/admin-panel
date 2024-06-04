@@ -116,6 +116,60 @@ const allVehicles = async (req, res) => {
     }
 }
 
+const allServices = async (req, res) => {
+    try {
+        if (req.body) {
+
+            if (req.body.countryId !== 'none') {
+
+                console.log(req.body);
+                const { countryId ,cityId } = req.body
+                let c = new mongoose.Types.ObjectId(countryId)
+                let services = await vechicle.aggregate([
+                    {
+                        $lookup: {
+                            from: "pricings",
+                            localField: "_id",
+                            foreignField: "typeId",
+                            as: "got"
+                        }
+                    },
+                    {
+                        $unwind: "$got"
+                    },
+                    {
+                        $match: {
+                            "got.countryId": new mongoose.Types.ObjectId(countryId),
+                            "got.cityId": new mongoose.Types.ObjectId(cityId)
+                        }
+                    },
+                    {
+                        $project: {
+                            got: 0,
+                            __v: 0
+                        }
+                    }
+                ])
+                console.log('In allvehicles --------->>', services);
+
+                res.status(200).json(services)
+            } else {
+
+                let allVehicles = []
+                allVehicles = await vechicle.find();
+                res.status(200).json(allVehicles);
+                if (allVehicles.length < 0) {
+                    return res.json({ Message: 'There is no current vehicles' })
+                }
+            }
+        } else {
+            return res.status(400).json({ error: 'dont get the request body' })
+        }
+    } catch (e) {
+        console.log('Error fetching vehicles:', e);
+        return res.status(500).json({ error: 'Faild to fetch vehicles ' })
+    }
+}
 
 function deleteUploadedFile(fileName) {
     if (!fileName) return;
@@ -201,4 +255,4 @@ const editVehicleType = async (req, res) => {
     }
 }
 
-module.exports = { addVehicleType, allVehicles, editVehicleType }
+module.exports = { addVehicleType, allVehicles, editVehicleType ,allServices }

@@ -49,7 +49,7 @@ export class HomeComponent {
 
     this._socketIoService.listen('updatedCount').pipe(
       tap((res) => {
-        console.log('updaed count', res);
+        console.log('updated count', res);
         this.updateCount(res);
       })
     ).subscribe()

@@ -18,7 +18,6 @@ const startCron = cron.schedule('*/1 * * * * *', async () => {
     await checkForManual();
     await assignNewDriverToRide();
 
-
 }, {
     scheduled: false
 })

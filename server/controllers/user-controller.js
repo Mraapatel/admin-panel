@@ -4,8 +4,20 @@ const fs = require('fs');
 const path = require('path');
 const { error, log } = require('console');
 require('dotenv').config();
-const secreat_strip_key = process.env.STRIP_SECREATE_KEY
-const stripe = require('stripe')(secreat_strip_key);
+const { fetchKeys } = require('../utils/fetchKeys');
+
+let stripe = null;
+
+const initializeStripe = async () => {
+    try {
+        let publickey = await fetchKeys('stripe');
+        stripe = require('stripe')(publickey);
+
+    } catch (e) {
+        console.log('error in initializeStripe', e);
+    }
+
+}
 
 
 const userSchema = new Schema({
@@ -45,7 +57,7 @@ const User = mongoose.model('User', userSchema);
 const addUser = async (req, res) => {
     try {
         console.log('add User req.body ---->>', req.body);
-
+        await initializeStripe();
         if (req.body) {
 
             let existingCCAndP = await User.findOne({ $and: [{ countryCallingCode: req.body.countryCallingCode }, { userPhone: req.body.userPhone }] });
@@ -301,13 +313,12 @@ const updateUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
     try {
-
+        await initializeStripe();
         let stripCustomer = await User.findById(req.body.id, { _id: false, stripCustomerId: true });
         let stripCustomerId = stripCustomer.stripCustomerId
         console.log(stripCustomerId);
 
-        // let deleted = await stripe.customers.del(stripCustomerId);
-        // console.log(deleted);
+
         const deletedUser = await User.findByIdAndDelete(req.body.id);
         if (!deletedUser) {
             console.log('User not found.');
@@ -337,6 +348,8 @@ const deleteUser = async (req, res) => {
 
 const getCards = async (req, res) => {
     try {
+
+        await initializeStripe();
         console.log(req.body);
         let cardsToSend = [];
         let defaultCardId
@@ -393,6 +406,7 @@ const getCards = async (req, res) => {
 const addCard = async (req, res) => {
     try {
         console.log(req.body);
+        await initializeStripe();
 
         stripe.customers.createSource(req.body.stripClientId, { source: req.body.token }, (err, cardResponse) => {
             if (err) {
@@ -427,7 +441,7 @@ const addCard = async (req, res) => {
 
 const setDefaultCard = async (req, res) => {
     try {
-
+        await initializeStripe();
         console.log(req.body);
         if (req.body) {
             const { customerId, cardId } = req.body;
@@ -459,6 +473,7 @@ const setDefaultCard = async (req, res) => {
 
 const deleteCard = async (req, res) => {
     try {
+        await initializeStripe();
         console.log(req.body);
         if (req.body) {
             const { customerId, cardId } = req.body;
@@ -482,13 +497,13 @@ const deleteCard = async (req, res) => {
             console.error('An error occurred while deleting the card:', error.message);
             return res.status(500).json({ error: 'An error occurred while deleting the card' });
         }
-        // return res.status(500).json({ error: 'An error occurred while deleting the card' });
 
     }
 }
 
 const getSinglUser = async (req, res) => {
     try {
+        await initializeStripe();
         console.log('inside the getSinglUser of userController ===>', req.body);
         if (req.body) {
             const { countryCC, userPhone } = req.body;
@@ -534,4 +549,4 @@ const getSinglUser = async (req, res) => {
 
 
 
-module.exports = { User , addUser, getUser, updateUser, deleteUser, addCard, getCards, setDefaultCard, deleteCard, getSinglUser }
+module.exports = { User, addUser, getUser, updateUser, deleteUser, addCard, getCards, setDefaultCard, deleteCard, getSinglUser }

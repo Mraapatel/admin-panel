@@ -4,13 +4,28 @@ const { User } = require('../controllers/user-controller');
 const { Pricing } = require('../controllers/pricing-controller');
 
 const mongoose = require('mongoose');
+const { fetchKeys } = require('../utils/fetchKeys');
+
 const { getRidesFormDb } = require('../utils/fetchRides');
 const { fetchIdleDrivers } = require('../utils/fetchIdleDrivers');
 const { addFunds } = require('../utils/addFunds');
 const { sendEmail } = require('../utils/email');
-const secreat_strip_key = process.env.STRIP_SECREATE_KEY
-const stripe = require('stripe')(secreat_strip_key);
+// const secreat_strip_key = await fetchKeys('stripe')
+// const stripe = require('stripe')(secreat_strip_key);
+let stripe = null
 
+
+
+const initializeStripe = async () => {
+    try {
+        let publickey = await fetchKeys('stripe');
+        stripe = require('stripe')(publickey);
+
+    } catch (e) {
+        console.log('error in initializeStripe', e);
+    }
+
+}
 
 const getRides = async (req, res) => {
     try {
@@ -240,7 +255,12 @@ const rideStarted = async (req, res) => {
 
 
             if (ride) {
-                return res.status(200).json({ message: 'The rideStarted successfully', rideStatus: ride.rideStatus, rideId: ride._id });
+                let data = {
+                    rideStatus: ride.rideStatus,
+                    rideId: ride._id
+                }
+                global.ioInstance.emit('driverStartedMovingToUser', data)
+                return res.status(200).json({ message: 'Driver Started Moving To User', rideStatus: ride.rideStatus, rideId: ride._id });
             }
             return res.status(404).json({ message: 'Some Error occured while starting the ride' });
         }
@@ -265,7 +285,12 @@ const rideArrived = async (req, res) => {
 
 
             if (ride) {
-                return res.status(200).json({ message: 'The rideArrived successfully', rideStatus: ride.rideStatus, rideId: ride._id });
+                let data = {
+                    rideStatus: ride.rideStatus,
+                    rideId: ride._id
+                }
+                global.ioInstance.emit('DriverArrivedToUser', data)
+                return res.status(200).json({ message: 'Driver Arrived To User', rideStatus: ride.rideStatus, rideId: ride._id });
             }
             return res.status(404).json({ message: 'Some Error occured while Assigning-- rideArrived' });
         }
@@ -290,7 +315,12 @@ const ridePicked = async (req, res) => {
 
 
             if (ride) {
-                return res.status(200).json({ message: 'The ridePicked successfully', rideStatus: ride.rideStatus, rideId: ride._id });
+                let data = {
+                    rideStatus: ride.rideStatus,
+                    rideId: ride._id
+                }
+                global.ioInstance.emit('driverStartedTrip', data)
+                return res.status(200).json({ message: 'Driver started trip', rideStatus: ride.rideStatus, rideId: ride._id });
             }
             return res.status(404).json({ message: 'Some Error occured while Assigning-- ridePicked' });
         }
@@ -333,6 +363,11 @@ const rideCompleted = async (req, res) => {
                 if (userPayment.length > 37) {
                     response.status = 201;
                 }
+                let data = {
+                    rideStatus: ride.rideStatus,
+                    rideId: ride._id
+                }
+                global.ioInstance.emit('driverEndedTrip', data)
                 return res.status(200).json(response)
             }
 
@@ -349,8 +384,12 @@ const rideCompleted = async (req, res) => {
 
 
 async function collectFormUser(ride) {
+    await initializeStripe();
+
+    let user = await User.findById(ride.userId);
+    await sendEmail('haramilond@gmail.com', user.userName, ride.totalFare, 'stripe.com');
     if (ride.paymentMethod === 'card') {
-        let user = await User.findById(ride.userId);
+
         // done
         if (user.stripCustomerId) {
             const customer = await stripe.customers.retrieve(user.stripCustomerId)
@@ -400,6 +439,7 @@ async function payToDriver(ride) {
 
 async function createCharge(customerId, amount, paymentMethodId, userName) {
     try {
+        await initializeStripe();
         console.log('customerId', customerId);
         console.log('amount', amount);
         console.log('paymentMethodId', paymentMethodId);
@@ -435,8 +475,6 @@ async function createCharge(customerId, amount, paymentMethodId, userName) {
         });
 
 
-        await sendEmail('haramilond@gmail.com', userName, amount, 'stripe.com');
-
         if (paymentIntent.status === 'succeeded') {
             console.log('Payment successful:', paymentIntent);
             return 'Payment Collected From the User'
@@ -460,6 +498,8 @@ async function createCharge(customerId, amount, paymentMethodId, userName) {
 
 async function checkForDriver(driverId) {
     try {
+        await initializeStripe();
+
         let driver = await Driver.findById(driverId);
 
         console.log("driverId", driverId);
@@ -487,6 +527,8 @@ async function checkForDriver(driverId) {
 
 async function createPayout(customerId, amount) {
     try {
+        await initializeStripe();
+
         console.log('amount', amount);
         console.log('default_source', customerId);
         const payout = await stripe.transfers.create({
@@ -524,4 +566,4 @@ async function amountPayble(cityId, typeId, amount) {
 }
 
 
-module.exports = { getRides, getVehicleTypes, getDrivers, assignNearestDriver, cancleRide, rideStarted, rideArrived, ridePicked, rideCompleted }
+module.exports = { getRides, getVehicleTypes, getDrivers, assignNearestDriver, cancleRide, rideStarted, rideArrived, ridePicked, rideCompleted, initializeStripe }

@@ -30,6 +30,15 @@ export class VehicleTypeService {
     );
   }
 
+  getAllServices(countryid:string , cityid:string) {
+    return this.http.post('http://localhost:5000/vehicleType/allServices',{countryId:countryid , cityId:cityid}).pipe(
+      tap(data => {
+        if (data)
+          console.log("got data form the server");
+      })
+    );
+  }
+
   // getAllVehiclesForPricing(typeId:string) {
   //   return this.http.post('http://localhost:5000/vehicleType',{typeId:typeId}).pipe(
   //     tap(data => {

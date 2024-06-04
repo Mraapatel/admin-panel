@@ -222,7 +222,11 @@ export class RunningRequestComponent {
         this._toster.error('Some Error Occured while rejecting the request', 'Error');
         return of(error)
       })
-    ).subscribe()
+    ).subscribe({
+      next:()=>{
+        this._socketIoService.emitNewEvent('updateCount', {});
+      }
+    })
   }
 
 }

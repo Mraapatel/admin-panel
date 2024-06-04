@@ -2,17 +2,21 @@ const mongoose = require('mongoose');
 const { Schema } = require('mongoose');
 const fs = require('fs');
 const path = require('path');
-const secreat_strip_key = process.env.STRIP_SECREATE_KEY
-const stripe = require('stripe')(secreat_strip_key);
-// stripe.accounts.update(
-//     'acct_1PM1y9RokFntEKS9',
-//     {
-//         tos_acceptance: {
-//             date: 1717049035,
-//             ip: '8.8.8.8',
-//         },
-//     }
-// ).then(value => console.log(value)).catch()
+const { fetchKeys } = require('../utils/fetchKeys');
+
+let stripe = null;
+
+const initializeStripe = async () => {
+    try {
+        let publickey = await fetchKeys('stripe');
+        stripe = require('stripe')(publickey);
+
+    } catch (e) {
+        console.log('error in initializeStripe', e);
+    }
+
+}
+
 const driverSchema = new Schema({
     driverName: {
         type: String,
@@ -275,6 +279,8 @@ const addDriver = async (req, res) => {
             };
 
             if (addedDriver) {
+
+                await initializeStripe();
                 const account = await stripe.accounts.create(accountData);
 
                 console.log('account', account);
@@ -597,7 +603,7 @@ const updateDriver = async (req, res) => {
 
 const deleteDriver = async (req, res) => {
     try {
-
+        await initializeStripe()
         let stripCustomer = await Driver.findById(req.body.id);
         let stripCustomerId = stripCustomer.driverStripCustomerId
         // console.log(stripCustomerId);
@@ -753,6 +759,7 @@ const storeBankDetails = async (req, res) => {
     try {
         console.log('inside the driverController - storeBankDetails', req.body);
         if (req.body) {
+            await initializeStripe();
             let fetchedDriver = await Driver.findById(req.body.driverId);
 
 
@@ -762,18 +769,7 @@ const storeBankDetails = async (req, res) => {
                 const dCustomer = await stripe.accounts.retrieve(fetchedDriver.driverStripCustomerId);
                 console.log('dcustomer ===>', dCustomer);
 
-                // const token = await stripe.createToken('bank_account', {
-                //     account_holder_name: req.body.AccountHolderName,
-                //     account_holder_type: "individual",
-                //     account_number: req.body.AccountNumber,
-                //     country: "US",
-                //     currency: "usd",
-                //     metadata: {
-                //         info: 'Adding card to Driver'
-                //     },
-                //     routing_number: req.body.RoutingNumber
-                // });
-
+ 
                 if (req.body.token) {
                     console.log("token ", req.body.token);
                     const bankAccount = await stripe.accounts.createExternalAccount(

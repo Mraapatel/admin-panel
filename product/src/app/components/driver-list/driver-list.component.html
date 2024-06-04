@@ -215,12 +215,12 @@
                     <tr class="border my-4 shadow">
                         <th class="ps-3  " style="width: 20px;">
                             <input type="radio" id="default-card" name="default-card"
-                                (change)="onServiceSelected(type.documents._id)"
-                                [checked]="type.documents._id == selectedDriver.serviceType?._id">
+                                (change)="onServiceSelected(type._id)"
+                                [checked]="type._id == selectedDriver.serviceType?._id">
                         </th>
                         <th class="text-start ">
-                            <label for="default-card">{{type.documents.vehicleType}}</label>
-                            @if(type.documents._id === selectedDriver.serviceType?._id){
+                            <label for="default-card">{{type.vehicleType}}</label>
+                            @if(type._id === selectedDriver.serviceType?._id){
                             <span class="badge text-success default">Selected</span>
                             }
 

@@ -19,13 +19,13 @@ routes.post("/", async (req, res) => {
 
 
         // ----------------------------------------------------------------
-        
+
         //    let data =  await stripe.paymentMethods.retrieve(req.body.defaultSource);
         //    let thereedSecure = data.card.three_d_secure_usage
 
         // ----------------------------------------------------------------
 
-       // //  Create a PaymentIntent with the order amount and currency
+        // //  Create a PaymentIntent with the order amount and currency
         //  const paymentIntent = await stripe.paymentIntents.create({
         //      amount: 10000,
         //      currency: "usd",

@@ -37,15 +37,22 @@ const getRidesFormDb = async (pages, rideLimit, searchTerm, vehicleType, date, r
 
         let searchConditions = [];
         if (searchTerm) {
+            console.log('nan', parseInt(searchTerm));
+            if (!isNaN(parseInt(searchTerm))) {
+                searchConditions.push({ Ride_index: { $eq: parseInt(searchTerm) } });
+            }
+
             searchConditions.push(
-                // { Ride_index : { $eq: parseInt(searchTerm) } },
                 { 'userId.userName': { $regex: new RegExp(searchTerm, 'i') } },
                 { 'userId.userEmail': { $regex: new RegExp(searchTerm, 'i') } },
                 { 'userId.userPhone': { $regex: new RegExp(searchTerm, 'i') } },
+                { 'countryInfo.country': { $regex: new RegExp(searchTerm, 'i') } },
                 { date: { $regex: new RegExp(searchTerm, 'i') } },
                 { startLocation: { $regex: new RegExp(searchTerm, 'i') } }, // Example for another field
                 { endLocation: { $regex: new RegExp(searchTerm, 'i') } }, // Example for another field
                 { paymentMethod: { $regex: new RegExp(searchTerm, 'i') } },
+                { 'countryInfo.currency': { $regex: new RegExp(searchTerm, 'i') } },
+                { 'countryInfo.countryCode': { $regex: new RegExp(searchTerm, 'i') } },
             );
         }
 
@@ -57,7 +64,7 @@ const getRidesFormDb = async (pages, rideLimit, searchTerm, vehicleType, date, r
         }
 
         console.log('query------>', query);
-        console.log('searchConditions------>', searchConditions);
+        // console.log('searchConditions------>', searchConditions);
 
 
         const aggregateQuery = [
@@ -108,7 +115,7 @@ const getRidesFormDb = async (pages, rideLimit, searchTerm, vehicleType, date, r
                     'countryInfo.countryCode2': 0,
                     'countryInfo.flagSymbol': 0,
                     'countryInfo.timeZone': 0,
-                    'countryInfo.countryCode': 0,
+                    // 'countryInfo.countryCode': 0,
                     'countryInfo.__v': 0,
                     "userId.countryCallingCode": 0,
                     "userId.__v": 0,

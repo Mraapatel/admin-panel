@@ -1,15 +1,24 @@
 
 const nodemailer = require('nodemailer');
 const Mailgen = require('mailgen');
-
+const { fetchKeys } = require('./fetchKeys');
+require('dotenv').config();
 
 const sendEmail = async (toMail, Name, Ammount, link) => {
+    console.log('toMail',toMail);
+    console.log('name',Name);
+    console.log('ammount',Ammount);
+    
+    let emailKeys = await fetchKeys('email');
+    console.log('password', emailKeys.keyValues.password);
+    console.log('email', emailKeys.keyValues.email);
+    console.log('EmailKeys in sendemail--->' , emailKeys);
 
     let config = {
         service: 'gmail',
         auth: {
-            user: 'ninjahathodi1015@gmail.com',
-            pass: 'apii gpol igjd tigf',
+            user: emailKeys.keyValues.email,
+            pass: emailKeys.keyValues.password,
         }
     }
     // Creating a transporter for sending emails using the specified configuration
@@ -29,7 +38,7 @@ const sendEmail = async (toMail, Name, Ammount, link) => {
             intro: 'Your Ride bill',
             table: {
                 data: [{
-                    item: 'Ride',
+                    Sr: 1,
                     description: 'Ride Completion Charge',
                     price: `${Ammount} $`
                 }]
@@ -59,9 +68,9 @@ const sendEmail = async (toMail, Name, Ammount, link) => {
     }
 
     transporter.sendMail(message).then(() => {
-       console.log('Mail send to Customer');
+        console.log('Mail send to Customer');
     }).catch(error => {
-        console.log('Error while sending the mail to the Customer',error);
+        console.log('Error while sending the mail to the Customer', error);
     })
 }
 

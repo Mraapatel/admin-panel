@@ -24,7 +24,7 @@ function initialize(server) {
             global.NotificationCount++
             console.log('global' ,global.NotificationCount);
             // console.log('socket object',socket);
-            socket.emit('updatedCount', global.NotificationCount);
+            global.ioInstance.emit('updatedCount', global.NotificationCount);
 
         })
 
@@ -33,7 +33,7 @@ function initialize(server) {
             global.NotificationCount--
             console.log('global iin des ' ,global.NotificationCount);
             // console.log('socket object',socket);
-            socket.emit('updatedCount', global.NotificationCount);
+            global.ioInstance.emit('updatedCount', global.NotificationCount);
         })
 
         socket.on('getCount', async (data) => {
@@ -41,7 +41,7 @@ function initialize(server) {
             // global.NotificationCount--
             console.log('global iin des ' ,global.NotificationCount);
             // console.log('socket object',socket);
-            socket.emit('updatedCount', global.NotificationCount);
+            global.ioInstance.emit('updatedCount', global.NotificationCount);
         })
 
         // db.collection.aggregate([

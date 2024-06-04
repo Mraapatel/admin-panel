@@ -31,11 +31,11 @@ export interface VehicleType {
 }
 
 export interface VehicleTypeByCountryId {
-  documents: {
+  // documents: {
     vehicleIcon: string;
     vehicleType: string;
     _id: string;
-  }
+  // }
 }
 
 

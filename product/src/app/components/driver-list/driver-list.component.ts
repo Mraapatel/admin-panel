@@ -661,7 +661,7 @@ export class DriverListComponent {
     this.vehicleTypeList = []
     console.log(this.selectedDriver);
     console.log('getServices');
-    this._vehicleTypeService.getAllVehicles(this.selectedDriver.countryId._id).pipe(
+    this._vehicleTypeService.getAllServices(this.selectedDriver.countryId._id , this.selectedDriver.cityId!._id).pipe(
       tap((res) => {
         console.log(res);
 

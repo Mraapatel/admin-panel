@@ -65,6 +65,8 @@
         </div>
         <!-- <span class="line"></span> -->
 
+
+        <!-- stripe -->
         <div class=" container mt-3  col col-xxl-6 col-xl-6 col-lg-12 col-md-12 col-sm-12 col-xs-12 col-12">
             <h3 class="text-success">Stripe Keys</h3>
             <form [formGroup]="Stripe" (submit)="storeDetails('stripe')" class="mt-3">
@@ -74,7 +76,7 @@
                     </tr>
                     <tr>
                         <td>
-                            <input class=" mt-1 form-control border-success" type="text" name="secreateKey"
+                            <input class=" mt-1 form-control border-success" type="password" name="secreateKey"
                                 id="secreateKey" formControlName="secreateKey">
                             @if(Stripe.get('secreateKey')?.errors && Stripe.get('secreateKey')?.touched){
                             @if(Stripe.get('secreateKey')?.errors?.['required']){
@@ -120,7 +122,7 @@
     </div>
     <hr>
     <div class="row">
-
+        <!-- twilio -->
         <div class="container mt-3 border-right col col-xxl-6 col-xl-6 col-lg-12 col-md-12 col-sm-12 col-xs-12 col-12">
             <h3 class="text-danger">Twilio Cradentials</h3>
             <form [formGroup]="Twilio" (submit)="storeDetails('twilio')">
@@ -151,7 +153,7 @@
                     </tr>
                     <tr>
                         <td>
-                            <input class=" mt-1 form-control border-danger" type="text" name="authToken" id="authToken"
+                            <input class=" mt-1 form-control border-danger" type="password" name="authToken" id="authToken"
                                 formControlName="authToken">
                             @if(Twilio.get('authToken')?.errors && Twilio.get('authToken')?.touched){
                             @if(Twilio.get('authToken')?.errors?.['required']){
@@ -193,7 +195,7 @@
             </form>
         </div>
 
-
+        <!-- email -->
         <div class=" container mt-3  col col-xxl-6 col-xl-6 col-lg-12 col-md-12 col-sm-12 col-xs-12 col-12">
             <h3 class="text-warning">Email Cradentials</h3>
             <form [formGroup]="Email" (submit)="storeDetails('email')" class="mt-2">
@@ -219,8 +221,8 @@
                     </tr>
                     <tr>
                         <td>
-                            <input class="form-control mt-1 border-warning " type="text" name="password" id="password"
-                                formControlName="password">
+                            <input class="form-control mt-1 border-warning " type="password" name="password"
+                                id="password" formControlName="password">
                             @if(Email.get('email')?.errors && Email.get('email')?.touched){
                             @if(Email.get('email')?.errors?.['required']){
                             <span class="text-danger">Please enter the Email</span> <br>

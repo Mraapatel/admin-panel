@@ -25,7 +25,7 @@ interface Cities {
 })
 export class CityComponent {
 
-  private _http = inject(AddCountryService);
+  private _addCountryService = inject(AddCountryService);
   private _cityService = inject(CityService);
   private _toastr = inject(ToastrService);
   private _fb = inject(FormBuilder);
@@ -60,7 +60,7 @@ export class CityComponent {
 
   ngOnInit() {
     this.pageload();
-    this._http.getCountry().subscribe((res) => {
+    this. _addCountryService.getCountry().subscribe((res) => {
       if (Array.isArray(res)) {
         this.countryList = res
         // this.seletedC(`${this.countryList[0].countryCode2}+${this.countryList[0]._id}`);
@@ -341,8 +341,7 @@ export class CityComponent {
       place_id: this.place?.place_id,
       coordinates: this.coordinates
     }
-    console.log('this.coordinates',);
-
+    console.log('placeInfo',placeInfo);
 
     this._cityService.saveZone(placeInfo).subscribe((res) => {
       console.log(res);
@@ -460,6 +459,10 @@ export class CityComponent {
       cityId: this.selectedCity?._id,
       coordinates: coordinates,
     }
+
+    console.log('Update Zone details',updatedZone);
+    // return;
+    
     this._cityService.saveChangedZone(updatedZone).subscribe((res) => {
       this._toastr.success('Zone updated successfully', 'Success');
       let updatedZone = res as Cities

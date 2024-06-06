@@ -87,9 +87,21 @@ const addPrice = async (req, res) => {
                 {
                     $unwind: "$cityId",
                 },
-
+                {
+                    $project: {
+                        __v: 0,
+                        "countryId.timeZone": 0,
+                        "countryId.flagSymbol": 0,
+                        "countryId.__v": 0,
+                        "cityId.zone": 0,
+                        "cityId.__v": 0,
+                        "cityId.place_id": 0,
+                        "typeId.vehicleIcon": 0,
+                        "typeId.__v": 0,
+                    }
+                }
             ])
-         
+
 
             res.status(200).json(response[0], { message: 'Price saved successfully' });
 
@@ -125,7 +137,7 @@ const getPrice = async (req, res) => {
             {
                 $unwind: '$countryId'
             },
-  
+
             {
                 '$lookup': {
                     from: 'cityzones',
@@ -134,7 +146,7 @@ const getPrice = async (req, res) => {
                     as: 'cityId'
                 }
             },
-     
+
             {
                 $unwind: '$cityId'
             }
@@ -155,6 +167,7 @@ const getPrice = async (req, res) => {
 
 const getCountry = async (req, res) => {
     try {
+        console.log('inside the getCountry --->',req.body);
         let countryList = [];
         countryList = await Pricing.aggregate([
 
@@ -203,6 +216,7 @@ const getCountry = async (req, res) => {
 const updatePrice = async (req, res) => {
     try {
 
+        console.log('inside updatePrice ---->', req.body);
         let updatedPrice = await Pricing.findByIdAndUpdate({ _id: req.body.PriceId }, {
             driverProfit: req.body.driverProfit,
             basePrice: req.body.basePrice,
@@ -254,8 +268,21 @@ const updatePrice = async (req, res) => {
             {
                 $unwind: "$cityId",
             },
+            {
+                $project: {
+                    __v: 0,
+                    "countryId.timeZone": 0,
+                    "countryId.flagSymbol": 0,
+                    "countryId.__v": 0,
+                    "cityId.zone": 0,
+                    "cityId.__v": 0,
+                    "cityId.place_id": 0,
+                    "typeId.vehicleIcon": 0,
+                    "typeId.__v": 0,
+                }
+            }
         ]);
-       
+
         console.log(response);
 
         if (updatedPrice && response) {
@@ -371,7 +398,7 @@ const getCityPricig = async (req, res) => {
                     $project: {
                         __v: 0,
                         "typeId.__v": 0,
-                                      },
+                    },
                 },
             ])
             if (pricing) {
@@ -391,4 +418,4 @@ const getCityPricig = async (req, res) => {
     }
 }
 
-module.exports = {Pricing, addPrice, getPrice, updatePrice, getCountry, getCity, getCityPricig }
+module.exports = { Pricing, addPrice, getPrice, updatePrice, getCountry, getCity, getCityPricig }

@@ -16,6 +16,12 @@ import { SocketIoService } from '../../services/socket-io.service';
 import { HttpErrorResponse } from '@angular/common/http';
 
 
+interface createRideRes {
+  message: string,
+  rideInfo: {},
+  status: number
+}
+
 interface CityZone {
   _id: string;
   coordinates: google.maps.Polygon;
@@ -687,21 +693,25 @@ export class CreateRideComponent {
         return of(error)
       })
     ).subscribe({
-      next: (res) => {
+      next: (res: createRideRes) => {
         console.log(res);
-        this._toastr.success('Your ride is booked successfully', 'Success');
-        this.bookRideForm.reset();
-        this.locationForm.reset();
-        this.userForm.reset();
-        this.showOverView = false;
-        this.addPlaces = false
-        this.showDetails = false;
-        this.userForm.get('userPhone')?.enable();
-        this.userForm.get('countryCC')?.enable();
-        this.DirectionsRenderer.setMap(null);
-        this.STOPS = [];
-        this.map.setCenter({ lat: 25.4484, lng: 78.5685 })
-        this.map.setZoom(6)
+        if (res.status === 200) {
+          this._toastr.success(res.message, 'Success');
+          this.bookRideForm.reset();
+          this.locationForm.reset();
+          this.userForm.reset();
+          this.showOverView = false;
+          this.addPlaces = false
+          this.showDetails = false;
+          this.userForm.get('userPhone')?.enable();
+          this.userForm.get('countryCC')?.enable();
+          this.DirectionsRenderer.setMap(null);
+          this.STOPS = [];
+          this.map.setCenter({ lat: 25.4484, lng: 78.5685 })
+          this.map.setZoom(6)
+        } else if (res.status === 300) {
+          this._toastr.error(res.message, 'error');
+        }
       }
     })
     console.log(details);
@@ -722,11 +732,11 @@ export class CreateRideComponent {
     })
   }
 
-  dateSelected(){
+  dateSelected() {
     // let today = new Date()
     // let choosedDate = new Date(this.bookRideForm.get('bookingDate')?.value)
     // console.log(choosedDate.getDate());
-    
+
     this.bookRideForm.get('booktime')?.setValue('');
   }
   // createZonesOfCities() {

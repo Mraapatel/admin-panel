@@ -10,7 +10,12 @@
                 }
                 }
             </select>
-            <input type="date" class="form-control rounded" placeholder="please select the date" formControlName="date">
+            <!-- <label for="formdate" class="mt-2 me-1">From:</label> -->
+            <input type="date" class="form-control rounded" placeholder="please select the date" formControlName="date"
+                id="formdate">
+            <!-- <label for="todate" class="  ms-2 mt-2 me-1">To:</label>
+            <input type="date" class="form-control rounded" placeholder="please select the date" formControlName="date"
+                id="todate"> -->
             <div class="input-group-append">
                 <div class="input-group-text bg-dark text-white">Select Date</div>
             </div>
@@ -48,7 +53,7 @@
         </div>
         <div class="container text-center my-3 text-danger">
             <!-- <td class="border text-center p-1 py-2 width"> -->
-                Donload Rides: 
+            Donload Rides:
             <button class="btn btn-sm ms-2 border download" (click)="downloadRidesInfo(RidesFetched)">
                 <img src="../../../assets/icons8-download.gif" alt="Download" height="20rem" width="60rem">
             </button>
@@ -64,16 +69,17 @@
                 <th class="border text-center p-1 py-2 bg-dark text-white width ">Stop Locations</th>
                 <th class="border text-center p-1 py-2 bg-dark text-white width">Drop off address</th>
                 <th class="border text-center p-1 py-2 bg-dark text-white width">Service Type</th>
-                <th class="border text-center p-1 py-2 bg-dark text-white width">Status</th>
-                <!-- <th class="border text-center p-1 py-2 bg-dark text-white width">Download</th> -->
+                <th class="border text-center p-1 py-2 bg-dark text-white width">Status / info</th>
+                <th class="border text-center p-1 py-2 bg-dark text-white width">feedback</th>
                 <!-- <th class="border text-center p-1 py-2 bg-dark text-white">Status</th>
                 <th class="border text-center p-1 py-2 bg-dark text-white">Assign</th>
                 <th class="border text-center p-1 py-2 bg-dark text-white">Action</th> -->
             </tr>
             @if(RidesFetched){
             @for(ride of RidesFetched;track $index){
-            <tr class="hover rounded shadow" (click)="rideInfo(ride)" data-bs-toggle="modal"
-                data-bs-target="#infoModal">
+            <tr class="rounded shadow">
+                <!-- <tr class="hover rounded shadow" (click)="rideInfo(ride)" data-bs-toggle="modal"
+                data-bs-target="#infoModal"> -->
                 <!-- <td class="border text-center p-1 py-2 id">{{ride._id}}</td>
                 <td class="border text-center p-1 py-2 id">{{ride.userId._id}}</td> -->
                 <td class="border text-center p-1 py-2 width">{{ride.Ride_index}}</td>
@@ -85,26 +91,39 @@
                 }
                 <td class="border text-center p-1 py-2 time">{{ride.date}} {{ride.timeInString}}</td>
                 <td class="border text-center p-1 py-2 width">{{ride.startLocation}}</td>
-
-                @for(point of ride.route ;track $index){
-                <td class=" border text-center p-1 py-2 width">{{$index +1}}. &nbsp;{{point}}</td>
-                }
-                @if(ride.route && ride.route.length == 0){
-                <td class=" border text-center p-1 py-2 width">No Way Points for this Ride</td>
-                }
+                <td class=" border text-center p-1 py-2 width">
+                    @for(point of ride.route ;track $index){
+                    <span>{{$index +1}}. &nbsp;{{point}}</span> <br> <br>
+                    }
+                    @if(ride.route && ride.route.length == 0){
+                    <span>No Way Points for this Ride</span>
+                    }
+                </td>
                 <td class="border text-center p-1 py-2 width">{{ride.endLocation}}</td>
                 <td class="border text-center p-1 py-2 width">{{ride.typeId.vehicleType}}</td>
                 <td class="border text-center p-1 py-2 width">
                     <div class="btn"
-                        [ngStyle]="{'background-color':ride.rideStatus === 7 ? 'green' : 'orange' , 'color':'white'}">
+                        [ngStyle]="{'background-color':ride.rideStatus === 7 ? 'green' : 'red' , 'color':'white'}"
+                        (click)="rideInfo(ride)" data-bs-toggle="modal" data-bs-target="#infoModal">
                         {{ ride.rideStatus === 7 ? 'Completed' : ride.rideStatus === 8 ? 'Cancelled' : '' }}
                     </div>
                 </td>
-                <!-- <td class="border text-center p-1 py-2 width">
-                    <button class="btn btn-sm border download" (click)="downloadRidesInfo(RidesFetched)" >
+                <td class="border text-center p-1 py-2 width">
+                    <!-- <button class="btn btn-sm border download" (click)="downloadRidesInfo(RidesFetched)" >
                         <img src="../../../assets/icons8-download.gif" alt="Download" height="15px" width="15px">
+                    </button> -->
+                    <!-- <button class="btn btn-sm border download" (click)="rideInfo(ride)" data-bs-toggle="modal" -->
+                    <button class="btn btn-sm border download" (click)="FeedbackBtnClicked(ride)" data-bs-toggle="modal"
+                        data-bs-target="#feedback"
+                        [ngStyle]="{'background-color':ride.feedback ? 'green' : 'blue' , 'color':'white'}">
+                        @if(ride.feedback){
+                        Submited
+                        }@else{
+                        feedback
+                        }
+                        <!-- <img src="../../../assets/icons8-download.gif" alt="Download" height="15px" width="15px"> -->
                     </button>
-                </td> -->
+                </td>
             </tr>
             <br>
             }
@@ -142,7 +161,7 @@
             <div class="d-flex  mb-2">
                 <div class="first mt-2 me-1">
                     @if(selectedRide){
-                    <h5 class=" ms-3">User Info :</h5>
+                    <h5 class=" ms-3 text-primary">User Info :</h5>
                     <div class="ms-4 my-1">
 
                         <img [src]="'http://localhost:5000/public/userProfile/' + selectedRide.userId.userProfile"
@@ -150,57 +169,59 @@
                             alt="{{selectedRide.userId.userName }} Icon">
                     </div>
                     <table id="InfoTable" class="ms-3 me-1">
-                        <tr>
+                        <tr class="border-bottom">
                             <th>User Name </th>
                             <td>: {{selectedRide.userId.userName}}</td>
                         </tr>
-                        <tr>
+                        <tr class="border-bottom">
                             <th>User Phone</th>
                             <td> : {{selectedRide.countryInfo.countryCallingCode}}
                                 {{selectedRide.userId.userPhone}}</td>
                         </tr>
-                        <tr>
+                        <tr class="border-bottom">
                             <th>User Email </th>
                             <td>: {{selectedRide.userId.userEmail}}</td>
                         </tr>
-                        <tr>
+                        <tr class="border-bottom">
                             <th>Book Date</th>
                             <td>: {{selectedRide.date}}</td>
                         </tr>
-                        <tr>
+                        <tr class="border-bottom">
                             <th>Book Time</th>
                             <td>: {{selectedRide.timeInString}}</td>
                         </tr>
-                        <tr>
+                        <tr class="border-bottom">
                             <th>PickUp Location </th>
                             <td>: {{selectedRide.startLocation}}</td>
                         </tr>
-                        <tr>
+                        <tr class="border-bottom">
                             <th>Drop-Off Location </th>
                             <td>: {{selectedRide.endLocation}}</td>
                         </tr>
-                        <tr>
+                        <tr class="border-bottom">
                             <th>Way Points: </th>
-                            @for(point of selectedRide.route ;track $index){
-                            <td>:{{$index +1}}-{{point}}</td><br>
-                            }
-                            @if(selectedRide.route && selectedRide.route.length == 0){
-                            <td class="text-danger">: No Way Points for this Ride</td>
-                            }
+                            <td>
+                                @for(point of selectedRide.route ;track $index){
+                                <span> : &nbsp;{{$index +1}}&nbsp;-{{point}}</span> <br>
+                                }
+                                @if(selectedRide.route && selectedRide.route.length == 0){
+                                <span class="text-danger"> No Way Points for this Ride </span>
+                                }
+                            </td>
                         </tr>
-                        <tr>
+                        <tr class="border-bottom">
                             <th>Service Type </th>
                             <td>: {{selectedRide.typeId.vehicleType}}</td>
                         </tr>
-                        <tr>
+                        <tr class="border-bottom">
                             <th>Total Distance </th>
                             <td>: {{selectedRide.totalDistance | number:'1.2-2'}} Km</td>
                         </tr>
-                        <tr>
+                        <tr class="border-bottom">
                             <th>Estimated Time </th>
                             <td> : {{selectedRide.totalTime}} m </td>
                         </tr>
-                        <tr>
+                        <tr class="border-bottom">
                             <th>Estimated Fare </th>
                             <td> : {{selectedRide.totalFare |number:'1.2-2'}}
                                 {{selectedRide.countryInfo.currency}}</td>
@@ -210,7 +231,7 @@
 
                         @if(selectedRide.driverId){
 
-                        <h5 class=" ms-2">Driver Info :</h5>
+                        <h5 class=" ms-2 text-primary">Driver Info :</h5>
 
                         <div class="ms-4 my-1">
 
@@ -219,21 +240,21 @@
                                 class="my-1 border profile2 rounded img-fluid "
                                 alt="{{selectedRide.driverId.driverProfile }} Icon">
                         </div>
-                        <tr>
+                        <tr class="border-bottom">
                             <th>Driver Name</th>
                             <td>: {{selectedRide.driverId.driverName}}</td>
                         </tr>
-                        <tr>
+                        <tr class="border-bottom">
                             <th>Driver Phone</th>
                             <td>:{{selectedRide.countryInfo.countryCallingCode}} {{selectedRide.driverId.driverPhone}}
                             </td>
                         </tr>
-                        <tr>
+                        <tr class="border-bottom">
                             <th>Driver Email</th>
                             <td>: {{selectedRide.driverId.driverEmail}}</td>
                         </tr>
                         }@else{
-                        <tr>
+                        <tr class="border-bottom">
                             <th>No Driver Assigned</th>
                         </tr>
                         }
@@ -259,6 +280,79 @@
 
             <div class="modal-footer">
                 <button class="btn btn-secondary shadow" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="feedback" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="infoModalLabel">FeedBack</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @if(selectedRide){
+                <!-- @if(selectedRide.feedback){ -->
+                <form [formGroup]="feedback" #ratingForm="ngForm">
+                    <div class="mb-3">
+                        <label for="rating" class="form-label">Rating :</label>
+                        <div id="rating" class="d-flex justify-content-center">
+                            <div class="form-check ">
+                                <input class="form-check-input font2 " type="radio" name="rating" id="rating1"
+                                    [value]="1" formControlName="rating">
+                                <label class="form-check-label  font " for="rating1">
+                                    😒
+                                </label>
+                            </div>
+                            <div class="form-check ">
+                                <input class="form-check-input font2" type="radio" name="rating" id="rating2"
+                                    [value]="2" formControlName="rating">
+                                <label class="form-check-label font " for="rating2">
+                                    🙁
+                                </label>
+                            </div>
+                            <div class="form-check ">
+                                <input class="form-check-input font2" type="radio" name="rating" id="rating3"
+                                    [value]="3" formControlName="rating">
+                                <label class="form-check-label font " for="rating3">
+                                    😐
+                                </label>
+                            </div>
+                            <div class="form-check ">
+                                <input class="form-check-input font2" type="radio" name="rating" id="rating4"
+                                    [value]="4" formControlName="rating">
+                                <label class="form-check-label font " for="rating4">
+                                    😄
+                                </label>
+                            </div>
+                            <div class="form-check ">
+                                <input class="form-check-input font2" type="radio" name="rating" id="rating5"
+                                    [value]="5" formControlName="rating">
+                                <label class="form-check-label font " for="rating5">
+                                    👍
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Feedback :</label>
+                        <textarea class="form-control" id="message" name="message" rows="3"
+                            formControlName="message"></textarea>
+                    </div>
+                </form>
+                <!-- } -->
+                @if(!selectedRide.feedback){
+                <button type="button" class="btn btn-primary" (click)="storeFeedback(selectedRide._id)"
+                    data-bs-dismiss="modal">Give Feedback</button>
+                }@else{
+                <div class="text-center text-danger">FeedBack is Submited Already</div>
+                }
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

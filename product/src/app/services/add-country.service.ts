@@ -29,7 +29,7 @@ export class AddCountryService {
   }
 
   serchCountries(value: string) {
-    return this._http.put('http://localhost:5000/country',{serch:value}).pipe(
+    return this._http.post('http://localhost:5000/country/searchCountry',{search:value}).pipe(
       tap((_) => {
         console.log('got countries');
       })

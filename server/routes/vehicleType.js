@@ -18,13 +18,13 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 
-routes.post('/', upload.single('vehicleIcon'), addVehicleType);
+routes.post('/', upload.single('vehicleIcon'), addVehicleType); // done
 
-routes.post('/edit', upload.single('vehicleIcon'), editVehicleType);
+routes.post('/edit', upload.single('vehicleIcon'), editVehicleType); // done 
 
-routes.post('/getTypes', allVehicles);
+routes.post('/getTypes', allVehicles); // done 
 
-routes.post('/allServices', allServices);
+routes.post('/allServices', allServices); // done
 
 
 module.exports = routes

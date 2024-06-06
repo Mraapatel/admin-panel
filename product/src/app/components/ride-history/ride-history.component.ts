@@ -26,12 +26,14 @@ export class RideHistoryComponent {
 
   RidesFetched: Ride[] = [];
   rideHistory!: FormGroup;
+  feedback!: FormGroup;
   fetchedVehicleTypes: Array<VehicleType> = [];
   selectedRide!: Ride
   API_KEY = environment.API_KEY;
   map!: google.maps.Map;
   geocoder!: google.maps.Geocoder;
-  rideRoute!: google.maps.Polyline
+  rideRoute!: google.maps.Polyline;
+  markers!: google.maps.Marker[]
 
 
   ngOnInit() {
@@ -41,6 +43,11 @@ export class RideHistoryComponent {
       rideStatus: [Number],
       vechicleType: [''],
       date: ['']
+    });
+
+    this.feedback = this._fb.group({
+      rating: [Number],
+      message: [''],
     });
     this._browserNotification.requestPermission();
     let details = {
@@ -146,6 +153,59 @@ export class RideHistoryComponent {
     })
   }
 
+  storeFeedback(rideId: string) {
+    let rating = this.feedback.get('rating')?.value;
+    let message = this.feedback.get('message')?.value;
+    console.log('rideid in the storefeedback', rideId);
+    if ((!rating || isNaN(rating)) && !message) {
+      this._toster.error('Please fill any of the fields first');
+      return;
+    }
+
+    let data = {
+      id: rideId,
+      rating: this.feedback.get('rating')?.value,
+      message: this.feedback.get('message')?.value
+    }
+    this._rideHistory.storeFeedback(data).pipe(
+      catchError((e) => {
+        this._toster.error(`Error Occured ${e}`, 'Error');
+        return of(e)
+      }), tap((res: { message: string, status: number }) => {
+        if (res.status === 200) {
+          this._toster.success(res.message, 'success');
+          let index = this.RidesFetched.findIndex((r) => r._id === this.selectedRide._id);
+          console.log('index', index);
+
+          console.log('inside storeFeedback ---->', this.feedback.get('message')?.value);
+          console.log('inside storeFeedback ---->', this.feedback.get('rating')?.value);
+
+          // this.RidesFetched[index].feedback.message = this.feedback.get('message')?.value;
+          // this.RidesFetched[index].feedback.rating = this.feedback.get('rating')?.value;
+          this.RidesFetched[index].feedback = { rating: this.feedback.get('rating')?.value, message: this.feedback.get('message')?.value }
+          this.feedback.reset();
+        } else {
+          this._toster.error(res.message, 'error');
+        }
+      })
+    ).subscribe()
+  }
+
+  FeedbackBtnClicked(ride: Ride) {
+    this.feedback.reset()
+    this.selectedRide = ride
+    console.log('selectedride', this.selectedRide);
+    if (this.selectedRide.feedback) {
+      console.log('inside the this.selectedRide.feedback condtion');
+
+      this.feedback.patchValue({
+        rating: this.selectedRide.feedback.rating,
+        message: this.selectedRide.feedback.message
+      })
+    }
+    // this.rideInfo(ride);
+  }
+
   // downloadRideInfo( ride: Ride) {
   //   // event.stopPropagation();
 
@@ -231,23 +291,23 @@ export class RideHistoryComponent {
     const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
-  
+
     link.setAttribute('href', url);
     link.setAttribute('download', 'trip_history.csv');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   }
-  
+
   convertArrayToCSV(dataArray: Ride[]) {
     if (dataArray.length === 0) {
       return '';
     }
-  
+
     const flatDataArray = dataArray.map(data => this.flattenObject(data));
     const headers = Object.keys(flatDataArray[0]);
     const headerRow = headers.join(',');
-  
+
     const dataRows = flatDataArray.map(flatData => {
       return headers.map(header => {
         const value = flatData[header];
@@ -257,16 +317,16 @@ export class RideHistoryComponent {
         return `"${value}"`;
       }).join(',');
     });
-  
+
     return [headerRow, ...dataRows].join('\n');
   }
-  
+
   flattenObject(ob: any): any {
     const toReturn: any = {};
-  
+
     for (const i in ob) {
       if (!ob.hasOwnProperty(i)) continue;
-  
+
       if (typeof ob[i] === 'object' && ob[i] !== null && !Array.isArray(ob[i])) {
         const flatObject = this.flattenObject(ob[i]);
         for (const x in flatObject) {
@@ -279,13 +339,14 @@ export class RideHistoryComponent {
     }
     return toReturn;
   }
-  
+
+
   async rideInfo(ride: Ride) {
     if (this.rideRoute) {
       console.log('inside the if condtion ');
-
       this.rideRoute.setMap(null); // Remove the polyline from the map
     }
+
     let latLng: { lat: number, lng: number }[] = [];
     this.selectedRide = ride;
     let address = [ride.startLocation, ...ride.route, ride.endLocation];
@@ -303,11 +364,22 @@ export class RideHistoryComponent {
 
     this.rideRoute = new google.maps.Polyline({
       path: latLng,
-      // geodesic: true,
       strokeColor: "#FF0000",
       strokeOpacity: 1.0,
       strokeWeight: 2,
     })
+
+    // latLng.forEach((point, index) => {
+    //   const mark = new google.maps.Marker({
+    //     position: point,
+    //     label: (index + 1).toString(),
+    //     map: this.map
+    //   });
+    //   // this.markers.push(mark)
+    // });
+
+
+
     const bound = new google.maps.LatLngBounds()
     bound.extend(latLng[0])
     bound.extend(latLng[latLng.length - 1])

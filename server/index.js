@@ -13,8 +13,8 @@ const server = require('http').Server(app);
 socket.initialize(server);
 const Port = process.env.PORT || 5000;
 
-// const { startCron } = require('../server/utils/cron');
-// // startCron();
+const { startCron } = require('../server/utils/cron');
+// startCron();
 const jwt = require('./routes/jwt_token');
 const vehicleType = require('./routes/vehicleType')
 const addCounty = require('./routes/addCountry');
@@ -47,34 +47,34 @@ app.use(cors());
 
 app.use('/authenticate', jwt);
 
-// app.use(varifyToken);
-app.use('/vehicleType', vehicleType);
+app.use(varifyToken);
+app.use('/vehicleType', vehicleType);  //done
 
-app.use('/country', addCounty);
+app.use('/country', addCounty); // done
 
-app.use('/city', city);
+app.use('/city', city); //done
 
 // app.use('/pricing', varifyToken, pricing);
-app.use('/pricing', pricing);
+app.use('/pricing', pricing); // done
 
 app.use('/setting', settingStorage)
 
-app.use('/User', user);
+app.use('/User', user); // done
 // app.use('/User', varifyToken, user);
 
-app.use('/driver', driver);
+app.use('/driver', driver); // done 
 
-app.use('/createRide', createRide);
+app.use('/createRide', createRide); //done
 
-app.use('/confirmRide', confirmRide);
+app.use('/confirmRide', confirmRide); // done
 
-app.use('/runningRequest', runningRequest);
+app.use('/runningRequest', runningRequest); // done
 
-app.use('/rideHistory', rideHistory);
+app.use('/rideHistory', rideHistory); // done
 
 app.use('/test', test);
 
-app.use('/allkeys', allkeys);
+app.use('/allkeys', allkeys); // done
 
 // app.listen(Port, () => {
 //     console.log(`server is listning to port no:${Port}`);

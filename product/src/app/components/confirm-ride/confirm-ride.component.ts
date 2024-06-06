@@ -11,6 +11,7 @@ import { BrowserNotificationService } from '../../services/browser-notification.
 import { HttpClient } from '@angular/common/http';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
 import { HomeComponent } from '../home/home.component';
+import { Router } from '@angular/router'
 
 
 interface RideComp_Res {
@@ -36,6 +37,7 @@ export class ConfirmRideComponent {
   private _runningRequestService = inject(RunningRequestService);
   private _confirmRiedService = inject(ConfirmRideService);
   private _browserNotification = inject(BrowserNotificationService);
+  private _router = inject(Router)
   private _http = inject(HttpClient);
 
   private _home = inject(HomeComponent)
@@ -258,7 +260,6 @@ export class ConfirmRideComponent {
 
   }
 
-
   // ----------------------------------------------------rideCompleted--------------------------------------------
 
   rideCompleted(rideId: string, driverId: string) {
@@ -278,7 +279,8 @@ export class ConfirmRideComponent {
           this._toster.success(res.userPayment, 'Success');
           this._toster.success(res.driverPayment, 'Success');
           let index = this.RidesFetched.findIndex((r) => r._id == res.rideId);
-          this.RidesFetched.splice(index, 1)
+          this.RidesFetched.splice(index, 1);
+          this._router.navigate(['home/rideHistory'] )
         }
       }
     })

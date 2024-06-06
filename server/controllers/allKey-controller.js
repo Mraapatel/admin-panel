@@ -27,7 +27,7 @@ const saveData = async (req, res) => {
             }
         }
         response.status = 404;
-        response.message = 'No such data found';
+        response.message = 'No request body found';
         return res.json(response)
     } catch (e) {
         console.log('Error happend in saveEmailKeys', e);

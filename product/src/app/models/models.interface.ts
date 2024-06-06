@@ -393,6 +393,10 @@ export interface Ride {
   endLocation: string,
   timeInString: string,
   nearest: boolean,
+  feedback:{
+    rating: Number,
+    message: String
+  }
   countryInfo: {
     _id: string;
     country: string;

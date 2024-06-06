@@ -151,7 +151,8 @@
                                 <div class="input-group-append centered-container">
                                     <div class="input-group-text bg-secondary text-white ">?</div>
                                     <div class="tooltip-container">
-                                        <div class="tooltip-text">The base price is a predetermined amount that a rider                                            is
+                                        <div class="tooltip-text">The base price is a predetermined amount that a rider
+                                            is
                                             charged as soon as the ride starts.</div>
                                     </div>
                                 </div>
@@ -176,7 +177,8 @@
                                 <div class="input-group-append centered-container">
                                     <div class="input-group-text bg-secondary text-white ">?</div>
                                     <div class="tooltip-container">
-                                        <div class="tooltip-text"> The unit distance price is the amount that a rider is charged for each mile or kilometer traveled after 
+                                        <div class="tooltip-text"> The unit distance price is the amount that a rider is
+                                            charged for each mile or kilometer traveled after
                                             base price distance.</div>
                                     </div>
                                 </div>
@@ -203,7 +205,8 @@
                                 <div class="input-group-append centered-container">
                                     <div class="input-group-text bg-secondary text-white ">?</div>
                                     <div class="tooltip-container">
-                                        <div class="tooltip-text">The unit time price is the amount that a rider is charged for each minute that they spend in the vehicle 
+                                        <div class="tooltip-text">The unit time price is the amount that a rider is
+                                            charged for each minute that they spend in the vehicle
                                             during a ride.</div>
                                     </div>
                                 </div>
@@ -346,40 +349,47 @@
     </form>
 </div>
 
-<div class="table-responsive table-hover">
-    <table class="table table-hover border">
-        <tr class="text-center bg-dark text-white">
-            <th class="py-2 border">Country</th>
-            <th class="py-2 border">City</th>
-            <th class="py-2 border">Vehicle Type</th>
-            <th class="py-2 border">Price Per Unit Distance</th>
-            <th class="py-2 border">Price Per Unit Time_Min</th>
-            <th class="py-2 border">Min. Fare</th>
-            <th class="py-2 border">Base Price</th>
-            <th class="py-2 border">Driver Profit</th>
-            <th class="py-2 border">Distance For Base Price</th>
-            <th class="py-2 border">Max Space</th>
-            <th class="py-2 border">edit</th>
-        </tr>
-        @for(price of PricingList ;track price){
-        <tr class="border text-center">
-            <td class="py-1 border">{{price.countryId.country}}</td>
-            <td class="py-1 border">{{price.cityId.formatted_address}} </td>
-            <td class="py-1 border">{{price.typeId.vehicleType}}</td>
-            <td class="py-1 border">{{price.pricePerUnitDistance}} {{price.countryId.currency}}</td>
-            <td class="py-1 border">{{price.pricePerUnitTime_Min}} {{price.countryId.currency}}</td>
-            <td class="py-1 border">{{price.minFare}} {{price.countryId.currency}}</td>
-            <td class="py-1 border">{{price.basePrice}} {{price.countryId.currency}}</td>
-            <td class="py-1 border">{{price.driverProfit}} %</td>
-            <td class="py-1 border">{{price.distanceForBasePrice}} km</td>
-            <td class="py-1 border">{{price.maxSpace}}</td>
-            <!-- <button class=" btn btn-info btn-sm my-2" (click)="editBtnClicked(price)" data-bs-toggle="modal" data-bs-target="#editForm">edit</button> -->
-            <td>
-                <button class="btn btn-warning btn-sm px-3 my-2 me-1 edit shadow" data-bs-toggle="modal"
-                    data-bs-target="#editModal" (click)="editBtnClicked(price)">Edit</button>
-            </td>
-        </tr>
-        }
+<div class="table-responsive ">
+    <table class="table table-striped table-hover border  hover">
+        <thead class=" table-dark">
+
+            <tr class="text-center bg-dark text-white">
+                <th class="py-2 border">Country</th>
+                <th class="py-2 border">City</th>
+                <th class="py-2 border">Vehicle Type</th>
+                <th class="py-2 border">Price Per Unit Distance</th>
+                <th class="py-2 border">Price Per Unit Time_Min</th>
+                <th class="py-2 border">Min. Fare</th>
+                <th class="py-2 border">Base Price</th>
+                <th class="py-2 border">Driver Profit</th>
+                <th class="py-2 border">Distance For Base Price</th>
+                <th class="py-2 border">Max Space</th>
+                <th class="py-2 border">edit</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @for(price of PricingList ;track price){
+            <tr class="border text-center">
+                <td class="py-1 border">{{price.countryId.country}}</td>
+                <td class="py-1 border">{{price.cityId.formatted_address}} </td>
+                <td class="py-1 border">{{price.typeId.vehicleType}}</td>
+                <td class="py-1 border">{{price.pricePerUnitDistance}} {{price.countryId.currency}}</td>
+                <td class="py-1 border">{{price.pricePerUnitTime_Min}} {{price.countryId.currency}}</td>
+                <td class="py-1 border">{{price.minFare}} {{price.countryId.currency}}</td>
+                <td class="py-1 border">{{price.basePrice}} {{price.countryId.currency}}</td>
+                <td class="py-1 border">{{price.driverProfit}} %</td>
+                <td class="py-1 border">{{price.distanceForBasePrice}} km</td>
+                <td class="py-1 border">{{price.maxSpace}}</td>
+                <!-- <button class=" btn btn-info btn-sm my-2" (click)="editBtnClicked(price)" data-bs-toggle="modal" data-bs-target="#editForm">edit</button> -->
+                <td>
+                    <button class="btn btn-warning btn-sm px-3 my-2 me-1 edit shadow" data-bs-toggle="modal"
+                        data-bs-target="#editModal" (click)="editBtnClicked(price)">Edit</button>
+                </td>
+            </tr>
+            }
+        </tbody>
+
     </table>
 </div>
 

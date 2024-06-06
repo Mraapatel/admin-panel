@@ -5,11 +5,11 @@ const routes = express.Router();
 const {addPrice ,getPrice ,updatePrice ,getCountry ,getCity ,getCityPricig} = require('../controllers/pricing-controller')
 
 
-routes.post('/add', addPrice);
+routes.post('/add', addPrice); // done
 
 routes.get('/fetch', getPrice);
 
-routes.post('/update',updatePrice)
+routes.post('/update',updatePrice) //done
 
 routes.post('/fetchCountries',getCountry)
 

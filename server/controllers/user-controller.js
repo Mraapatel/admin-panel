@@ -62,7 +62,7 @@ const addUser = async (req, res) => {
 
             let existingCCAndP = await User.findOne({ $and: [{ countryCallingCode: req.body.countryCallingCode }, { userPhone: req.body.userPhone }] });
 
-            console.log(existingCCAndP);
+            console.log('existingCCAndP',existingCCAndP);
             if (existingCCAndP) {
                 let errorMessage = '';
                 errorMessage = 'Phone number already exists!';
@@ -313,6 +313,8 @@ const updateUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
     try {
+
+        console.log('inside the delete user ' , req.body);
         await initializeStripe();
         let stripCustomer = await User.findById(req.body.id, { _id: false, stripCustomerId: true });
         let stripCustomerId = stripCustomer.stripCustomerId

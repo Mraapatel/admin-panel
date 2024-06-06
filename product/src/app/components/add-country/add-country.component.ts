@@ -258,6 +258,8 @@ export class AddCountryComponent {
   }
 
   addCountryToServer(data: any) {
+    console.log('data going to be stored',data);
+    
     this._addCountry.addCountry(data).subscribe((data) => {
       console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$');
 

@@ -42,6 +42,12 @@ const Country = mongoose.model('countries', countrySchema);
 
 routes.post('/', async (req, res) => {
     try {
+
+        let existingCountry = await Country.findOne({ country: req.body.country })
+        if (existingCountry) {
+            return res.status(400).send( { message: 'This country already exists' });
+        }
+
         const { country, currency, countryCode, countryCallingCode, timeZone, flagSymbol, countryCode2 } = req.body
 
         let newCountry = {
@@ -77,15 +83,15 @@ routes.get('/', async (req, res) => {
 });
 
 
-routes.put('/', async (req, res) => {
+routes.post('/searchCountry', async (req, res) => {
     try {
         console.log(req.body);
         let matchedCountry = await Country.find({
             $or: [
-                { country: { $regex: new RegExp(req.body.serch, 'i') } },
-                { countryCode: { $regex: new RegExp(req.body.serch, 'i') } },
-                { currency: { $regex: new RegExp(req.body.serch, 'i') } },
-                { countryCallingCode: { $regex: new RegExp(req.body.serch, 'i') } },
+                { country: { $regex: new RegExp(req.body.search, 'i') } },
+                { countryCode: { $regex: new RegExp(req.body.search, 'i') } },
+                { currency: { $regex: new RegExp(req.body.search, 'i') } },
+                { countryCallingCode: { $regex: new RegExp(req.body.search, 'i') } },
             ]
         });
         return res.status(200).send(matchedCountry, { message: 'Found  countries new bro' });

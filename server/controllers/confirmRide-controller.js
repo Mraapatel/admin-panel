@@ -52,11 +52,13 @@ const getRides = async (req, res) => {
 }
 
 const getVehicleTypes = async (req, res) => {
+    console.log('here');
     try {
         let response = {
             message: 'Error occured',
             TypesArray: []
         }
+
 
         console.log('inside the confirmRide getVehicleTypes ------->', req.body);
         let vehicleType = await createRide.aggregate([
@@ -171,12 +173,14 @@ const getDrivers = async (req, res) => {
         // global.ioInstance.emit('dakfja', 'broooooo  this is form the server ')
         // console.log('ioInstance----->',global.ioInstance);
 
-        if (Drivers) {
+        if (Drivers.length > 0) {
             response.driverArray = Drivers;
             response.message = 'Driver fetched successfully'
             // console.log(Drivers);
             res.status(200).json(response);
         }
+        response.message = 'No Driver Found'
+        res.status(404).json(response);
 
     } catch (e) {
         response.message = 'Some Error Occured while Feteching drivers'

@@ -20,8 +20,10 @@ const getRides = async (req, res) => {
             query = {
                 rideStatus: { $in: [rideStatus] } // Always exclude rideStatus 7 and 8
             };
-        } else {
-            let query = {
+        }
+         else {
+            console.log('insdie there');
+            query = {
                 rideStatus: { $in: [7, 8] } // Always exclude rideStatus 7 and 8
             };
         }
@@ -68,7 +70,7 @@ const getRides = async (req, res) => {
             }
             query.$or = query.$or.concat(searchConditions);
         }
-        console.log('query ===>' ,query);
+        console.log('query ===>', query);
         const aggregateQuery = [
             {
                 $match: {
@@ -127,15 +129,12 @@ const getRides = async (req, res) => {
             {
                 $project: {
                     __v: 0,
-                    _id: 0,
                     time: 0,
                     assignTime: 0,
                     nearestdriverList: 0,
-                    // rideStatus: 0,
                     'countryInfo.countryCode2': 0,
                     'countryInfo.flagSymbol': 0,
                     'countryInfo.timeZone': 0,
-                    // 'countryInfo.countryCode': 0,
                     'countryInfo.__v': 0,
                     'countryInfo._id': 0,
                     "userId.countryCallingCode": 0,
@@ -152,11 +151,8 @@ const getRides = async (req, res) => {
                     "driverId.__v": 0,
                     "userId.__v": 0,
                     'typeId.__v': 0,
-                    'typeId._id': 0,
                     'typeId.vehicleIcon': 0,
                     'cityId': 0,
-
-
                 }
             },
             { $match: query },
@@ -164,6 +160,7 @@ const getRides = async (req, res) => {
             // { $skip: (page - 1) * limit },
             // { $limit: limit },
         ];
+        // console.log('AggregateQuery------->',aggregateQuery);
 
         let rides = await createRide.aggregate(aggregateQuery)
         console.log('rides fetched', rides);
@@ -184,4 +181,31 @@ const getRides = async (req, res) => {
     }
 }
 
-module.exports = { getRides }
+const storeFeedback = async (req, res) => {
+    let response = {
+        message: 'Some Error Occured in While storing the feedback',
+        status:500
+    }
+    try {
+
+        console.log('inside the stroefeedback --->', req.body);
+        let ride = await createRide.findByIdAndUpdate(req.body.id, { feedback: { rating: req.body.rating, message: req.body.message } }  , {new :true})
+        console.log('storedfeedbackRide-->', ride);
+
+        if (ride) {
+            response.message = 'feedback stored Successfully';
+            response.status = 200;
+            return res.status(200).json(response)
+        }
+        
+        response.message = 'No such Rides Found';
+        response.status = 404;
+        return res.status(404).json(response)
+
+
+    } catch (e) {
+        console.log('Some Erorr Occured in storefeedback', e);
+        return res.status(500).json(response)
+    }
+}
+module.exports = { getRides, storeFeedback }

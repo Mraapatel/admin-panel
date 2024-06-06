@@ -200,7 +200,8 @@ const addDriver = async (req, res) => {
     try {
 
         if (req.body) {
-
+            console.log('inside the adddriver ----->',req.body);
+            // return ;
             let cCid = new mongoose.Types.ObjectId(req.body.countryId)
             let existingCCAndP = await Driver.findOne({ $and: [{ countryId: cCid }, { driverPhone: req.body.driverPhone }] });
 
@@ -757,7 +758,7 @@ const storeBankDetails = async (req, res) => {
         staus: 500
     }
     try {
-        console.log('inside the driverController - storeBankDetails', req.body);
+        console.log('inside the driverController - storeBankDetails--------->', req.body);
         if (req.body) {
             await initializeStripe();
             let fetchedDriver = await Driver.findById(req.body.driverId);

@@ -18,7 +18,7 @@ export class SettingService {
     return this._http.post<{
       message: string,
       status: number
-    }>('http://localhost:5000/allkeys', data)
+    }>('http://localhost:5000/allkeys/update', data)
   }
 
   getAllKeys() {

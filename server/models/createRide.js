@@ -84,6 +84,13 @@ const createRideSchema = new Schema({
     nearest: {
         type: Boolean,
         default: false
+    },
+    feedback: {
+        type: {
+            rating: Number,
+            message: String
+        },
+        default: null
     }
 })
 

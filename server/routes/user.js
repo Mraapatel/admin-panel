@@ -3,7 +3,7 @@ const multer = require('multer')
 const routes = express.Router();
 const path = require('path')
 
-const { addUser, getUser, updateUser, deleteUser, addCard, getCards, setDefaultCard, deleteCard  ,getSinglUser} = require('../controllers/user-controller');
+const { addUser, getUser, updateUser, deleteUser, addCard, getCards, setDefaultCard, deleteCard, getSinglUser } = require('../controllers/user-controller');
 // const { log } = require('console');
 
 const storage = multer.diskStorage({
@@ -18,21 +18,23 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 
-routes.post('/addUser', upload.single('userProfile'), addUser);
 
-routes.post('/addCard', addCard);
+routes.post('/addUser', upload.single('userProfile'), addUser); // done
 
-routes.post('/getCards', getCards);
+routes.post('/addCard', addCard); // done
 
-routes.post('/setDefaultCard', setDefaultCard);
+routes.post('/getCards', getCards); //done
 
-routes.post('/deleteCard', deleteCard);
+routes.post('/setDefaultCard', setDefaultCard);  //done
 
-routes.post('/getUser', getUser);
+routes.post('/deleteCard', deleteCard); //done
 
-routes.post('/updateUser', upload.single('userProfile'), updateUser);
+routes.post('/getUser', getUser); //done
 
-routes.post('/deleteUser', deleteUser);
+
+routes.post('/updateUser', upload.single('userProfile'), updateUser); // done
+
+routes.post('/deleteUser', deleteUser); // done
 
 routes.post('/getSinglUser', getSinglUser);
 

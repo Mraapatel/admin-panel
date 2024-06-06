@@ -54,6 +54,7 @@ const addVehicleType = async (req, res) => {
 
 const allVehicles = async (req, res) => {
     try {
+        console.log('inside the getallvehicles------>',req.body);
         if (req.body) {
 
             if (req.body.countryId !== 'none') {
@@ -119,6 +120,7 @@ const allVehicles = async (req, res) => {
 const allServices = async (req, res) => {
     try {
         if (req.body) {
+            console.log('inside theh allServices controller --->',req.body);
 
             if (req.body.countryId !== 'none') {
 
@@ -216,8 +218,8 @@ function deleteUploadedFile(fileName) {
 const editVehicleType = async (req, res) => {
     let changed
     const { _id, vehicleName } = req.body
-    console.log('1111--------------------------------------');
-    console.log(req.body);
+    // console.log('1111--------------------------------------');
+    console.log('inside the editvehicleType ------------->',req.body);
 
     let vehicleT = vehicleName.trim().toUpperCase();
 

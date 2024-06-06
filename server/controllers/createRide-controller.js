@@ -1,14 +1,32 @@
 const { City } = require('./city-controller');
 const { createRide } = require('../models/createRide');
 const { getRidesFormDb } = require('../utils/fetchRides');
+const mongoose = require('mongoose');
 
 
 const storeRide = async (req, res) => {
     try {
         let response = {
             message: 'Error occured',
-            rideInfo: {}
+            rideInfo: {},
+            status: 400
         }
+        let isUserHaveAlreadyRide = await createRide.aggregate([
+            {
+                $match: {
+                    userId: new mongoose.Types.ObjectId(req.body.userId),
+                    date: req.body.date
+                }
+            }
+        ])
+
+        if (isUserHaveAlreadyRide.length > 0) {
+            console.log('isUserHaveAlreadyRide',isUserHaveAlreadyRide);
+            response.status = 300
+            response.message = 'User have already booked Ride on this date'
+            return res.status(200).json(response)
+        }
+
         console.log('inside the createRide get sotreRide ------->');
         if (req.body) {
             console.log(req.body);
@@ -26,15 +44,15 @@ const storeRide = async (req, res) => {
                 startLocation: req.body.startLocation,
                 endLocation: req.body.endLocation,
                 timeInString: req.body.timeInString,
-
             }
 
             let saved = await createRide.create(newRide);
 
 
             if (saved) {
+                response.status = 200
                 response.rideInfo = saved;
-                response.message = 'Ride saved successfully'
+                response.message = 'Your ride is booked successfully'
             }
             return res.status(200).json(response);
         } else {

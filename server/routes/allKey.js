@@ -7,7 +7,7 @@ const routes = express.Router();
 const {saveData ,getKeys} = require('../controllers/allKey-controller');
 
 
-routes.post('/', saveData);
+routes.post('/update', saveData);
 
 routes.post('/getKeys', getKeys);
 

@@ -18,20 +18,20 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 
-routes.post('/addDriver', upload.single('driverProfile'), addDriver);
+routes.post('/addDriver', upload.single('driverProfile'), addDriver); //done
 
-routes.post('/addService', addService);
+routes.post('/addService', addService); // done
 
-routes.post('/getCities', getCities);
+routes.post('/getCities', getCities); // done
 
-routes.post('/storeBankDetails', storeBankDetails);
+routes.post('/storeBankDetails', storeBankDetails); // done
 
-routes.post('/getDrivers', getDrivers);
+routes.post('/getDrivers', getDrivers); //done
 
-routes.post('/updateDriver', upload.single('driverProfile'), updateDriver);
+routes.post('/updateDriver', upload.single('driverProfile'), updateDriver); // done
 
-routes.post('/deleteDriver', deleteDriver);
+routes.post('/deleteDriver', deleteDriver); // done
 
-routes.post('/approve', approveDriver);
+routes.post('/approve', approveDriver); //done
 
 module.exports = routes

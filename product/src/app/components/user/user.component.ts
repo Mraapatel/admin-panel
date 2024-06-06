@@ -584,6 +584,9 @@ export class UserComponent {
       cardId: card.cardId
     }
 
+    console.log('delete card ===> ' , details);
+    // return;
+    
     this._userService.deleteCard(details).pipe(
       tap((res) => {
         this._tostr.success('Card Deleted', 'Success');

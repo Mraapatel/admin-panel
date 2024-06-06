@@ -29,6 +29,18 @@
     border-radius: 5px
 }
 
+.font{
+    font-size: 2rem;
+    margin-right: 1rem;
+}
+.font2{
+    border: 2px solid rgb(110, 243, 210);
+    margin-top: 1rem;
+    width: 20px;
+    height: 20px;
+}
+
+
 /* .download{
     width: 2rem;
 } */

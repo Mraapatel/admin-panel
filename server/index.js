@@ -48,19 +48,18 @@ app.use(cors());
 app.use('/authenticate', jwt);
 
 app.use(varifyToken);
+
 app.use('/vehicleType', vehicleType);  //done
 
 app.use('/country', addCounty); // done
 
 app.use('/city', city); //done
 
-// app.use('/pricing', varifyToken, pricing);
 app.use('/pricing', pricing); // done
 
 app.use('/setting', settingStorage)
 
 app.use('/User', user); // done
-// app.use('/User', varifyToken, user);
 
 app.use('/driver', driver); // done 
 

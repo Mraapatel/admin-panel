@@ -8,7 +8,9 @@ const getRides = async (req, res) => {
         rides: []
     }
     try {
-        let date = req.body.date;
+        // let date = req.body.date;
+        let fromdate = req.body.fromdate;
+        let todate = req.body.todate;
         let vehicleType = req.body.vechicleType
         let searchTerm = req.body.searchTerm;
         let rideStatus = req.body.rideStatus;
@@ -21,7 +23,7 @@ const getRides = async (req, res) => {
                 rideStatus: { $in: [rideStatus] } // Always exclude rideStatus 7 and 8
             };
         }
-         else {
+        else {
             console.log('insdie there');
             query = {
                 rideStatus: { $in: [7, 8] } // Always exclude rideStatus 7 and 8
@@ -33,9 +35,19 @@ const getRides = async (req, res) => {
         if (vehicleType) {
             query['typeId._id'] = new mongoose.Types.ObjectId(vehicleType);
         }
-        console.log('date======>', date);
-        if (date) {
-            query.date = date;
+        // console.log('date======>', date);
+        // if (date) {
+        //     query.date = date;
+        // }
+        if (fromdate && todate) {
+            query.date = {
+                $gte: fromdate,
+                $lte: todate
+            };
+        } else if (fromdate) {
+            query.date = { $gte: new Date(fromdate) };
+        } else if (todate) {
+            query.date = { $lte: new Date(todate) };
         }
 
         let searchConditions = [];
@@ -163,7 +175,7 @@ const getRides = async (req, res) => {
         // console.log('AggregateQuery------->',aggregateQuery);
 
         let rides = await createRide.aggregate(aggregateQuery)
-        console.log('rides fetched', rides);
+        // console.log('rides fetched', rides);
 
         if (rides.length > 0) {
             response.rides = rides;
@@ -184,12 +196,12 @@ const getRides = async (req, res) => {
 const storeFeedback = async (req, res) => {
     let response = {
         message: 'Some Error Occured in While storing the feedback',
-        status:500
+        status: 500
     }
     try {
 
         console.log('inside the stroefeedback --->', req.body);
-        let ride = await createRide.findByIdAndUpdate(req.body.id, { feedback: { rating: req.body.rating, message: req.body.message } }  , {new :true})
+        let ride = await createRide.findByIdAndUpdate(req.body.id, { feedback: { rating: req.body.rating, message: req.body.message } }, { new: true })
         console.log('storedfeedbackRide-->', ride);
 
         if (ride) {
@@ -197,7 +209,7 @@ const storeFeedback = async (req, res) => {
             response.status = 200;
             return res.status(200).json(response)
         }
-        
+
         response.message = 'No such Rides Found';
         response.status = 404;
         return res.status(404).json(response)

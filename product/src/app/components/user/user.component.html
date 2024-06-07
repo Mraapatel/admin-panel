@@ -183,13 +183,13 @@
                                 value="{{card.cardId}}" [checked]="card.cardId === defaultCardId"
                                 [checked]="card.cardId === defaultCardId" (change)="onCardSelected(card.cardId)">
                         </th>
-                        <th class="text-start">
+                        <th class="text-start" >
                             <span class="text-primary border rounded-top border-bottom-0 border-end-0 border-start-0">
                                 {{card.brand}}</span>
                             @if(card.cardId == defaultCardId){
                             <span class="badge text-success default">Default</span>
                             }<br>
-                            XXXX XXXX XXXX<label for="default-card">{{card.last4}}</label>
+                            XXXX XXXX XXXX<label for="default-card-{{card.cardId}}">{{card.last4}}</label>
 
                         </th>
                         <td class="text-danger "><b>Exp:</b>

@@ -10,10 +10,19 @@ import { ConfirmRideService } from '../../services/confirm-ride.service';
 import { environment } from '../../../environments/environment.development';
 import { Loader } from '@googlemaps/js-api-loader';
 
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatNativeDateModule } from '@angular/material/core';
+
 @Component({
   selector: 'app-ride-history',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule,
+    MatButtonModule, MatDatepickerModule,
+    MatFormFieldModule, MatInputModule, MatNativeDateModule,
+    ],
   templateUrl: './ride-history.component.html',
   styleUrl: './ride-history.component.css'
 })
@@ -33,16 +42,19 @@ export class RideHistoryComponent {
   map!: google.maps.Map;
   geocoder!: google.maps.Geocoder;
   rideRoute!: google.maps.Polyline;
-  markers!: google.maps.Marker[]
+  markers: google.maps.Marker[] = []
 
 
   ngOnInit() {
 
     this.rideHistory = this._fb.group({
       searchTerm: [''],
-      rideStatus: [Number],
+      rideStatus: ['All Rides'],
       vechicleType: [''],
-      date: ['']
+      // date: [''],
+      fromdate: [''],
+      todate: [''],
+    
     });
 
     this.feedback = this._fb.group({
@@ -50,11 +62,18 @@ export class RideHistoryComponent {
       message: [''],
     });
     this._browserNotification.requestPermission();
+    const fromdateValue = this.rideHistory.get('fromdate')?.value;
+    const todateValue = this.rideHistory.get('todate')?.value;
+  
+    const formattedFromDate = fromdateValue ? this.formatDate(fromdateValue) : null;
+    const formattedToDate = todateValue ? this.formatDate(todateValue) : null;
     let details = {
       // limit: this.limit,
       // page: this.pageNumber,
       // sort: 'none',
-      date: this.rideHistory.get('date')?.value,
+      // date: this.rideHistory.get('date')?.value,
+      fromdate: formattedFromDate,
+      todate: formattedToDate,
       rideStatus: null,
       searchTerm: '',
       vechicleType: this.rideHistory.get('vechicleType')?.value
@@ -100,6 +119,7 @@ export class RideHistoryComponent {
       tap((res) => {
         console.log('res tap', res);
         if (res.message === 'Rides Fetched Successfully') {
+          this._toster.success('Rides Fetched successfully')
           this.RidesFetched = res.rides
         }
 
@@ -107,13 +127,28 @@ export class RideHistoryComponent {
     ).subscribe()
   }
 
+  selectedDateRange(){
+    if(this.rideHistory.get('fromdate')?.value == '' , this.rideHistory.get('todate')?.value == ''){
+      this._toster.error('Please Select both dates');
+      return
+    }
+    this.searchRides(this.rideHistory.get('searchTerm')?.value);
+  }
 
   searchRides(val: string) {
+
+    const fromdateValue = this.rideHistory.get('fromdate')?.value;
+    const todateValue = this.rideHistory.get('todate')?.value;
+  
+    const formattedFromDate = fromdateValue ? this.formatDate(fromdateValue) : null;
+    const formattedToDate = todateValue ? this.formatDate(todateValue) : null;
     let details = {
       // limit: this.limit,
       // page: this.pageNumber,
       // sort: 'none',
-      date: this.rideHistory.get('date')?.value,
+      // date: this.rideHistory.get('date')?.value,
+      fromdate: formattedFromDate,
+      todate: formattedToDate,
       rideStatus: parseInt(this.rideHistory.get('rideStatus')?.value),
       searchTerm: val,
       vechicleType: this.rideHistory.get('vechicleType')?.value
@@ -130,8 +165,15 @@ export class RideHistoryComponent {
       return;
     }
     this.rideHistory.reset();
+        const fromdateValue = this.rideHistory.get('fromdate')?.value;
+    const todateValue = this.rideHistory.get('todate')?.value;
+  
+    const formattedFromDate = fromdateValue ? this.formatDate(fromdateValue) : null;
+    const formattedToDate = todateValue ? this.formatDate(todateValue) : null;
     let details = {
-      date: this.rideHistory.get('date')?.value,
+      // date: this.rideHistory.get('date')?.value,
+      fromdate: formattedFromDate,
+      todate: formattedToDate,
       rideStatus: parseInt(this.rideHistory.get('rideStatus')?.value),
       searchTerm: this.rideHistory.get('searchTerm')?.value,
       vechicleType: this.rideHistory.get('vechicleType')?.value
@@ -195,13 +237,14 @@ export class RideHistoryComponent {
     this.feedback.reset()
     this.selectedRide = ride
     console.log('selectedride', this.selectedRide);
-    if (this.selectedRide.feedback) {
+    if (this.selectedRide.feedback !== null) {
       console.log('inside the this.selectedRide.feedback condtion');
 
       this.feedback.patchValue({
         rating: this.selectedRide.feedback.rating,
         message: this.selectedRide.feedback.message
       })
+      // this.feedback.disable()
     }
     // this.rideInfo(ride);
   }
@@ -345,6 +388,14 @@ export class RideHistoryComponent {
     if (this.rideRoute) {
       console.log('inside the if condtion ');
       this.rideRoute.setMap(null); // Remove the polyline from the map
+      if (this.markers) {
+        console.log('inside the if this.markers');
+
+        this.markers.forEach(marker => {
+          marker.setMap(null);
+        });
+        this.markers = [];
+      }
     }
 
     let latLng: { lat: number, lng: number }[] = [];
@@ -369,24 +420,35 @@ export class RideHistoryComponent {
       strokeWeight: 2,
     })
 
-    // latLng.forEach((point, index) => {
-    //   const mark = new google.maps.Marker({
-    //     position: point,
-    //     label: (index + 1).toString(),
-    //     map: this.map
-    //   });
-    //   // this.markers.push(mark)
-    // });
+
+    latLng.forEach((point, index) => {
+      const mark = new google.maps.Marker({
+        position: point,
+        label: (index + 1).toString(),
+        map: this.map
+      });
+      console.log('mark', mark);
+      this.markers.push(mark)
+    });
 
 
 
-    const bound = new google.maps.LatLngBounds()
-    bound.extend(latLng[0])
-    bound.extend(latLng[latLng.length - 1])
-    this.map.fitBounds(bound);
+    this.fitMapToBounds(latLng);
+    // const bound = new google.maps.LatLngBounds()
+    // bound.extend(latLng[0])
+    // bound.extend(latLng[latLng.length - 1])
+    // this.map.fitBounds(bound);
     // this.map.setCenter(latLng[0])
     // this.map.setZoom(10)
     this.rideRoute.setMap(this.map)
+  }
+
+  fitMapToBounds(latLng: { lat: number, lng: number }[]) {
+    const bound = new google.maps.LatLngBounds();
+    latLng.forEach(point => {
+      bound.extend(point);
+    });
+    this.map.fitBounds(bound);
   }
 
 
@@ -405,5 +467,13 @@ export class RideHistoryComponent {
         }
       });
     });
+  }
+
+  formatDate(date: string | Date): string {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = (d.getMonth() + 1).toString().padStart(2, '0');
+    const day = d.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

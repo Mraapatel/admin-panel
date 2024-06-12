@@ -1,11 +1,11 @@
 const cron = require('node-cron');
-const { fetchAllRidesByStatus, fetchSinglRideInfo } = require('./fetchAllRidesByStatus');
+const { fetchAllRidesByStatus } = require('./fetchAllRidesByStatus');
 // const { fetchIdleDrivers } = require('./fetchIdleDrivers');
 // const { getSettings } = require('../utils/getSettings');
-const { AssignRideToDriver, removeDriverFormRide, updateRideAndDriverModal } = require('./comman');
+// const { default: mongoose } = require('mongoose');
+const { updateRideAndDriverModal } = require('./comman');
 const { assignedRides } = require('./manuallyAssignedRides');
 const { Driver } = require('../controllers/driverList-controller');
-const { default: mongoose } = require('mongoose');
 const { createRide } = require('../models/createRide');
 
 
@@ -14,7 +14,7 @@ let IdleRides = [];
 
 const startCron = cron.schedule('*/1 * * * * *', async () => {
 
-    console.log('cron Ran');
+    // console.log('cron Ran');
     await checkForManual();
     await assignNewDriverToRide();
 
@@ -22,7 +22,7 @@ const startCron = cron.schedule('*/1 * * * * *', async () => {
     scheduled: false
 })
 
-// startCron.start()
+startCron.start()
 
 
 const assignNewDriverToRide = async () => {
@@ -30,7 +30,7 @@ const assignNewDriverToRide = async () => {
     // console.log('idlerides by nearby', IdleRides);
 
 
-    console.log('----------------------------------------------------------------------------------------------------------------------------');
+    // console.log('-------------------------------------------------------');
     if (IdleRides.length > 0) {
         for (let i = 0; i < IdleRides.length; i++) {
             const ride = IdleRides[i];
@@ -135,11 +135,11 @@ const assignNewDriverToRide = async () => {
                     _id: { $nin: ride.nearestdriverList }
                 })
 
-                if (ride._id == '6649e23cb887aef24ed4ed90') {
+                // if (ride._id == '6649e23cb887aef24ed4ed90') {
 
-                    let d = await Driver.findById(new mongoose.Types.ObjectId('6645d6cd6338fc54614de0ff'))
-                    console.log('dddddddddddd', d);
-                }
+                //     let d = await Driver.findById(new mongoose.Types.ObjectId('6645d6cd6338fc54614de0ff'))
+                //     console.log('dddddddddddd', d);
+                // }
                 console.log('remaining driver ------------>', remainingDriver);
 
                 if (remainingDriver) {

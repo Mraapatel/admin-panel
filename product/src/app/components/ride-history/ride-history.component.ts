@@ -22,7 +22,7 @@ import { MatNativeDateModule } from '@angular/material/core';
   imports: [CommonModule, ReactiveFormsModule,
     MatButtonModule, MatDatepickerModule,
     MatFormFieldModule, MatInputModule, MatNativeDateModule,
-    ],
+  ],
   templateUrl: './ride-history.component.html',
   styleUrl: './ride-history.component.css'
 })
@@ -54,7 +54,7 @@ export class RideHistoryComponent {
       // date: [''],
       fromdate: [''],
       todate: [''],
-    
+
     });
 
     this.feedback = this._fb.group({
@@ -64,7 +64,7 @@ export class RideHistoryComponent {
     this._browserNotification.requestPermission();
     const fromdateValue = this.rideHistory.get('fromdate')?.value;
     const todateValue = this.rideHistory.get('todate')?.value;
-  
+
     const formattedFromDate = fromdateValue ? this.formatDate(fromdateValue) : null;
     const formattedToDate = todateValue ? this.formatDate(todateValue) : null;
     let details = {
@@ -127,8 +127,8 @@ export class RideHistoryComponent {
     ).subscribe()
   }
 
-  selectedDateRange(){
-    if(this.rideHistory.get('fromdate')?.value == '' , this.rideHistory.get('todate')?.value == ''){
+  selectedDateRange() {
+    if (this.rideHistory.get('fromdate')?.value == '', this.rideHistory.get('todate')?.value == '') {
       this._toster.error('Please Select both dates');
       return
     }
@@ -139,7 +139,7 @@ export class RideHistoryComponent {
 
     const fromdateValue = this.rideHistory.get('fromdate')?.value;
     const todateValue = this.rideHistory.get('todate')?.value;
-  
+
     const formattedFromDate = fromdateValue ? this.formatDate(fromdateValue) : null;
     const formattedToDate = todateValue ? this.formatDate(todateValue) : null;
     let details = {
@@ -165,9 +165,13 @@ export class RideHistoryComponent {
       return;
     }
     this.rideHistory.reset();
-        const fromdateValue = this.rideHistory.get('fromdate')?.value;
+    // if (!Object.values(formValues).some(value => value !== '')) {
+    //   this._toster.info('There is nothing to clear', 'Info');
+    //   return;
+    // }
+    const fromdateValue = this.rideHistory.get('fromdate')?.value;
     const todateValue = this.rideHistory.get('todate')?.value;
-  
+
     const formattedFromDate = fromdateValue ? this.formatDate(fromdateValue) : null;
     const formattedToDate = todateValue ? this.formatDate(todateValue) : null;
     let details = {

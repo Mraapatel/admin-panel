@@ -47,9 +47,8 @@ const getRidesFormDb = async (pages, rideLimit, searchTerm, vehicleType, date, r
                 { 'userId.userEmail': { $regex: new RegExp(searchTerm, 'i') } },
                 { 'userId.userPhone': { $regex: new RegExp(searchTerm, 'i') } },
                 { 'countryInfo.country': { $regex: new RegExp(searchTerm, 'i') } },
-                { date: { $regex: new RegExp(searchTerm, 'i') } },
-                { startLocation: { $regex: new RegExp(searchTerm, 'i') } }, // Example for another field
-                { endLocation: { $regex: new RegExp(searchTerm, 'i') } }, // Example for another field
+                //  { startLocation: { $regex: new RegExp(searchTerm, 'i') } }, 
+                //  { endLocation: { $regex: new RegExp(searchTerm, 'i') } }, 
                 { paymentMethod: { $regex: new RegExp(searchTerm, 'i') } },
                 { 'countryInfo.currency': { $regex: new RegExp(searchTerm, 'i') } },
                 { 'countryInfo.countryCode': { $regex: new RegExp(searchTerm, 'i') } },
@@ -138,8 +137,9 @@ const getRidesFormDb = async (pages, rideLimit, searchTerm, vehicleType, date, r
             },
             { $match: query },
             { $skip: (page - 1) * limit },
-            { $limit: limit },
+            // { $limit: limit },
         ];
+
 
         if (searchConditions.length > 0) {
             aggregateQuery.push({ $match: { $or: searchConditions } });
@@ -148,6 +148,7 @@ const getRidesFormDb = async (pages, rideLimit, searchTerm, vehicleType, date, r
         Rides = await createRide.aggregate(aggregateQuery).collation({ locale: 'en', strength: 2 });
         console.log('Rides.length,', Rides.length);
 
+        ////////////////////////////  pagination logic ///////////////////////////////
         if (vehicleType) {
 
             aggregateQuery.push({

@@ -5,7 +5,7 @@ require('dotenv').config();
 const path = require('path');
 const socket = require('./middlewares/socket-io');
 
-global.NotificationCount = null;
+// global.NotificationCount = null;
 
 
 const app = express();

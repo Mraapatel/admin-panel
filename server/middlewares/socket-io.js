@@ -1,10 +1,19 @@
 const { Server } = require('socket.io');
 const { getDrivers } = require('../controllers/confirmRide-controller');
 const { runnigRequest, allRunnigRequest, driverAccecptedRide } = require('../controllers/runningRequest-controller');
+const { createRide } = require('../models/createRide');
+const { getCount } = require('../utils/comman')
+
+
 
 global.ioInstance = null
 
-function initialize(server) {
+
+// async function getCount() {
+//     return await createRide.countDocuments({ rideStatus: 9 });
+// }
+
+async function initialize(server) {
     global.ioInstance = new Server(server, {
         cors: {
             origin: ['http://localhost:4200'],
@@ -20,28 +29,31 @@ function initialize(server) {
         })
 
         socket.on('updateCount', async (data) => {
-            console.log('updateCount event catched', data);
+            console.log('updateCount event catched in first', data);
             global.NotificationCount++
-            console.log('global' ,global.NotificationCount);
+            console.log('using the getCount------->>>', await getCount());
             // console.log('socket object',socket);
-            global.ioInstance.emit('updatedCount', global.NotificationCount);
+            // global.ioInstance.emit('updatedCount', global.NotificationCount);
+            global.ioInstance.emit('updatedCount', await getCount());
 
         })
 
         socket.on('updateCountDes', async (data) => {
             console.log('updateCountDes event catched', data);
             global.NotificationCount--
-            console.log('global iin des ' ,global.NotificationCount);
+            console.log('global iin des ', global.NotificationCount);
             // console.log('socket object',socket);
-            global.ioInstance.emit('updatedCount', global.NotificationCount);
+            global.ioInstance.emit('updatedCount', await getCount());
+            // global.ioInstance.emit('updatedCount', global.NotificationCount);
         })
 
         socket.on('getCount', async (data) => {
             console.log('getCount event catched', data);
             // global.NotificationCount--
-            console.log('global iin des ' ,global.NotificationCount);
+            console.log('using the getCount------->>>', await getCount());
             // console.log('socket object',socket);
-            global.ioInstance.emit('updatedCount', global.NotificationCount);
+            // global.ioInstance.emit('updatedCount', global.NotificationCount);
+            global.ioInstance.emit('updatedCount', await getCount());
         })
 
         // db.collection.aggregate([
@@ -81,4 +93,4 @@ function initialize(server) {
 }
 
 
-module.exports = { initialize };
+module.exports = { initialize, getCount };

@@ -156,7 +156,7 @@ const assignNewDriverToRide = async () => {
 
                     // if (ride.driverId) {
                     // removeDriverFormRide(ride._id);
-                    let updatedRide4 = await createRide.findByIdAndUpdate(ride._id, { driverId: null, rideStatus: 0, nearest: false, nearestdriverList: [], assignTime: null }, { new: true });
+                    let updatedRide4 = await createRide.findByIdAndUpdate(ride._id, { driverId: null, rideStatus: 9, nearest: false, nearestdriverList: [], assignTime: null }, { new: true });
                     let data = {
                         rideId: updatedRide4._id,
                         rideStatus: updatedRide4.rideStatus

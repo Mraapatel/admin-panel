@@ -73,7 +73,7 @@ const updateRideAndDriverModal = async (rideIds, driverIds) => {
 
         const update1 = {
             $set: {
-                rideStatus: 0,
+                rideStatus: 9,
                 driverId: null
             }
         }
@@ -196,7 +196,9 @@ const fetchSingleRide = async (rideId) => {
     }
 }
 
-
+async function getCount() {
+    return await createRide.countDocuments({ rideStatus: 9 });
+}
 // const fetchSinglRideInfo = async (rideId)=>{
 //     try{
 //         if(rideId){
@@ -207,4 +209,4 @@ const fetchSingleRide = async (rideId) => {
 //     }
 // }
 
-module.exports = { AssignRideToDriver, removeDriverFormRide, updateRideAndDriverModal, fetchSingleRide }
+module.exports = { AssignRideToDriver, removeDriverFormRide, updateRideAndDriverModal, fetchSingleRide ,getCount}

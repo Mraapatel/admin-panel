@@ -10,6 +10,7 @@ const { getRidesFormDb } = require('../utils/fetchRides');
 const { fetchIdleDrivers } = require('../utils/fetchIdleDrivers');
 const { addFunds } = require('../utils/addFunds');
 const { sendEmail } = require('../utils/email');
+const { getCount} = require('../utils/comman')
 // const secreat_strip_key = await fetchKeys('stripe')
 // const stripe = require('stripe')(secreat_strip_key);
 let stripe = null
@@ -177,10 +178,10 @@ const getDrivers = async (req, res) => {
             response.driverArray = Drivers;
             response.message = 'Driver fetched successfully'
             // console.log(Drivers);
-            res.status(200).json(response);
+         return   res.status(200).json(response);
         }
         response.message = 'No Driver Found'
-        res.status(404).json(response);
+       return res.status(404).json(response);
 
     } catch (e) {
         response.message = 'Some Error Occured while Feteching drivers'
@@ -198,7 +199,8 @@ const assignNearestDriver = async (req, res) => {
 
             let ride = await createRide.findByIdAndUpdate(req.body.rideId, {
                 nearest: true, rideStatus: 1
-            }, { new: true })
+            }, { new: true });
+            global.ioInstance.emit('updatedCount', await getCount());
 
             if (ride) {
                 return res.status(200).json({ message: 'The ride will be Assigned' });

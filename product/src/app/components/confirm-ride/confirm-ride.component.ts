@@ -385,7 +385,7 @@ export class ConfirmRideComponent {
           this.RidesFetched.forEach((r, index) => {
             if (res.includes(r._id)) {
               this.RidesFetched[index].driverId = null
-              this.RidesFetched[index].rideStatus = 0
+              this.RidesFetched[index].rideStatus = 9
               this.notify(this.RidesFetched[index].userId.userName )
             }
           })

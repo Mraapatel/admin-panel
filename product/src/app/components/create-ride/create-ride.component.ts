@@ -101,17 +101,11 @@ export class CreateRideComponent {
       countryCC: ['', Validators.required],
       userName: [{ value: '', disabled: true }],
       userEmail: [{ value: '', disabled: true }],
-      // inputfileds: this._fb.array([
-      //   // this._fb.control('')
-      // ])
     })
 
     this.locationForm = this._fb.group({
       form: ['', Validators.required],
       to: ['', Validators.required],
-      // inputfileds: this._fb.array([
-      //   // this._fb.control('')
-      // ]),
       stops: ['']
     });
 
@@ -122,11 +116,9 @@ export class CreateRideComponent {
       bookingDate: [, [Validators.required, DateValidator()]],
       booktime: [, [Validators.required, TimeValidator()]],
     })
-
-
-
   }
 
+  
   /*
  pageload() {
    if (navigator.geolocation) {
@@ -277,7 +269,7 @@ export class CreateRideComponent {
       this.autocompleteInput3.value.trim() == '' ||
       this.IntermediateStop !== this.StopsField.nativeElement.value
     ) {
-      this._toastr.warning(`Please select form autosuggetion `, 'Warning');
+      this._toastr.warning(`Please select form autosuggetion `);
       return;
     }
     this.bookRideForm.reset();
@@ -454,23 +446,6 @@ export class CreateRideComponent {
   }
 
 
-  focusMarker(type: string) {
-    if (this.locationMarker && this.map) {
-      this.map.setCenter(this.locationMarker.getPosition()!);
-      this.map.setZoom(10); // Adjust the zoom level as needed
-    }
-  }
-
-  Clear() {
-    this.showDetails = false;
-    this.gotUser = null
-    this.userForm.reset();
-    this.userForm.get('userPhone')?.setValue('')
-    this.userForm.get('countryCC')?.setValue('')
-    this.userForm.get('userPhone')?.enable();
-    this.userForm.get('countryCC')?.enable();
-  }
-
   getTheLocations() {
     this.addPlaces = true;
     this._createRideService.getCities(this.CountryId).pipe(
@@ -503,8 +478,10 @@ export class CreateRideComponent {
       this._toastr.warning(`First add form and to location `, 'Warning');
       return;
     }
-    if (this.FormStop === this.ToStop) {
-      this._toastr.warning(`Both locations can't be same`, 'Warning');
+    if (this.FormStop === this.ToStop && !(this.STOPS.length > 0)) {
+      this._toastr.warning(`Please Add Way Point because Both locations can't be same`, );
+      this.showOverView = false;
+
       if (this.DirectionsRenderer) this.DirectionsRenderer.setMap(null);
       return;
     }
@@ -553,6 +530,7 @@ export class CreateRideComponent {
       destination: this.EndField.nativeElement.value,
       waypoints: this.STOPS.map((stop) => { return { location: stop }; }),
       travelMode: google.maps.TravelMode.DRIVING,
+      optimizeWaypoints: true,
     }
 
     this.DirectionService.route(request, (result, status) => {
@@ -733,12 +711,10 @@ export class CreateRideComponent {
   }
 
   dateSelected() {
-    // let today = new Date()
-    // let choosedDate = new Date(this.bookRideForm.get('bookingDate')?.value)
-    // console.log(choosedDate.getDate());
-
     this.bookRideForm.get('booktime')?.setValue('');
   }
+
+
   // createZonesOfCities() {
   //   this.TurnAutocomplete();
   //   if (this.cities.length >= 1) {
@@ -772,5 +748,21 @@ export class CreateRideComponent {
     return true
   }
 
+  focusMarker(type: string) {
+    if (this.locationMarker && this.map) {
+      this.map.setCenter(this.locationMarker.getPosition()!);
+      this.map.setZoom(10); // Adjust the zoom level as needed
+    }
+  }
+
+  Clear() {
+    this.showDetails = false;
+    this.gotUser = null
+    this.userForm.reset();
+    this.userForm.get('userPhone')?.setValue('')
+    this.userForm.get('countryCC')?.setValue('')
+    this.userForm.get('userPhone')?.enable();
+    this.userForm.get('countryCC')?.enable();
+  }
 
 }

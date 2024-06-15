@@ -3,8 +3,9 @@ const { createRide } = require('../models/createRide');
 const mongoose = require('mongoose');
 const { Driver } = require('./driverList-controller');
 const { fetchAllRidesByStatus } = require('../utils/fetchAllRidesByStatus');
+const { getCount } = require('../utils/comman');
 
-const assignDriverToRide = async (req, res) => {
+const assignDriverToRide = async (req, res) => {    
     let response = {
         // AssignedRide: {},
         message: 'faild to assign driver'
@@ -15,7 +16,10 @@ const assignDriverToRide = async (req, res) => {
         let date = new Date()
         let time = date.getTime();
         await createRide.findByIdAndUpdate(req.body.rideId, { assignTime: time, rideStatus: req.body.rideStatus, driverId: new mongoose.Types.ObjectId(req.body.driverId), nearest: false })
-        await Driver.findByIdAndUpdate(req.body.driverId, { driverStatus: 1 })
+        await Driver.findByIdAndUpdate(req.body.driverId, { driverStatus: 1 });
+        console.log('why----->>', await getCount());
+        global.ioInstance.emit('updatedCount', await getCount());
+
 
         const aggregateQuery = [
             {
@@ -268,17 +272,19 @@ const driverRejectedRide = async (req, res) => {
         Ride: {},
         message: "Faild to Reject Ride"
     }
-
+ 
     try {
         let status
         if (req.body.nearest) {
             status = 1
         } else {
-            status = 0
+            status = 9
         }
         console.log('inside the runningRequest - driverRejectedRide', req.body);
         const rejectedRide = await createRide.findByIdAndUpdate(req.body.rideId, { rideStatus: status, driverId: null, assignTime: null }, { new: true })
-        await Driver.findByIdAndUpdate(req.body.driverId, { driverStatus: 0 })
+        await Driver.findByIdAndUpdate(req.body.driverId, { driverStatus: 0 });
+        global.ioInstance.emit('updatedCount', await getCount());
+
 
         if (rejectedRide) {
             response.Ride = rejectedRide

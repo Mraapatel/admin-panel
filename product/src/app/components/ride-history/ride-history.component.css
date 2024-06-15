@@ -79,17 +79,44 @@ hr {
     /* Firefox */
 }
 
-/* 
-  mat-form-field{
-    background-color: red;
-  }
+/* mat-form-field {
+    background-color: red ;
+} */
 
-  mat-date-range-input{
-    background-color: red;
-  }
-  mat-datepicker-toggle{
-    background-color: red;
-  }
-  mat-date-range-picker{
-    background-color: red;
-  } */
+
+/* mat-date-range-input {
+    background-color: red !important;
+}
+
+mat-datepicker-toggle {
+    background-color: red !important;
+}
+
+mat-date-range-picker {
+    background-color: red !important;
+} */
+
+.mat-mdc-text-field-wrapper {
+    display: none !important;
+}
+
+.mat-mdc-form-field-subscript-wrapper{
+    display: none !important;
+}
+
+
+/* .mat-mdc-form-field-subscript-wrapper,
+.mat-mdc-form-field-bottom-align {
+    display: none !important;
+}
+
+.mat-mdc-form-field-hint-wrapper,
+.ng-trigger,
+.ng-trigger-transitionMessages {
+    display: none !important;
+
+}
+
+.mat-mdc-form-field-hint-spacer {
+    display: none !important;
+} */

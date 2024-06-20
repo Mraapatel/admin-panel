@@ -402,61 +402,7 @@ const addDriver = async (req, res) => {
                 }
 
 
-                // stripe.customers.create(stripCustomer, async (err, customer) => {
-                //     if (err) {
-                //         console.log("Some Error Occured" + err);
-                //         return res.status(500).json({ error: 'Stripe customer creation failed' });
-                //     }
-                //     if (customer) {
-                //         console.log(customer);
-                //         let stripCustomerId = customer.id;
-                //         let updatedDriver = await Driver.findByIdAndUpdate(addedDriver._id, { driverStripCustomerId: stripCustomerId })
-                //         console.log('done');
-
-                //         if (updatedDriver) {
-
-                //             let newDriver = await Driver.aggregate([
-                //                 {
-                //                     $match: {
-                //                         // _id:addedDriver._id
-                //                         _id: new mongoose.Types.ObjectId(updatedDriver._id)
-
-                //                     }
-                //                 },
-                //                 {
-                //                     $lookup: {
-                //                         from: 'cityzones',
-                //                         localField: 'cityId',
-                //                         foreignField: '_id',
-                //                         as: 'cityId'
-                //                     }
-                //                 },
-                //                 {
-                //                     $unwind: '$cityId'
-                //                 },
-                //                 {
-                //                     $lookup: {
-                //                         from: 'countries',
-                //                         localField: 'countryId',
-                //                         foreignField: '_id',
-                //                         as: 'countryId'
-                //                     }
-                //                 },
-                //                 {
-                //                     $unwind: '$countryId'
-                //                 }
-
-                //             ])
-
-                //             console.log('newly added user -----------', newDriver[0]);
-                //             return res.status(200).send(newDriver[0], { message: 'added successfully' });
-                //         }
-                //         // return res.status(200).send(updatedDriver, { message: 'added successfully' });
-                //     }
-                //     else {
-                //         console.log("Unknown Error");
-                //     }
-                // })
+              
             }
             console.log('done');
         }

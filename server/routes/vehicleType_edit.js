@@ -3,8 +3,6 @@ const multer = require('multer')
 const routes = express.Router();
 const path = require('path')
 
-const { addVehicleType, allVehicles, editVehicleType } = require('../controllers/vehicleType-controller');
-const { log } = require('console');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -18,9 +16,6 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-
-
-// routes.post('/', upload.single('vehicleIcon'), editVehicleType);
 
 
 module.exports = routes

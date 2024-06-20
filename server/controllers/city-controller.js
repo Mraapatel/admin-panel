@@ -32,10 +32,6 @@ zoneSchema.index({ zone: '2dsphere' });
 
 const City = mongoose.model('cityZone', zoneSchema);
 
-// mongoose.connect('mongodb://127.0.0.1:27017/Product')
-//     .then(() => console.log('connection is successfull...'))
-//     .catch((error) => console.log(error));
-
 
 const addZone = async (req, res) => {
     try {

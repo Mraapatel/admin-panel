@@ -26,9 +26,6 @@ const addPrice = async (req, res) => {
         let typeId = new mongoose.Types.ObjectId(req.body.typeId);
 
         let newPrice = {
-            // countryName: req.body.countryName,
-            // cityName: req.body.cityName,
-            // vehicleType: req.body.vehicleType,
             countryId: countryId,
             cityId: cityId,
             typeId: typeId,
@@ -167,7 +164,7 @@ const getPrice = async (req, res) => {
 
 const getCountry = async (req, res) => {
     try {
-        console.log('inside the getCountry --->',req.body);
+        console.log('inside the getCountry --->', req.body);
         let countryList = [];
         countryList = await Pricing.aggregate([
 

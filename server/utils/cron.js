@@ -1,8 +1,5 @@
 const cron = require('node-cron');
 const { fetchAllRidesByStatus } = require('./fetchAllRidesByStatus');
-// const { fetchIdleDrivers } = require('./fetchIdleDrivers');
-// const { getSettings } = require('../utils/getSettings');
-// const { default: mongoose } = require('mongoose');
 const { updateRideAndDriverModal } = require('./comman');
 const { assignedRides } = require('./manuallyAssignedRides');
 const { Driver } = require('../controllers/driverList-controller');
@@ -27,16 +24,11 @@ startCron.start()
 
 const assignNewDriverToRide = async () => {
     IdleRides = await fetchAllRidesByStatus(1, true);
-    // console.log('idlerides by nearby', IdleRides);
-
-
     // console.log('-------------------------------------------------------');
     if (IdleRides.length > 0) {
         for (let i = 0; i < IdleRides.length; i++) {
             const ride = IdleRides[i];
             console.log('****************************************', ride.endLocation, '********************************************************************************************************');
-            // console.log('HERRRRRRRRRRRRRRRR', i);
-            // console.log('dirverId', ride.driverId);
             if (ride.driverId !== null) {
                 let removedDriver = await Driver.findByIdAndUpdate(ride.driverId, { driverStatus: 0 }, { new: true })
                 console.log('removedDriver', removedDriver);
@@ -44,19 +36,12 @@ const assignNewDriverToRide = async () => {
             console.log('eeeeeeeeeeeeeeeeeeeeeeee');
             // console.log('ddddddddddddd----------in', ride.notAssigndDrivers);
             if (ride.notAssigndDrivers && ride.notAssigndDrivers.length > 0) {
-                // console.log('broooooo', ride.notAssigndDrivers[0]);
-                // console.log('ddddddddddddd ---------out', ride);
 
                 let c = await Driver.findById(ride.notAssigndDrivers[0])
                 console.log('cccccccccccc', c);
-                // console.log('dddddddddddd', ride.notAssigndDrivers[0]);
-
 
                 if (c && c.driverStatus == 0) {
                     try {
-
-                        // console.log('ride.id', ride._id);
-                        // console.log('ride.notAssigndDrivers[0]', ride.notAssigndDrivers[0]);
 
                         let date = new Date()
                         let time = date.getTime();
@@ -66,12 +51,9 @@ const assignNewDriverToRide = async () => {
                             driverId: ride.notAssigndDrivers[0],
                             $push: { nearestdriverList: ride.notAssigndDrivers[0] }
                         }, { new: true }).lean()
-                        // console.log('after updateing the ride info');
 
                         // console.log('inside the c.driverStatus == 0');
                         let updatedDriver = await Driver.findByIdAndUpdate(ride.notAssigndDrivers[0], { driverStatus: 1 }, { new: true })
-
-
                         let updatedRide = ride
                         updatedRide.driverId = updatedDriver
                         updatedRide.rideStatus = rideUpdated.rideStatus
@@ -114,11 +96,8 @@ const assignNewDriverToRide = async () => {
                         }
                         global.ioInstance.emit('NoDriverRemaining-ByCron', data)
                         console.log('NoDriverRemaining-ByCron event inside the if 2" -else ');
-
                     }
-
                 }
-
             }
             else {
 
@@ -135,11 +114,6 @@ const assignNewDriverToRide = async () => {
                     _id: { $nin: ride.nearestdriverList }
                 })
 
-                // if (ride._id == '6649e23cb887aef24ed4ed90') {
-
-                //     let d = await Driver.findById(new mongoose.Types.ObjectId('6645d6cd6338fc54614de0ff'))
-                //     console.log('dddddddddddd', d);
-                // }
                 console.log('remaining driver ------------>', remainingDriver);
 
                 if (remainingDriver) {
@@ -153,9 +127,6 @@ const assignNewDriverToRide = async () => {
                     console.log('PutRideOnHold-FromCron event inside the else - if ', ride.endLocation);
 
                 } else {
-
-                    // if (ride.driverId) {
-                    // removeDriverFormRide(ride._id);
                     let updatedRide4 = await createRide.findByIdAndUpdate(ride._id, { driverId: null, rideStatus: 9, nearest: false, nearestdriverList: [], assignTime: null }, { new: true });
                     let data = {
                         rideId: updatedRide4._id,
@@ -164,7 +135,6 @@ const assignNewDriverToRide = async () => {
                     console.log('updatedRide4=========>', updatedRide4);
                     global.ioInstance.emit('NoDriverRemaining-ByCron', data)
                     console.log('NoDriverRemaining-ByCron event inside the else 2" -else ');
-                    // }
                 }
             }
 

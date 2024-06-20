@@ -45,14 +45,5 @@ async function verifyToken(req, res, next) {
     });
 }
 
-//  async function varifyAdmin(decoded) {
-//      console.log('inside the varifyAdmin---->', decoded);
-//      let existAdmin = await Admin.findById({ _id: decoded.id });
-//      console.log('after existAdmin---->', existAdmin);
-//      if (existAdmin) {
-//          return true
-//      }
-//      return false
-//  }
 
 module.exports = verifyToken;

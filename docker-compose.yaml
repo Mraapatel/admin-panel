@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  frontend:
+    restart: always
+    build:
+      context: ./product  # Specify the path to your frontend Dockerfile
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80"  # Map port 80 of the host to port 80 of the frontend container
+    # environment:
+    #   - BACKEND_URL=http://backend:5000
+    depends_on:
+      - backend  # Ensure backend service is started before frontend
+    # networks:
+    #   - app-network 
+
+  backend:
+    restart: always
+    build:
+      context: ./server  
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"  # Map port 3000 of the host to port 3000 of the backend container
+    # networks:
+    #   - app-network  # Connect both services to the same network for communication
+
+# networks:
+#   app-network:
+#     driver: bridge

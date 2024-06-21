@@ -1,8 +1,13 @@
 const { Driver } = require('../controllers/driverList-controller');
 const mongoose = require('mongoose');
 
+
+
 const fetchIdleDrivers = async (cityId, typeId, status = 0) => {
- 
+    // console.log('idledriver method called ');
+    // console.log('cityid',cityId);
+    // console.log('typeId',typeId);
+
     let fetchedDrivers = await Driver.aggregate(
         [
             {

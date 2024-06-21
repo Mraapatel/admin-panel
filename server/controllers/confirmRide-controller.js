@@ -11,6 +11,8 @@ const { fetchIdleDrivers } = require('../utils/fetchIdleDrivers');
 const { addFunds } = require('../utils/addFunds');
 const { sendEmail } = require('../utils/email');
 const { getCount} = require('../utils/comman')
+// const secreat_strip_key = await fetchKeys('stripe')
+// const stripe = require('stripe')(secreat_strip_key);
 let stripe = null
 
 
@@ -114,7 +116,64 @@ const getDrivers = async (req, res) => {
 
         console.log('inside the confirmride - getdrivers---->', req.body);
         let Drivers = await fetchIdleDrivers(req.body.cityId, req.body.typeId, req.body.rideStatus)
-        
+        /* 
+        let Drivers = await Driver.aggregate(
+            [
+                {
+                    $match: {
+                        cityId: new mongoose.Types.ObjectId(req.body.cityId),
+                        serviceType: new mongoose.Types.ObjectId(req.body.typeId),
+                        approveStatus: true,
+                        driverStatus: 0
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'cityzones',
+                        localField: 'cityId',
+                        foreignField: '_id',
+                        as: 'cityId'
+                    }
+                },
+                {
+                    $unwind: {
+                        path: '$cityId',
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'countries',
+                        localField: 'countryId',
+                        foreignField: '_id',
+                        as: 'countryId'
+                    }
+                },
+                {
+                    $unwind: {
+                        path: '$countryId',
+                    }
+                },
+                {
+                    $project: {
+                        __v: 0,
+                        'cityId.place_id': 0,
+                        'cityId.coordinates': 0,
+                        'cityId.__v': 0,
+                        'cityId.countryId': 0,
+                        'countryId.flagSymbol': 0,
+                        'countryId.countryCode2': 0,
+                        'countryId.countryCode': 0,
+                        'countryId.timeZone': 0,
+                        'countryId.__v': 0,
+                    }
+                }
+            ]
+        )
+        */
+
+        // global.ioInstance.emit('dakfja', 'broooooo  this is form the server ')
+        // console.log('ioInstance----->',global.ioInstance);
+
         if (Drivers.length > 0) {
             response.driverArray = Drivers;
             response.message = 'Driver fetched successfully'

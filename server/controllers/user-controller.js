@@ -162,6 +162,7 @@ const getUser = async (req, res) => {
         let sort; // Parse the sort direction from the query parameter, defaulting to ascending
         let sortStuff
         if (req.body.sort !== 'none') {
+            // sort = req.body.sort; // Parse the sort direction from the query parameter, defaulting to ascending
             const sortT = req.body.sort
             sortStuff = { [sortT]: 1 }
         } else {
@@ -175,12 +176,19 @@ const getUser = async (req, res) => {
 
         let query = {};
 
+        // if (req.body.searchTerm) {
+        //     const sortT = req.body.searchTerm
+        //     sortStuff = { [sortT]: 1 }
+        // }
+
+        // If searchTerm exists, add conditions to search for userName or userEmail
         if (searchTerm) {
             query = {
                 $or: [
                     { userName: { $regex: new RegExp(searchTerm, 'i') } },
                     { userEmail: { $regex: new RegExp(searchTerm, 'i') } },
                     { userPhone: { $regex: new RegExp(searchTerm, 'i') } },
+                    //  { _id: searchTerm.toLowerCase()}
                 ]
             };
         }
@@ -189,6 +197,7 @@ const getUser = async (req, res) => {
 
         const aggregateQuery = [
             { $match: query },
+            // { $sort: sortStuff }, 
             { $skip: (page - 1) * limit },
             { $limit: limit },
             {
@@ -205,12 +214,18 @@ const getUser = async (req, res) => {
         ];
 
 
+        // console.log('--here-----', sortStuff);
         if (sort !== null) {
+            // console.log();
             aggregateQuery.unshift({ $sort: sortStuff });
         }
 
         Users = await User.aggregate(aggregateQuery).collation({ locale: 'en', strength: 2 });
-  
+
+        // }
+
+
+
         if (searchTerm) {
             totalUsers = await User.countDocuments(query);
         } else {
@@ -348,6 +363,7 @@ const getCards = async (req, res) => {
             }
             if (customer) {
                 defaultCardId = customer.default_source;
+                // defaultCardId = customer.invoice_settings.default_payment_method;
                 console.log(customer);
                 console.log(defaultCardId);
             }
@@ -373,11 +389,15 @@ const getCards = async (req, res) => {
             cardsToSend.push(details);
         });
 
+        // console.log(cards.data);
+        // console.log(cardsToSend);
+        // Return the list of cards in the response
         let response = {
             cards: cardsToSend,
             defaultCardId: defaultCardId
         }
         return res.status(200).json(response);
+        // return res.status(200).json({ cards: cards.data });
     } catch (error) {
         console.log('Error fetching cards:', error);
         return res.status(500).json({ error: 'Failed to fetch cards' });
@@ -445,6 +465,8 @@ const setDefaultCard = async (req, res) => {
                 }
             })
         }
+        // console.log('successfully:');
+        // return res.status(400).json({ message: 'Some Error Occured' });
     } catch (e) {
         console.log('Error occured:', e);
         return res.status(500).json({ error: 'Failed to set default' });

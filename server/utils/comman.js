@@ -6,6 +6,20 @@ const { createRide } = require('../models/createRide');
 const AssignRideToDriver = async (rideId, driverIdToAssign, alreadyAssingedDriver) => {
     try {
 
+        // console.log('AssingeRideToDriver', rideId, driverIdToAssign, alreadyAssingedDriver);
+        // return;
+        // let c = await Driver.findById(driverIdToAssign)
+        // console.log('00000000000000000000000000000000000000000' , c ,'0000000000000000000000000000000000000');
+        // if (c.driverStatus !== 0) {
+        //     let updatedRide2 = await createRide.findByIdAndUpdate(rideId, { rideStatus: 6 }, { new: true });
+        //     let data = {
+        //         rideId: updatedRide2._id,
+        //         rideStatus: updatedRide2.rideStatus,
+        //     }
+        //     global.ioInstance.emit('PutRideOnHold-FromCron', data)
+        //     return false;
+        // }
+
         let date = new Date()
         let time = date.getTime();
         let ride = await createRide.findByIdAndUpdate(rideId, {
@@ -19,6 +33,8 @@ const AssignRideToDriver = async (rideId, driverIdToAssign, alreadyAssingedDrive
         if (alreadyAssingedDriver) {
             await Driver.findByIdAndUpdate(alreadyAssingedDriver, { driverStatus: 0 })
         }
+
+        // let fetchedRide = await fetchSingleRide(ride._id);
 
         // console.log("Ride inside the AssigneRideToDriver", ride);
         return updatedDriver
@@ -35,6 +51,9 @@ const removeDriverFormRide = async (rideId) => {
 
         if (rideId) {
             await createRide.findByIdAndUpdate(rideId, { driverId: null, rideStatus: 0, nearest: false, nearestdriverList: [], assignTime: null });
+            // if(driverId){
+            //     await Driver.findByIdAndUpdate(driverId, { driverStatus: 0 })
+            // }
             return true;
         }
     } catch (e) {
@@ -180,6 +199,14 @@ const fetchSingleRide = async (rideId) => {
 async function getCount() {
     return await createRide.countDocuments({ rideStatus: 9 });
 }
+// const fetchSinglRideInfo = async (rideId)=>{
+//     try{
+//         if(rideId){
+//             let rideInfo = await createRide.aggregate
+//         }
+//     }catch (e){
+//         return null
+//     }
+// }
 
-
-module.exports = { AssignRideToDriver, removeDriverFormRide, updateRideAndDriverModal, fetchSingleRide, getCount }
+module.exports = { AssignRideToDriver, removeDriverFormRide, updateRideAndDriverModal, fetchSingleRide ,getCount}

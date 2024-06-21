@@ -12,9 +12,8 @@ const app = express();
 const server = require('http').Server(app);
 socket.initialize(server);
 const Port = process.env.PORT || 5000;
-const mongodbUrl = process.env.MONGODBATLAS
-
-const { startCron } = require('../server/utils/cron');
+const mongodbatlas = process.env.MONGODBATLAS
+const { startCron } = require('./utils/cron');
 // startCron();
 const jwt = require('./routes/jwt_token');
 const vehicleType = require('./routes/vehicleType')
@@ -32,7 +31,8 @@ const rideHistory = require('./routes/rideHistory');
 const test = require('./routes/test');
 const allkeys = require('./routes/allKey');
 
-mongoose.connect(mongodbUrl)
+// mongoose.connect('mongodb://127.0.0.1:27017/Product')
+mongoose.connect(mongodbatlas)
     .then(() => console.log('connection is successfull...'))
     .catch((error) => console.log(error));
 
@@ -43,7 +43,11 @@ app.use('/public', express.static(path.join(__dirname, 'public')))
 // app.use('/icons', express.static('./public'));
 // app.use('/userProfile', express.static('./public/userProfile'));
 // app.use('/driverProfile', express.static('./public/driverProfile'));
-app.use(cors());
+const corsOptions = {
+    origin: 'http://localhost:4200',  // URL of your frontend
+    optionsSuccessStatus: 200
+}
+app.use(cors(corsOptions));
 
 
 app.use('/authenticate', jwt);

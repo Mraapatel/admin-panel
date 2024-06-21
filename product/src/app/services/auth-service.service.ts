@@ -67,6 +67,7 @@ export class AuthServiceService {
 
   login(user: { username: string, password: string }) {
     return this.http.post<TokenResponse>('http://localhost:5000/authenticate', user)
+    // return this.http.post<TokenResponse>('http://backend:5000/authenticate', user)
       .pipe(
         tap((response) => {
           this.doLoginAdmin(user.username, response);

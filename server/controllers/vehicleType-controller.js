@@ -16,6 +16,10 @@ const VehicleSchema = new Schema({
 
 const vechicle = mongoose.model('vehicleType', VehicleSchema);
 
+// mongoose.connect('mongodb://127.0.0.1:27017/Product')
+//     .then(() => console.log('connection is successfull...'))
+//     .catch((error) => console.log(error));
+
 const addVehicleType = async (req, res) => {
     try {
         const { vehicleType, vehicleIcon } = req.body;
@@ -180,6 +184,36 @@ function deleteUploadedFile(fileName) {
         }
     });
 }
+
+// const allVehiclesForPricing = async (req, res) => {
+//     try {
+//         const allVehicles = await Vehicle.aggregate([
+//             {
+//                 $lookup: {
+//                     from: 'otherCollection', // Replace 'otherCollection' with the actual name of the collection
+//                     localField: '_id',
+//                     foreignField: 'typeId',
+//                     as: 'matchedDocuments'
+//                 }
+//             },
+//             {
+//                 $match: {
+//                     matchedDocuments: { $ne: [] } // Filter only vehicles with matching documents
+//                 }
+//             }
+//         ]);
+
+//         if (allVehicles.length > 0) {
+//             res.status(200).json(allVehicles);
+//         } else {
+//             res.json({ Message: 'There are no vehicles with matching documents' });
+//         }
+//     } catch (e) {
+//         console.log('Error fetching vehicles:', e);
+//         res.status(500).json({ error: 'Failed to fetch vehicles' });
+//     }
+// }
+
 
 const editVehicleType = async (req, res) => {
     let changed

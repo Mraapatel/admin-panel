@@ -1,18 +1,22 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { tap } from 'rxjs';
+import { environment } from '../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AddCountryService {
 
-  constructor() { }
+  backendUrl!: string
+  constructor() {
+    this.backendUrl = environment.BACKEND_URL
+  }
 
   private _http = inject(HttpClient);
 
   getCountry() {
-    return this._http.get('http://localhost:5000/country').pipe(
+    return this._http.get(`${this.backendUrl}country`).pipe(
       tap((_) => console.log('data fatched form server')
       )
     )
@@ -21,7 +25,7 @@ export class AddCountryService {
   addCountry(formdata: object) {
     console.log('in service');
     console.log(formdata);
-    return this._http.post('http://localhost:5000/country', formdata).pipe(
+    return this._http.post(`${this.backendUrl}country`, formdata).pipe(
       tap((_) => {
         console.log('country added');
       })
@@ -29,7 +33,7 @@ export class AddCountryService {
   }
 
   serchCountries(value: string) {
-    return this._http.post('http://localhost:5000/country/searchCountry',{search:value}).pipe(
+    return this._http.post(`${this.backendUrl}country/searchCountry`, { search: value }).pipe(
       tap((_) => {
         console.log('got countries');
       })

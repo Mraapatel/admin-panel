@@ -15,7 +15,7 @@ const Port = process.env.PORT || 3000;
 const mongodbUrl = process.env.MONGODBATLAS
 
 const { startCron } = require('../server/utils/cron');
-// startCron();
+startCron();
 const jwt = require('./routes/jwt_token');
 const vehicleType = require('./routes/vehicleType')
 const addCounty = require('./routes/addCountry');

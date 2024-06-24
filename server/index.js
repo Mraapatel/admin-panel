@@ -5,6 +5,7 @@ require('dotenv').config();
 const path = require('path');
 const socket = require('./middlewares/socketIo');
 
+app.use(cors());
 // global.NotificationCount = null;
 
 
@@ -43,7 +44,6 @@ app.use('/public', express.static(path.join(__dirname, 'public')))
 // app.use('/icons', express.static('./public'));
 // app.use('/userProfile', express.static('./public/userProfile'));
 // app.use('/driverProfile', express.static('./public/driverProfile'));
-app.use(cors());
 
 
 app.use('/authenticate', jwt);

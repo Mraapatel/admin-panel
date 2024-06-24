@@ -8,9 +8,7 @@ import { ToastrService } from 'ngx-toastr';
 import { CommonModule } from '@angular/common';
 import { RunningRequestService } from '../../services/running-request.service';
 import { BrowserNotificationService } from '../../services/browser-notification.service';
-import { HttpClient } from '@angular/common/http';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
-import { HomeComponent } from '../home/home.component';
 import { Router } from '@angular/router'
 
 
@@ -38,10 +36,6 @@ export class ConfirmRideComponent {
   private _confirmRiedService = inject(ConfirmRideService);
   private _browserNotification = inject(BrowserNotificationService);
   private _router = inject(Router)
-  private _http = inject(HttpClient);
-
-  private _home = inject(HomeComponent)
-
 
   STRIPE!: Stripe | null;
   pageNumber: number = 1;
@@ -298,20 +292,6 @@ export class ConfirmRideComponent {
       this.ridePicked(rideId, driverId!)
     } else if (rideStatus === 3) {
       this.rideCompleted(rideId, driverId!)
-      // let clientKey
-      // this._http.post('http://localhost:5000/test', {}).subscribe({
-      //   next: (res) => {
-      //     clientKey = res
-      //   }
-      // });
-      // const items = [{ id: "xl-tshirt" }];
-      // const appearance = {
-      //   theme: 'stripe',
-      // };
-
-      // let   elements = this.STRIPE!.elements({ appearance, clientKey });
-
-
     }
   }
 

@@ -92,7 +92,7 @@ export class CreateRideComponent {
 
   ngOnInit() {
     // this.pageload();
-    this.loadDefaultMap();
+    // this.loadDefaultMap();
     this.getCountryCodes();
     this.getSettings();
 
@@ -163,7 +163,7 @@ export class CreateRideComponent {
   }
   */
 
-  // /*
+  /*
   loadDefaultMap() {
     const loader = new Loader({
       apiKey: this.API_KEY,
@@ -185,7 +185,7 @@ export class CreateRideComponent {
       console.error('Error loading Google Maps API:', err);
     });
   }
-  // */
+  */
   getCountryCodes() {
     this._createRideService.getCountryCodes().pipe(
       tap((res) => {
@@ -442,7 +442,7 @@ export class CreateRideComponent {
       //   return;
       // }
     }
-    // console.log('checkForPlace finished------>');
+    console.log('checkForPlace finished------>');
   }
 
 

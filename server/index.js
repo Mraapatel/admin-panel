@@ -11,7 +11,7 @@ const socket = require('./middlewares/socketIo');
 const app = express();
 const server = require('http').Server(app);
 socket.initialize(server);
-const Port = process.env.PORT || 3000;
+const Port = process.env.PORT || 6000;
 const mongodbUrl = process.env.MONGODBATLAS
 app.use(cors());
 

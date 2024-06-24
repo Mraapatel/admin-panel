@@ -5,11 +5,11 @@ require('dotenv').config();
 const path = require('path');
 const socket = require('./middlewares/socketIo');
 
-app.use(cors());
 // global.NotificationCount = null;
 
 
 const app = express();
+app.use(cors());
 const server = require('http').Server(app);
 socket.initialize(server);
 const Port = process.env.PORT || 3000;

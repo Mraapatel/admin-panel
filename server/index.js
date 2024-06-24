@@ -9,14 +9,21 @@ const socket = require('./middlewares/socketIo');
 
 
 const app = express();
-app.use(cors());
 const server = require('http').Server(app);
 socket.initialize(server);
 const Port = process.env.PORT || 3000;
 const mongodbUrl = process.env.MONGODBATLAS
 
+// CORS configuration
+const corsOptions = {
+    origin: 'http://65.1.64.220', // Change this to your client's origin
+    optionsSuccessStatus: 200 // Some legacy browsers (IE11, various SmartTVs) choke on 204
+};
+
+app.use(cors(corsOptions));
+
 const { startCron } = require('../server/utils/cron');
-startCron();
+// startCron();
 const jwt = require('./routes/jwt_token');
 const vehicleType = require('./routes/vehicleType')
 const addCounty = require('./routes/addCountry');
@@ -44,6 +51,7 @@ app.use('/public', express.static(path.join(__dirname, 'public')))
 // app.use('/icons', express.static('./public'));
 // app.use('/userProfile', express.static('./public/userProfile'));
 // app.use('/driverProfile', express.static('./public/driverProfile'));
+// app.use(cors());
 
 
 app.use('/authenticate', jwt);
@@ -130,31 +138,31 @@ server.listen(Port, () => {
 
 // router.use(varifyToken);
 
-// router.use('/vehicleType', vehicleType); 
+// router.use('/vehicleType', vehicleType);
 
-// router.use('/country', addCounty); 
+// router.use('/country', addCounty);
 
 // router.use('/city', city);
 
-// router.use('/pricing', pricing); 
+// router.use('/pricing', pricing);
 
 // router.use('/setting', settingStorage)
 
-// router.use('/User', user); 
+// router.use('/User', user);
 
-// router.use('/driver', driver);  
+// router.use('/driver', driver);
 
 // router.use('/createRide', createRide);
 
-// router.use('/confirmRide', confirmRide); 
+// router.use('/confirmRide', confirmRide);
 
-// router.use('/runningRequest', runningRequest); 
+// router.use('/runningRequest', runningRequest);
 
-// router.use('/rideHistory', rideHistory); 
+// router.use('/rideHistory', rideHistory);
 
 // router.use('/test', test);
 
-// router.use('/allkeys', allkeys); 
+// router.use('/allkeys', allkeys);
 
 
 // server.listen(Port, () => {
